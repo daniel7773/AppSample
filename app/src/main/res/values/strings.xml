@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">AppSample</string>
+
+    <string name="NavHostFragmentTag">NavHostFragment</string>
+
+    <!-- -->
+    <string name="edit">Редактировать</string>
+
+    <!-- User details -->
+    <string name="phone_number">Телефон\n%1$s</string>
+    <string name="city">Город: %1$s</string>
+    <string name="company_name">Название компании: %1$s</string>
+    <string name="zip_code">Zip код: %1$s</string>
+    <string name="coordinates">Координаты: %1$s</string>
+    <string name="full_address">Подробный адрес&#8230;</string>
+    <string name="hide_full_address">Свернуть подробный адрес</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Почта</string>
+    <string name="action_sign_in">Войти или зарегистрироваться</string>
+    <string name="action_sign_in_short">Войти</string>
+    <string name="action_sign_out">Выйти</string>
+    <string name="error_invalid_email">Адрес почты невалидный</string>
+    <string name="error_invalid_password">Пароль слишком короткий</string>
+    <string name="error_incorrect_password">Пароль введен неверно</string>
+    <string name="error_field_required">Поле обязательно*</string>
+    <string name="resend_verification_email">Отправить письмо подтверждения заново</string>
+    <string name="forgot_password">Забыли пароль?</string>
+    <string name="sign_up">Регистрация</string>
+    <string name="to_sign_up">Зарегестрироваться</string>
+    <string name="sign_in">Войти</string>
+    <string name="password">Пароль</string>
+    <string name="email_registration">Регистрация аккаунта</string>
+    <string name="email">Почта</string>
+    <string name="enter_email">Введите почту</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="birth_date">Дата рождения</string>
+    <string name="first_name">Имя</string>
+    <string name="second_name">Фамилия</string>
+    <string name="training_profile">Профиль подготовки</string>
+    <string name="desired_university">Желаемый университет</string>
+    <string name="password_reset">Восстановление пароля</string>
+    <string name="passwords_not_match">Пароли не совпадают</string>
+    <string name="some_error_during_registration">Возникла какая-то ошибка при регистрации</string>
+</resources>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="user"
+            type="com.example.appsample.framework.presentation.common.model.UserModel" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/profile_horizontal_padding"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_outline_phone"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:text="@{String.format(@string/phone_number, user.phone)}"
+            tools:text="Телефон: 1-477-935-8478 x6430" />
+
+        <TextView
+            android:id="@+id/company"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:drawableStart="@drawable/ic_home_work"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:text="@{String.format(@string/company_name, user.companyName)}"
+            tools:text="Название компании: Considine-Lockman" />
+
+        <!-- city -->
+        <TextView
+            android:id="@+id/address_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:drawableStart="@drawable/ic_outline_home"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:text="@{String.format(@string/city, user.address.city)}"
+            tools:text="Город: South Christy" />
+
+        <TextView
+            android:id="@+id/more_address_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/full_address"
+            tools:text="Подробный адрес..." />
+
+        <LinearLayout
+            android:id="@+id/address_details_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/street_suit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{user.streetAndSuit}"
+                tools:text="Noberto Crossing Apt. 950" />
+
+            <TextView
+                android:id="@+id/zipcode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{String.format(@string/zip_code, user.address.zipcode)}"
+                tools:text="Zip код: 235005-1337" />
+
+            <TextView
+                android:id="@+id/lat_lng"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{String.format(@string/coordinates, user.latAndLang)}"
+                tools:text="Координаты: lat -71.4197, lng 71.7478" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/hide_address_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/hide_full_address"
+            android:visibility="gone"
+            tools:text="Свернуть подробный адрес..."
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</layout>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="album"
+            type="com.example.appsample.framework.presentation.profile.models.AlbumModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout 
+        android:layout_width="@dimen/album_item_card_width"
+        android:layout_height="@dimen/album_item_card_height">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/post_icon"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/album_item_card_width"
+            android:layout_centerHorizontal="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_circle_placeholder" />
+
+        <View
+            android:id="@+id/skeleton_text_line_1"
+            android:layout_width="68dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="2dp"
+            android:background="@color/gray_studio_dark"
+            android:minWidth="68dp"
+            app:layout_constraintEnd_toEndOf="@+id/album_title"
+            app:layout_constraintStart_toStartOf="@+id/album_title"
+            app:layout_constraintTop_toTopOf="@+id/album_title" />
+
+        <View
+            android:id="@+id/skeleton_text_line_2"
+            android:layout_width="46dp"
+            android:layout_height="16dp"
+            android:layout_below="@id/skeleton_text_line_1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="2dp"
+            android:background="@color/gray_studio_dark"
+            app:layout_constraintEnd_toEndOf="@+id/album_title"
+            app:layout_constraintStart_toStartOf="@+id/album_title"
+            app:layout_constraintTop_toBottomOf="@+id/skeleton_text_line_1" />
+
+        <TextView
+            android:id="@+id/album_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@{album.title}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/post_icon"
+            tools:text="Строка вторая" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
