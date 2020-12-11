@@ -4,9 +4,7 @@ import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.framework.presentation.profile.ProfileAdapter
 import com.example.appsample.framework.presentation.profile.adapters.UserAlbumsChildAdapter
-import com.example.appsample.framework.presentation.profile.adapters.UserPostAdapterDelegate
 import com.example.appsample.framework.presentation.profile.models.AlbumModel
-import com.example.appsample.framework.presentation.profile.models.PostModel
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

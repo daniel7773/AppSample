@@ -1,11 +1,6 @@
 package com.example.appsample.business.data.network
 
-import com.example.appsample.business.data.models.AddressEntity
-import com.example.appsample.business.data.models.AlbumEntity
-import com.example.appsample.business.data.models.CompanyEntity
-import com.example.appsample.business.data.models.GeoEntity
-import com.example.appsample.business.data.models.PostEntity
-import com.example.appsample.business.data.models.UserEntity
+import com.example.appsample.business.data.models.*
 
 object DataFactory {
 
@@ -32,9 +27,9 @@ object DataFactory {
         )
     )
 
-    fun produceListOfPosts(postsNum: Int): List<PostEntity>{
+    fun produceListOfPosts(postsNum: Int): List<PostEntity> {
         val postList: ArrayList<PostEntity> = ArrayList()
-        repeat(postsNum){
+        repeat(postsNum) {
             postList.add(producePostEntity(it))
         }
         return postList
@@ -47,9 +42,9 @@ object DataFactory {
         body = "body"
     )
 
-    fun produceListOfAlbums(albumNum: Int): List<AlbumEntity>{
+    fun produceListOfAlbums(albumNum: Int): List<AlbumEntity> {
         val albumList: ArrayList<AlbumEntity> = ArrayList()
-        repeat(albumNum){
+        repeat(albumNum) {
             albumList.add(produceAlbumEntity(it))
         }
         return albumList

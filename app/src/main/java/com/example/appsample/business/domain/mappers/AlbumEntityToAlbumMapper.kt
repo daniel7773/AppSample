@@ -1,9 +1,7 @@
 package com.example.appsample.business.domain.mappers
 
 import com.example.appsample.business.data.models.AlbumEntity
-import com.example.appsample.business.data.models.PostEntity
 import com.example.appsample.business.domain.model.Album
-import com.example.appsample.business.domain.model.Post
 
 object AlbumEntityToAlbumMapper {
 

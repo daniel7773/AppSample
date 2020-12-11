@@ -1,9 +1,7 @@
 package com.example.appsample.framework.presentation.profile.mappers
 
 import com.example.appsample.business.domain.model.Album
-import com.example.appsample.business.domain.model.Post
 import com.example.appsample.framework.presentation.profile.models.AlbumModel
-import com.example.appsample.framework.presentation.profile.models.PostModel
 
 object AlbumToAlbumModelMapper {
 

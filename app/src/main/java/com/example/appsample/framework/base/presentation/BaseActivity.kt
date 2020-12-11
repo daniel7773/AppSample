@@ -1,6 +1,5 @@
 package com.example.appsample.framework.base.presentation
 
-import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

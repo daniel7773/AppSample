@@ -6,9 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.abstraction.Resource
-import com.example.appsample.business.interactors.profile.GetPostsUseCase
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumsUseCase
+import com.example.appsample.business.interactors.profile.GetPostsUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.mappers.UserToUserModelMapper
 import com.example.appsample.framework.presentation.common.model.State
@@ -23,9 +23,7 @@ import com.example.appsample.framework.presentation.profile.models.PostModel
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import java.lang.NullPointerException
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -40,7 +38,8 @@ class ProfileViewModel @Inject constructor(
     private var user: State<UserModel> = State.Unknown()
     private var albums: State<List<AlbumModel>> = State.Unknown()
 
-    private var _adapterItems: MutableLiveData<Sequence<ProfileElement>> = MutableLiveData(emptySequence())
+    private var _adapterItems: MutableLiveData<Sequence<ProfileElement>> =
+        MutableLiveData(emptySequence())
     var items: LiveData<Sequence<ProfileElement>> = _adapterItems
 
     init { // TODO: add checking if user logged in
@@ -73,7 +72,8 @@ class ProfileViewModel @Inject constructor(
         user = when (val response = getUserUseCase.getUser(sessionManager.user.id)) {
             is Resource.Success -> {
                 Log.d(TAG, "posts ${response.data}")
-                val user = UserToUserModelMapper.map(response.data!!) // force unwrap because null values must be handled earlier
+                val user =
+                    UserToUserModelMapper.map(response.data!!) // force unwrap because null values must be handled earlier
                 Success(user, "")
             }
             is Resource.Error -> {
@@ -88,8 +88,11 @@ class ProfileViewModel @Inject constructor(
         posts = State.Loading("init Loading")
         posts = when (val response = getPostsUseCase.getPosts(sessionManager.user.id)) {
             is Resource.Success -> {
-                Log.d(TAG, "posts came, size: ${response.data.size}")
-                val postList = PostToPostModelMapper.map(response.data)
+                Log.d(
+                    TAG,
+                    "posts came, size: ${response.data!!.size}"
+                ) // force unwrap because null values must be handled earlier
+                val postList = PostToPostModelMapper.map(response.data!!)
                 Success(postList, "")
             }
             is Resource.Error -> {
@@ -105,7 +108,8 @@ class ProfileViewModel @Inject constructor(
         albums = when (val response = getAlbumsUseCase.getAlbums(sessionManager.user.id)) {
             is Resource.Success -> {
                 Log.d(TAG, "posts ${response.data}")
-                val albums = AlbumToAlbumModelMapper.map(response.data)
+                val albums =
+                    AlbumToAlbumModelMapper.map(response.data!!)  // force unwrap because null values must be handled earlier
                 Success(albums, "")
             }
             is Resource.Error -> {

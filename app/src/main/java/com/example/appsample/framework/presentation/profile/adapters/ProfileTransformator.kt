@@ -3,16 +3,7 @@ package com.example.appsample.framework.presentation.profile.adapters
 import android.util.Log
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.UserModel
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
-import com.example.appsample.framework.presentation.profile.models.AlbumsBlockElement
-import com.example.appsample.framework.presentation.profile.models.Divider
-import com.example.appsample.framework.presentation.profile.models.EmptySpace
-import com.example.appsample.framework.presentation.profile.models.PostModel
-import com.example.appsample.framework.presentation.profile.models.ProfileElement
-import com.example.appsample.framework.presentation.profile.models.UserActionsElement
-import com.example.appsample.framework.presentation.profile.models.UserDetailsElement
-import com.example.appsample.framework.presentation.profile.models.UserInfoElement
-import com.example.appsample.framework.presentation.profile.models.UserPostsElement
+import com.example.appsample.framework.presentation.profile.models.*
 
 object ProfileTransformator {
 

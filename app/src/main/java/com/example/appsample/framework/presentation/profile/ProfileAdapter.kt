@@ -1,11 +1,7 @@
 package com.example.appsample.framework.presentation.profile
 
 import androidx.recyclerview.widget.DiffUtil
-import com.example.appsample.framework.presentation.profile.adapters.UserActionsAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserAlbumsAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserDetailsAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserInfoAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserPostAdapterDelegate
+import com.example.appsample.framework.presentation.profile.adapters.*
 import com.example.appsample.framework.presentation.profile.adapters.separators.DividerAdapterDelegate
 import com.example.appsample.framework.presentation.profile.adapters.separators.EmptySpaceAdapterDelegate
 import com.example.appsample.framework.presentation.profile.models.ProfileElement

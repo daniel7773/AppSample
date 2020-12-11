@@ -11,7 +11,8 @@ import com.example.appsample.framework.presentation.profile.models.AlbumModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class UserAlbumsChildAdapter : ListAdapter<AlbumModel?, UserAlbumsChildAdapter.ViewHolder>(DiffCallback) {
+class UserAlbumsChildAdapter :
+    ListAdapter<AlbumModel?, UserAlbumsChildAdapter.ViewHolder>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<AlbumModel?>() {
         override fun areItemsTheSame(

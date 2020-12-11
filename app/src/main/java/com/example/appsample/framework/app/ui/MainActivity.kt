@@ -12,13 +12,8 @@ import com.example.appsample.framework.presentation.auth.di.factories.fragments.
 import com.example.appsample.framework.presentation.common.model.AuthResource
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileFragmentFactory
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileNavHostFragment
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /*
 
@@ -116,25 +111,25 @@ class MainActivity : MainNavController, BaseActivity() {
         launch(supervisor) {
             (application as BaseApplication).getAppComponent()
                 .sessionManager().stateFlow.collectLatest { authResource ->
-                when (authResource) {
-                    is AuthResource.Authenticated -> {
-                        Log.d(TAG, "user authentication ------ Authenticated ------ ")
-                        onAuthenticated()
-                    }
-                    is AuthResource.Loading -> {
-                        Log.d(TAG, "user authentication ---------- Loading ---------- ")
-                    }
-                    is AuthResource.Error -> { // TODO: navigate to error screen
-                        Log.d(TAG, "user authentication ---------- Error ---------- ")
-                        onError()
-                    }
-                    is AuthResource.NotAuthenticated -> {
-                        Log.d(TAG, "user authentication ----- NotAuthenticated ----- ")
-                        Log.d(TAG, "Moving to Auth Fragment ")
-                        onLogOut()
+                    when (authResource) {
+                        is AuthResource.Authenticated -> {
+                            Log.d(TAG, "user authentication ------ Authenticated ------ ")
+                            onAuthenticated()
+                        }
+                        is AuthResource.Loading -> {
+                            Log.d(TAG, "user authentication ---------- Loading ---------- ")
+                        }
+                        is AuthResource.Error -> { // TODO: navigate to error screen
+                            Log.d(TAG, "user authentication ---------- Error ---------- ")
+                            onError()
+                        }
+                        is AuthResource.NotAuthenticated -> {
+                            Log.d(TAG, "user authentication ----- NotAuthenticated ----- ")
+                            Log.d(TAG, "Moving to Auth Fragment ")
+                            onLogOut()
+                        }
                     }
                 }
-            }
         }
     }
 

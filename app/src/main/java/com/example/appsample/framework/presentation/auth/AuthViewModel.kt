@@ -2,11 +2,7 @@ package com.example.appsample.framework.presentation.auth
 
 import android.util.Log
 import android.view.View
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.domain.repository.abstraction.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
@@ -96,10 +92,11 @@ class AuthViewModel @Inject constructor(
             )
         )
 
-    private suspend fun setErrorState(response: Resource.Error<User?>) = sessionManager.setAuthState(
-        AuthResource.Error(
-            response.message,
-            response.exception
+    private suspend fun setErrorState(response: Resource.Error<User?>) =
+        sessionManager.setAuthState(
+            AuthResource.Error(
+                response.message,
+                response.exception
+            )
         )
-    )
 }

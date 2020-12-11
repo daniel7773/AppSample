@@ -2,14 +2,14 @@ package com.example.appsample.framework.presentation.profile.di
 
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
-import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
+import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import com.example.appsample.business.domain.repository.implementation.AlbumsRepositoryImpl
-import com.example.appsample.business.domain.repository.implementation.UserRepositoryImpl
 import com.example.appsample.business.domain.repository.implementation.PostsRepositoryImpl
-import com.example.appsample.business.interactors.profile.GetPostsUseCase
+import com.example.appsample.business.domain.repository.implementation.UserRepositoryImpl
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumsUseCase
+import com.example.appsample.business.interactors.profile.GetPostsUseCase
 import com.example.appsample.framework.presentation.auth.di.BASE_URL
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module

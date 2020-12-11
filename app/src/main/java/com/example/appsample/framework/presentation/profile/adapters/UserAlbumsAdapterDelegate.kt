@@ -11,7 +11,8 @@ import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class UserAlbumsAdapterDelegate : AbsListItemAdapterDelegate<AlbumsBlockElement, ProfileElement, UserAlbumsAdapterDelegate.ViewHolder>() {
+class UserAlbumsAdapterDelegate :
+    AbsListItemAdapterDelegate<AlbumsBlockElement, ProfileElement, UserAlbumsAdapterDelegate.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val blockUserAlbumsBinding =

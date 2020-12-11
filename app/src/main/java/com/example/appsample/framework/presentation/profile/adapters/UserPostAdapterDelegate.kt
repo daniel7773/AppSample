@@ -3,21 +3,18 @@ package com.example.appsample.framework.presentation.profile.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.appsample.databinding.BlockUserActionsBinding
 import com.example.appsample.databinding.BlockUserPostBinding
 import com.example.appsample.framework.presentation.profile.models.PostModel
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
-import com.example.appsample.framework.presentation.profile.models.UserActionsElement
 import com.example.appsample.framework.presentation.profile.models.UserPostsElement
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class UserPostAdapterDelegate 
-    : AbsListItemAdapterDelegate<UserPostsElement, ProfileElement, UserPostAdapterDelegate.ViewHolder>() {
+class UserPostAdapterDelegate
+    :
+    AbsListItemAdapterDelegate<UserPostsElement, ProfileElement, UserPostAdapterDelegate.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val blockUserPostBinding =
