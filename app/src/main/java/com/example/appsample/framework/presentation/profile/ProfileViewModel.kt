@@ -21,49 +21,59 @@ import com.example.appsample.framework.presentation.profile.mappers.PostToPostMo
 import com.example.appsample.framework.presentation.profile.models.AlbumModel
 import com.example.appsample.framework.presentation.profile.models.PostModel
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 class ProfileViewModel @Inject constructor(
+    private val mainDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostsUseCase: GetPostsUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val getAlbumsUseCase: GetAlbumsUseCase
 ) : ViewModel() {
 
-    private var posts: State<List<PostModel>> = State.Unknown()
-    private var user: State<UserModel> = State.Unknown()
-    private var albums: State<List<AlbumModel>> = State.Unknown()
+    var posts: State<List<PostModel>?> = State.Unknown()
+    var user: State<UserModel?> = State.Unknown()
+    var albums: State<List<AlbumModel>?> = State.Unknown()
 
     private var _adapterItems: MutableLiveData<Sequence<ProfileElement>> =
         MutableLiveData(emptySequence())
     var items: LiveData<Sequence<ProfileElement>> = _adapterItems
 
     init { // TODO: add checking if user logged in
-        startSearch()
+
     }
 
-    private fun startSearch() {
-        val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-            posts = Error(
-                throwable.message.toString(), Exception("Error launching coroutine")
-            )
-            user = Error(
-                throwable.message.toString(), Exception("Error launching coroutine")
-            )
-            albums = Error(
-                throwable.message.toString(), Exception("Error launching coroutine")
-            )
-            Log.e(TAG, "Error in viewModel searchPosts coroutine chain: ", throwable)
-        }
+    fun startSearch() {
+        viewModelScope.launch(mainDispatcher) { //  + exceptionHandler
+            supervisorScope {
 
-        viewModelScope.launch(exceptionHandler) {
-            getUser()
-            getPosts()
-            getAlbums()
+                launch(CoroutineExceptionHandler { _, throwable ->
+                    user =
+                        Error(throwable.message.toString(), Exception("Error launching coroutine"))
+                }) {
+                    getUser()
+                }
+
+                launch(CoroutineExceptionHandler { _, throwable ->
+                    posts =
+                        Error(throwable.message.toString(), Exception("Error launching coroutine"))
+                }) {
+                    getPosts()
+                }
+
+                launch(CoroutineExceptionHandler { _, throwable ->
+                    albums =
+                        Error(throwable.message.toString(), Exception("Error launching coroutine"))
+                }) {
+                    getAlbums()
+                }
+            }
         }
     }
 
@@ -74,14 +84,14 @@ class ProfileViewModel @Inject constructor(
                 Log.d(TAG, "posts ${response.data}")
                 val user =
                     UserToUserModelMapper.map(response.data!!) // force unwrap because null values must be handled earlier
-                Success(user, "")
+                Success(user, response.message ?: "")
             }
             is Resource.Error -> {
                 Log.d(TAG, "error ${response.exception.localizedMessage}")
                 Error(response.message.toString(), response.exception)
             }
         }
-        _adapterItems.value = ProfileTransformator.transform(user, albums, posts)
+        refreshData()
     }
 
     private suspend fun getPosts() {
@@ -100,7 +110,7 @@ class ProfileViewModel @Inject constructor(
                 Error(response.message.toString(), response.exception)
             }
         }
-        _adapterItems.value = ProfileTransformator.transform(user, albums, posts)
+        refreshData()
     }
 
     private suspend fun getAlbums() {
@@ -117,6 +127,10 @@ class ProfileViewModel @Inject constructor(
                 Error(response.message.toString(), response.exception)
             }
         }
+        refreshData()
+    }
+
+    fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albums, posts)
     }
 

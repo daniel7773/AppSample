@@ -39,6 +39,13 @@ android {
     buildFeatures {
         dataBinding true
     }
+    /**
+     *  for not getting error while testing livedata in ViewModel
+     *  Caused by: java.lang.RuntimeException: Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.
+     */
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -109,19 +116,25 @@ dependencies {
     /**
      * Unit test dependencies
      */
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
-    testImplementation 'io.mockk:mockk:1.10.2'
-    testImplementation 'junit:junit:4.12'
+    testImplementation("junit:junit:4.13")
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.0"
+    /**
+     * Testing coroutines
+     * https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-test/index.html
+     */
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2'
 
+    /**
+     *  Mocking data https://mockk.io/
+     */
+    testImplementation "io.mockk:mockk:1.10.2"
 
-    // AndroidX test
-    def androidx_test_version = "1.1.0"
-    androidTestImplementation "androidx.test:core:$androidx_test_version"
-    androidTestImplementation "androidx.test:runner:$androidx_test_version"
+    /**
+     * Asserting tests https://github.com/assertj/assertj-core
+     */
+    testImplementation "org.assertj:assertj-core:3.18.1"
 
-    // Architecture components testing
-    def androidx_arch_test_version = "2.1.0"
-    androidTestImplementation "androidx.arch.core:core-testing:$androidx_arch_test_version"
-
-
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
 }

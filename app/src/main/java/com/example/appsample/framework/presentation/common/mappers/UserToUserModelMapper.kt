@@ -35,7 +35,7 @@ object UserToUserModelMapper {
         CompanyModel(
             name = name,
             catchPhrase = catchPhrase,
-            bs = catchPhrase
+            bs = bs
         )
     }
 

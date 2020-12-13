@@ -37,6 +37,7 @@ constructor(
         _binding = FragmentProfileBinding.inflate(inflater, container, false).also {
             it.viewModel = viewModel
             it.lifecycleOwner = viewLifecycleOwner
+            viewModel.startSearch()
         }
         return binding.root
     }

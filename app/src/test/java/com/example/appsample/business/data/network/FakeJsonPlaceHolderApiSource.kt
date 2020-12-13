@@ -36,7 +36,7 @@ class FakeJsonPlaceHolderApiSource : JsonPlaceholderApiSource {
         } else if (userId == FORCE_GET_TIMEOUT_EXCEPTION) {
             // DO nothing, so timeout will happened
         } else {
-            deferredPostList.complete(DataFactory.produceListOfPosts(4))
+            deferredPostList.complete(DataFactory.produceListOfPostsEntity(4))
         }
         return deferredPostList
     }
@@ -50,7 +50,7 @@ class FakeJsonPlaceHolderApiSource : JsonPlaceholderApiSource {
         } else if (userId == FORCE_GET_TIMEOUT_EXCEPTION) {
             // DO nothing, so timeout will happened
         } else {
-            deferredAlbumList.complete(DataFactory.produceListOfAlbums(4))
+            deferredAlbumList.complete(DataFactory.produceListOfAlbumsEntity(4))
         }
         return deferredAlbumList
     }

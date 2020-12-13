@@ -3,6 +3,7 @@ package com.example.appsample.framework.base.presentation
 import android.util.Log
 import com.example.appsample.framework.presentation.common.model.AuthResource
 import com.example.appsample.framework.presentation.common.model.UserModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -16,12 +17,14 @@ import kotlin.coroutines.CoroutineContext
 
 @ExperimentalCoroutinesApi
 @Singleton
-class SessionManager @Inject constructor() : CoroutineScope {
+class SessionManager @Inject constructor(
+    private val mainDispatcher: CoroutineDispatcher
+) : CoroutineScope {
 
     private val job = Job() // a lifecycle of a SessionManager coroutine
 
     override val coroutineContext: CoroutineContext // guaranties that when it's lifecycle ends everything gonna be cancelled
-        get() = job // we can add + Dispatchers.Main or etc here
+        get() = job + mainDispatcher
 
     private var _stateFlow: MutableSharedFlow<AuthResource> = MutableSharedFlow()
     val stateFlow = _stateFlow.asSharedFlow() // publicly exposed as read-only shared flow

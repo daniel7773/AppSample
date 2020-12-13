@@ -12,8 +12,13 @@ import com.example.appsample.framework.presentation.auth.di.factories.fragments.
 import com.example.appsample.framework.presentation.common.model.AuthResource
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileFragmentFactory
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileNavHostFragment
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /*
 

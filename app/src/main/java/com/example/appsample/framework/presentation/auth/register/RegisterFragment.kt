@@ -7,7 +7,13 @@ import android.text.TextUtils
 import android.util.Patterns
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.DatePicker
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.Spinner
+import android.widget.Toast
+import android.widget.ViewFlipper
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import com.example.appsample.R

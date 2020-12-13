@@ -7,12 +7,14 @@ import com.example.appsample.business.data.network.abstraction.JsonPlaceholderAp
 import com.example.appsample.business.domain.mappers.UserEntityToUserMapper
 import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import com.example.appsample.business.domain.repository.implementation.UserRepositoryImpl
-import junit.framework.Assert
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
+@ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 class UserRepositoryTest {
 
@@ -25,18 +27,19 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun getUser_success() = runBlocking {
+    fun `getUser Success`() = runBlockingTest {
 
         val userId = 1
 
         val networkValue = networkApi.getUser(userId).await()
         val repositoryValue = userRepository.getUser(userId)
 
-        Assert.assertEquals(UserEntityToUserMapper.map(networkValue!!), repositoryValue.data)
+        Assertions.assertThat(UserEntityToUserMapper.map(networkValue!!))
+            .isEqualTo(repositoryValue.data)
     }
 
     @Test
-    fun getUser_passedErrorCorrectly() = runBlocking {
+    fun `getUser Error passes through repository`() = runBlockingTest {
 
         val userId = FORCE_GET_EXCEPTION
 
@@ -48,23 +51,22 @@ class UserRepositoryTest {
             exception = e
         }
 
-        Assert.assertEquals(exception.javaClass, repositoryValue.exception?.javaClass)
-        Assert.assertEquals(exception.message, repositoryValue.exception?.message)
-        Assert.assertEquals(exception.localizedMessage, repositoryValue.exception?.localizedMessage)
+        Assertions.assertThat(repositoryValue.exception).isInstanceOf(exception::class.java)
+        Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception?.message)
+        Assertions.assertThat(exception.localizedMessage)
+            .isEqualTo(repositoryValue.exception?.localizedMessage)
     }
 
     @Test
-    fun getUser_timeoutCheck() = runBlocking {
+    fun `getUser TimeoutCancellationException passes through repository`() = runBlockingTest {
 
         val userId = FORCE_GET_TIMEOUT_EXCEPTION
 
         val repositoryValue = userRepository.getUser(userId)
 
-        Assert.assertNotNull(repositoryValue.exception)
-        Assert.assertEquals(
-            TimeoutCancellationException::class.java,
-            repositoryValue.exception!!.javaClass
-        )
+        Assertions.assertThat(repositoryValue.exception).isNotNull
+        Assertions.assertThat(repositoryValue.exception)
+            .isInstanceOf(TimeoutCancellationException::class.java)
     }
 
 }

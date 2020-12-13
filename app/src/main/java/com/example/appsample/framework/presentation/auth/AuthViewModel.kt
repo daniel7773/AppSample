@@ -2,7 +2,11 @@ package com.example.appsample.framework.presentation.auth
 
 import android.util.Log
 import android.view.View
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.domain.repository.abstraction.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
@@ -11,6 +15,7 @@ import com.example.appsample.framework.presentation.common.mappers.UserToUserMod
 import com.example.appsample.framework.presentation.common.model.AuthResource
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.UserModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -20,7 +25,8 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 class AuthViewModel @Inject constructor(
-    private val useCase: GetUserUseCase,
+    private val mainDispatcher: CoroutineDispatcher,
+    private val getUserUseCase: GetUserUseCase,
     val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -41,6 +47,22 @@ class AuthViewModel @Inject constructor(
 
     val userId: MutableLiveData<String> = MutableLiveData()
 
+    private val loadingExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        _loadingState.value = State.Error(
+            throwable.message.toString(), Exception(throwable.localizedMessage)
+        )
+
+        viewModelScope.launch(mainDispatcher) {
+            sessionManager.setAuthState(
+                AuthResource.Error(
+                    "ERROR IN RESPONSE",
+                    java.lang.Exception(throwable.localizedMessage)
+                )
+            )
+        }
+        Log.e(TAG, "Error in viewModel getUser coroutine chain: ", throwable)
+    }
+
     fun startLoading() {
         var id = -1
         try {
@@ -50,25 +72,9 @@ class AuthViewModel @Inject constructor(
             Log.d(TAG, "error message ${nfe.localizedMessage}")
         }
 
-        val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-            _loadingState.value = State.Error(
-                throwable.message.toString(), Exception(throwable.localizedMessage)
-            )
-
-            viewModelScope.launch {
-                sessionManager.setAuthState(
-                    AuthResource.Error(
-                        "ERROR IN RESPONSE",
-                        java.lang.Exception(throwable.localizedMessage)
-                    )
-                )
-            }
-            Log.e(TAG, "Error in viewModel getUser coroutine chain: ", throwable)
-        }
-
-        viewModelScope.launch(exceptionHandler) {
+        viewModelScope.launch(mainDispatcher + loadingExceptionHandler) {
             _loadingState.value = State.Loading("init loading")
-            when (val response = useCase.getUser(id)) {
+            when (val response = getUserUseCase.getUser(id)) {
                 is Resource.Success -> {
                     val user = UserToUserModelMapper.map(response.data!!)
                     _loadingState.value = State.Success(user, "")
