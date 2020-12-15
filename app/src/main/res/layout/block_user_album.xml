@@ -7,22 +7,22 @@
 
         <variable
             name="album"
-            type="com.example.appsample.framework.presentation.profile.models.AlbumModel" />
+            type="com.example.appsample.framework.presentation.common.model.AlbumModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout 
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="@dimen/album_item_card_width"
         android:layout_height="@dimen/album_item_card_height">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/post_icon"
             android:layout_width="match_parent"
             android:layout_height="@dimen/album_item_card_width"
             android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_circle_placeholder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_circle_placeholder" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/skeleton_text_line_1"

@@ -9,7 +9,6 @@ import com.example.appsample.framework.presentation.profile.adapters.UserPostAda
 import com.example.appsample.framework.presentation.profile.adapters.separators.DividerAdapterDelegate
 import com.example.appsample.framework.presentation.profile.adapters.separators.EmptySpaceAdapterDelegate
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
-import com.example.appsample.framework.presentation.profile.models.UserInfoElement
 import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -28,12 +27,7 @@ class ProfileAdapter @ExperimentalCoroutinesApi constructor() :
         }
 
         override fun areContentsTheSame(oldItem: ProfileElement, newItem: ProfileElement): Boolean {
-            return if (oldItem is UserInfoElement && newItem is UserInfoElement) {
-                oldItem.id == newItem.id &&
-                        oldItem.user == newItem.user
-            } else {
-                oldItem == newItem
-            }
+            return oldItem == newItem
         }
     }
 

@@ -76,6 +76,7 @@ class AuthViewModel @Inject constructor(
             _loadingState.value = State.Loading("init loading")
             when (val response = getUserUseCase.getUser(id)) {
                 is Resource.Success -> {
+                    // force unwrap because null values must be handled earlier
                     val user = UserToUserModelMapper.map(response.data!!)
                     _loadingState.value = State.Success(user, "")
                     setSuccessState(user)

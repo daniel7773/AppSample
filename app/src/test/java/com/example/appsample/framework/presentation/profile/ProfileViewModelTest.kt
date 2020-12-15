@@ -2,8 +2,8 @@ package com.example.appsample.framework.presentation.profile
 
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.interactors.common.GetUserUseCase
-import com.example.appsample.business.interactors.profile.GetAlbumsUseCase
-import com.example.appsample.business.interactors.profile.GetPostsUseCase
+import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
+import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.rules.InstantExecutorExtension
@@ -26,8 +26,8 @@ import org.junit.jupiter.api.extension.Extensions
 class ProfileViewModelTest {
 
     val getUserUseCase: GetUserUseCase = mockk()
-    val getPostsUseCase: GetPostsUseCase = mockk()
-    val getAlbumsUseCase: GetAlbumsUseCase = mockk()
+    val getPostListUseCase: GetPostListUseCase = mockk()
+    val getAlbumListUseCase: GetAlbumListUseCase = mockk()
 
     @get:Extensions
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
@@ -40,9 +40,9 @@ class ProfileViewModelTest {
         profileViewModel = ProfileViewModel(
             mainCoroutineRule.testDispatcher,
             sessionManager,
-            getPostsUseCase,
+            getPostListUseCase,
             getUserUseCase,
-            getAlbumsUseCase
+            getAlbumListUseCase
         )
     }
 
@@ -95,16 +95,16 @@ class ProfileViewModelTest {
                 // Given
 
                 coEvery {
-                    getAlbumsUseCase.getAlbums(any())
+                    getAlbumListUseCase.getAlbums(any())
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfAlbums(4))
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.albums).isNotNull
-                assertThat(profileViewModel.albums).isInstanceOf(State.Success::class.java)
-                assertThat(profileViewModel.albums.exception).isNull()
+                assertThat(profileViewModel.albumList).isNotNull
+                assertThat(profileViewModel.albumList).isInstanceOf(State.Success::class.java)
+                assertThat(profileViewModel.albumList.exception).isNull()
             }
 
         @Test
@@ -113,16 +113,16 @@ class ProfileViewModelTest {
 
                 // Given
                 coEvery {
-                    getAlbumsUseCase.getAlbums(any())
+                    getAlbumListUseCase.getAlbums(any())
                 } returns DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.albums.exception).isNotNull
-                assertThat(profileViewModel.albums.exception).isInstanceOf(
-                    getAlbumsUseCase.getAlbums(
+                assertThat(profileViewModel.albumList.exception).isNotNull
+                assertThat(profileViewModel.albumList.exception).isInstanceOf(
+                    getAlbumListUseCase.getAlbums(
                         3
                     ).exception!!::class.java
                 )
@@ -139,16 +139,16 @@ class ProfileViewModelTest {
                 // Given
 
                 coEvery {
-                    getPostsUseCase.getPosts(any())
+                    getPostListUseCase.getPostList(any())
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4))
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.posts).isNotNull
-                assertThat(profileViewModel.posts).isInstanceOf(State.Success::class.java)
-                assertThat(profileViewModel.posts.exception).isNull()
+                assertThat(profileViewModel.postList).isNotNull
+                assertThat(profileViewModel.postList).isInstanceOf(State.Success::class.java)
+                assertThat(profileViewModel.postList.exception).isNull()
             }
 
         @Test
@@ -157,16 +157,16 @@ class ProfileViewModelTest {
 
                 // Given
                 coEvery {
-                    getPostsUseCase.getPosts(any())
+                    getPostListUseCase.getPostList(any())
                 } returns DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.posts.exception).isNotNull
-                assertThat(profileViewModel.posts.exception).isInstanceOf(
-                    getPostsUseCase.getPosts(
+                assertThat(profileViewModel.postList.exception).isNotNull
+                assertThat(profileViewModel.postList.exception).isInstanceOf(
+                    getPostListUseCase.getPostList(
                         3
                     ).exception!!::class.java
                 )

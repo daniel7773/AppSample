@@ -25,13 +25,15 @@ class UserRepositoryImpl @Inject constructor(
                 return@withTimeout jsonPlaceholderApiSource.getUser(id ?: 0).await()
             }
         } catch (e: Exception) {
-            return Error(null, "catched error in try block of getUser", e)
+            return Error(null, "Catch error while calling getUser", e)
         }
 
         if (userEntity == null) {
-            return Error(null, "DATA IS NULL", NullPointerException())
+            return Error(null, "Data from repository is null", NullPointerException())
         }
 
-        return Success(UserEntityToUserMapper.map(userEntity), null)
+        val user = UserEntityToUserMapper.map(userEntity)
+
+        return Success(user, "Success")
     }
 }

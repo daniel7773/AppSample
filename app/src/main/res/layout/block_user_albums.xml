@@ -5,8 +5,9 @@
 
     <data>
         <import type="java.util.List"/>
+
         <variable name="albumList"
-            type="List&lt;com.example.appsample.framework.presentation.profile.models.AlbumModel>"/>
+            type="List&lt;com.example.appsample.framework.presentation.common.model.AlbumModel>"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -41,7 +42,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewTitle"
-            app:items="@{albumList}"
+            app:albumItems="@{albumList}"
             tools:listitem="@layout/block_user_album">
 
         </androidx.recyclerview.widget.RecyclerView>

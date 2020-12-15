@@ -16,21 +16,24 @@ class PostsRepositoryImpl @Inject constructor(
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
 ) : PostsRepository {
 
-    override suspend fun getPosts(userId: Int?): Resource<List<Post>?> {
+    override suspend fun getPostsList(userId: Int?): Resource<List<Post>?> {
         var postEntityList: List<PostEntity>? = null
 
         try {
             postEntityList = withTimeout(GET_POSTS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getPostsFromUser(userId ?: 0).await()
+                return@withTimeout jsonPlaceholderApiSource.getPostsListFromUser(userId ?: 0)
+                    .await()
             }
         } catch (e: Exception) {
-            return Error(null, "catched error in try block of getPosts", e)
+            return Error(null, "Catch error while calling getPostList", e)
         }
 
         if (postEntityList == null) {
-            return Error(null, "DATA IS NULL", NullPointerException())
+            return Error(null, "Data from repository is null", NullPointerException())
         }
 
-        return Success(PostEntityToPostMapper.map(postEntityList), null)
+        val postList = PostEntityToPostMapper.map(postEntityList)
+
+        return Success(postList, "Success")
     }
 }

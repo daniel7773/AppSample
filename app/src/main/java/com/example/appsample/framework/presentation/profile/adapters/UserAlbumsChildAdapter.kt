@@ -1,13 +1,17 @@
 package com.example.appsample.framework.presentation.profile.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appsample.R
 import com.example.appsample.databinding.BlockUserAlbumBinding
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
+import com.example.appsample.framework.presentation.common.model.AlbumModel
+import com.example.appsample.framework.presentation.common.model.PhotoModel
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
@@ -23,23 +27,18 @@ class UserAlbumsChildAdapter :
         }
 
         override fun areContentsTheSame(oldItem: AlbumModel, albumModel: AlbumModel): Boolean {
-            return oldItem.id == albumModel.id && oldItem.title == albumModel.title &&
-                    oldItem.userId == albumModel.userId
+            return true
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
-        val BlockUserAlbumBinding =
+        val blockUserAlbumBinding =
             BlockUserAlbumBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(BlockUserAlbumBinding)
+        return ViewHolder(blockUserAlbumBinding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
-    }
-
-    fun updateData(items: List<AlbumModel>?) {
-        this.submitList(items?.toList())
     }
 
     inner class ViewHolder @ExperimentalCoroutinesApi constructor(
@@ -55,6 +54,17 @@ class UserAlbumsChildAdapter :
                 binding.skeletonTextLine1.visibility = View.GONE
                 binding.skeletonTextLine2.visibility = View.GONE
             }
+            if (item?.firstPhoto != null) {
+                Log.d("TASF", "start loading url: ${item.firstPhoto?.url}")
+                loadAlbumPicture(item.firstPhoto!!)
+            }
         }
+
+        private fun loadAlbumPicture(photo: PhotoModel) =
+            Picasso.get()
+                .load(photo.thumbnailUrl)
+                .placeholder(R.drawable.ic_circle_placeholder)
+                .error(R.drawable.ic_error)
+                .into(binding.postIcon)
     }
 }

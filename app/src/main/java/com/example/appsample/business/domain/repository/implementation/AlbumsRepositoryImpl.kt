@@ -16,7 +16,7 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
 ) : AlbumsRepository {
 
-    override suspend fun getAlbums(userId: Int?): Resource<List<Album>?> {
+    override suspend fun getAlbumList(userId: Int?): Resource<List<Album>?> {
 
         var albumEntityList: List<AlbumEntity>? = null
 
@@ -25,14 +25,16 @@ class AlbumsRepositoryImpl @Inject constructor(
                 return@withTimeout jsonPlaceholderApiSource.getAlbumsFromUser(userId ?: 0).await()
             }
         } catch (e: Exception) {
-            return Error(null, "catched error in try block of getAlbums", e)
+            return Error(null, "Catch error while calling getAlbums", e)
         }
 
         if (albumEntityList == null) {
-            return Error(null, "DATA IS NULL", NullPointerException())
+            return Error(null, "Data from repository is null", NullPointerException())
         }
 
-        return Success(AlbumEntityToAlbumMapper.map(albumEntityList), null)
+        val albumList = AlbumEntityToAlbumMapper.map(albumEntityList).filter { it.id != null }
+
+        return Success(albumList, "Success")
     }
 
 }

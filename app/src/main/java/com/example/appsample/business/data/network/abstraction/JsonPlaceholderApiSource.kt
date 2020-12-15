@@ -1,6 +1,7 @@
 package com.example.appsample.business.data.network.abstraction
 
 import com.example.appsample.business.data.models.AlbumEntity
+import com.example.appsample.business.data.models.PhotoEntity
 import com.example.appsample.business.data.models.PostEntity
 import com.example.appsample.business.data.models.UserEntity
 import kotlinx.coroutines.Deferred
@@ -20,7 +21,7 @@ interface JsonPlaceholderApiSource {
     ): Deferred<UserEntity?>
 
     @GET("posts")
-    fun getPostsFromUser(
+    fun getPostsListFromUser(
         @Query("userId") userId: Int
     ): Deferred<List<PostEntity>?>
 
@@ -28,4 +29,14 @@ interface JsonPlaceholderApiSource {
     fun getAlbumsFromUser(
         @Query("userId") userId: Int
     ): Deferred<List<AlbumEntity>?>
+
+    @GET("albums")
+    fun getAlbumPhotos(
+        @Query("albumId") albumId: Int
+    ): Deferred<List<PhotoEntity>?>
+
+    @GET("photos/{id}")
+    fun getPhotoById(
+        @Path("id") photoId: Int // using hack in repository
+    ): Deferred<PhotoEntity?>
 }

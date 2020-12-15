@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.databinding.BlockUserAlbumsBinding
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
+import com.example.appsample.framework.presentation.common.model.AlbumModel
 import com.example.appsample.framework.presentation.profile.models.AlbumsBlockElement
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
@@ -41,6 +41,7 @@ class UserAlbumsAdapterDelegate :
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(items: List<AlbumModel>) {
+            binding.albumsRecyclerView.adapter = UserAlbumsChildAdapter()
             binding.albumList = items
         }
     }

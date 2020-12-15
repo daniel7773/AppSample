@@ -4,5 +4,5 @@ import com.example.appsample.business.domain.model.Post
 
 interface PostsRepository {
 
-    suspend fun getPosts(userId: Int?): Resource<List<Post>?>
+    suspend fun getPostsList(userId: Int?): Resource<List<Post>?>
 }

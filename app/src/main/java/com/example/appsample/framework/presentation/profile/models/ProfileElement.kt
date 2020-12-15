@@ -1,5 +1,6 @@
 package com.example.appsample.framework.presentation.profile.models
 
+import com.example.appsample.framework.presentation.common.model.AlbumModel
 import com.example.appsample.framework.presentation.common.model.UserModel
 
 sealed class ProfileElement(open val id: String)

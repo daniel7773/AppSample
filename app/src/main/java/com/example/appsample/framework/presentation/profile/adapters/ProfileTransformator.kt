@@ -1,9 +1,9 @@
 package com.example.appsample.framework.presentation.profile.adapters
 
 import android.util.Log
+import com.example.appsample.framework.presentation.common.model.AlbumModel
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.UserModel
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
 import com.example.appsample.framework.presentation.profile.models.AlbumsBlockElement
 import com.example.appsample.framework.presentation.profile.models.Divider
 import com.example.appsample.framework.presentation.profile.models.EmptySpace
