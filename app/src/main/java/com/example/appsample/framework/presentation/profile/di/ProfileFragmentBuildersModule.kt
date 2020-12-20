@@ -2,9 +2,10 @@ package com.example.appsample.framework.presentation.profile.di
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
-import com.example.appsample.framework.presentation.profile.ProfileFragment
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileFragmentFactory
 import com.example.appsample.framework.presentation.profile.di.keys.ProfileFragmentKey
+import com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment
+import com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -26,10 +27,10 @@ abstract class ProfileFragmentBuildersModule {
     @ProfileFragmentKey(ProfileFragment::class)
     abstract fun bindMainFragment(feature1MainFragment: ProfileFragment): Fragment
 
-//    @Binds
-//    @IntoMap
-//    @ProfileFragmentKey(Feature1NextFragment::class)
-//    abstract fun bindNextFragment(feature1NextFragment: Feature1NextFragment): Fragment
+    @Binds
+    @IntoMap
+    @ProfileFragmentKey(AlbumFragment::class)
+    abstract fun bindAlbumFragment(albumFragment: AlbumFragment): Fragment
 //
 //    @Binds
 //    @IntoMap

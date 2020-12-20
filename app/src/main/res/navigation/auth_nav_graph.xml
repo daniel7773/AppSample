@@ -12,15 +12,11 @@
 
         <action
             android:id="@+id/action_loadingFragment_to_mainFragment"
-            app:destination="@id/postsFragment"
-            app:popUpTo="@id/authFragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/profileFragment" />
 
         <action
             android:id="@+id/action_authFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment"
-            app:popUpTo="@id/registrationFragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/registrationFragment" />
 
     </fragment>
 
@@ -30,10 +26,7 @@
 
         <action
             android:id="@+id/action_registrationFragment_to_authFragment"
-            app:destination="@id/authFragment"
-            app:popUpTo="@id/authFragment"
-            app:popUpToInclusive="true" />
-
+            app:destination="@id/authFragment" />
 
     </fragment>
 </navigation>

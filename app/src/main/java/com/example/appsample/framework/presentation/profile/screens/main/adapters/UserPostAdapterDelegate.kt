@@ -1,4 +1,4 @@
-package com.example.appsample.framework.presentation.profile.adapters
+package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
 import android.view.LayoutInflater
 import android.view.View

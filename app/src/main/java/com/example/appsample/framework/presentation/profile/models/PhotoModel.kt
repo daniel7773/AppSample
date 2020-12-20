@@ -1,4 +1,4 @@
-package com.example.appsample.framework.presentation.common.model
+package com.example.appsample.framework.presentation.profile.models
 
 data class PhotoModel(
     var albumId: Int? = 1,

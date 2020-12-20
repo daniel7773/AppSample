@@ -15,7 +15,6 @@ import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.model.Post
 import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.domain.repository.abstraction.Resource
-import com.example.appsample.framework.presentation.common.model.PhotoModel
 import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.models.AddressModel
 import com.example.appsample.framework.presentation.profile.models.CompanyModel

@@ -10,7 +10,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 const val GET_USER_TIMEOUT = 15000L
-const val GET_ALBUMS_TIMEOUT = 15000L
+const val GET_ALBUMS_TIMEOUT = 25000L
 const val GET_POSTS_TIMEOUT = 15000L
 
 interface JsonPlaceholderApiSource {
@@ -30,7 +30,7 @@ interface JsonPlaceholderApiSource {
         @Query("userId") userId: Int
     ): Deferred<List<AlbumEntity>?>
 
-    @GET("albums")
+    @GET("photos")
     fun getAlbumPhotos(
         @Query("albumId") albumId: Int
     ): Deferred<List<PhotoEntity>?>

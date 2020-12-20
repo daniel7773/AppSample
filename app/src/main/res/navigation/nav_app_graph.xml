@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:startDestination="@id/postsFragment">
+    app:startDestination="@id/profileFragment">
 
     <fragment
-        android:id="@+id/postsFragment"
-        android:name="com.example.appsample.framework.presentation.profile.ProfileFragment">
+        android:id="@+id/profileFragment"
+        android:name="com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment">
 
         <action
-            android:id="@+id/action_mainFragment_to_noteCreatedFragment"
-            app:popUpToInclusive="true" />
-        <!--            app:destination="@id/noteListFragment"-->
-        <!--            app:enterAnim="@anim/slide_in_right"-->
-        <!--            app:exitAnim="@anim/slide_out_left"-->
-        <!--            app:popEnterAnim="@anim/slide_in_left"-->
-        <!--            app:popExitAnim="@anim/slide_out_right"-->
-        <!--            app:popUpTo="@id/splashFragment"-->
+            android:id="@+id/action_profileFragment_to_albumFragment"
+            app:destination="@id/albumFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/albumFragment"
+        android:name="com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment">
+
+        <argument
+            android:name="albumId"
+            app:argType="string" />
 
     </fragment>
 

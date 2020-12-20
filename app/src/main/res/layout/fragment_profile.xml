@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.appsample.framework.presentation.profile.ProfileViewModel" />
+            type="com.example.appsample.framework.presentation.profile.screens.main.ProfileViewModel" />
 
     </data>
 

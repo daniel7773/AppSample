@@ -1,4 +1,4 @@
-package com.example.appsample.framework.presentation.profile.adapters.separators
+package com.example.appsample.framework.presentation.profile.screens.main.adapters.separators
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

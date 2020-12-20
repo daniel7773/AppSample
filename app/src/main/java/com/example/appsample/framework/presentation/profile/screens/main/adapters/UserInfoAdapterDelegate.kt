@@ -1,25 +1,25 @@
-package com.example.appsample.framework.presentation.profile.adapters
+package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.appsample.databinding.BlockUserActionsBinding
+import com.example.appsample.databinding.BlockUserInfoBinding
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
-import com.example.appsample.framework.presentation.profile.models.UserActionsElement
+import com.example.appsample.framework.presentation.profile.models.UserInfoElement
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
 
 @FlowPreview
-class UserActionsAdapterDelegate @ExperimentalCoroutinesApi constructor() :
-    AbsListItemAdapterDelegate<UserActionsElement, ProfileElement, UserActionsAdapterDelegate.ViewHolder>() {
+class UserInfoAdapterDelegate @ExperimentalCoroutinesApi constructor() :
+    AbsListItemAdapterDelegate<UserInfoElement, ProfileElement, UserInfoAdapterDelegate.ViewHolder>() {
 
     @ExperimentalCoroutinesApi
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
-        val blockUserActionsBinding =
-            BlockUserActionsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(blockUserActionsBinding)
+        val viewProductCategoryBinding =
+            BlockUserInfoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(viewProductCategoryBinding)
     }
 
     override fun isForViewType(
@@ -27,11 +27,11 @@ class UserActionsAdapterDelegate @ExperimentalCoroutinesApi constructor() :
         items: MutableList<ProfileElement>,
         position: Int
     ): Boolean {
-        return item is UserActionsElement
+        return item is UserInfoElement
     }
 
     override fun onBindViewHolder(
-        item: UserActionsElement,
+        item: UserInfoElement,
         holder: ViewHolder,
         payloads: MutableList<Any>
     ) {
@@ -39,10 +39,10 @@ class UserActionsAdapterDelegate @ExperimentalCoroutinesApi constructor() :
     }
 
     class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: BlockUserActionsBinding
+        private val binding: BlockUserInfoBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: UserActionsElement) {
+        fun bind(item: UserInfoElement) {
             binding.user = item.user
         }
     }

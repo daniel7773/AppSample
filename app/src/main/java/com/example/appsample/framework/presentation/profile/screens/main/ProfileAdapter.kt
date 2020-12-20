@@ -1,21 +1,25 @@
-package com.example.appsample.framework.presentation.profile
+package com.example.appsample.framework.presentation.profile.screens.main
 
+import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
-import com.example.appsample.framework.presentation.profile.adapters.UserActionsAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserAlbumsAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserDetailsAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserInfoAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.UserPostAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.separators.DividerAdapterDelegate
-import com.example.appsample.framework.presentation.profile.adapters.separators.EmptySpaceAdapterDelegate
+import com.example.appsample.framework.presentation.profile.models.AlbumModel
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserActionsAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserAlbumsAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserDetailsAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserInfoAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserPostAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.separators.DividerAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.separators.EmptySpaceAdapterDelegate
 import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class ProfileAdapter @ExperimentalCoroutinesApi constructor() :
+class ProfileAdapter @ExperimentalCoroutinesApi constructor(
+    private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit)? = null
+) :
     AsyncListDifferDelegationAdapter<ProfileElement>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<ProfileElement>() {
@@ -43,7 +47,7 @@ class ProfileAdapter @ExperimentalCoroutinesApi constructor() :
 
             .addDelegate(UserDetailsAdapterDelegate())
 
-            .addDelegate(UserAlbumsAdapterDelegate())
+            .addDelegate(UserAlbumsAdapterDelegate(onAlbumClick))
 
             .addDelegate(UserPostAdapterDelegate())
 

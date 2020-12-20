@@ -9,7 +9,7 @@
 
         <variable
             name="albumList"
-            type="List&lt;com.example.appsample.framework.presentation.common.model.AlbumModel>" />
+            type="List&lt;com.example.appsample.framework.presentation.profile.models.AlbumModel>" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

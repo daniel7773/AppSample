@@ -1,4 +1,4 @@
-package com.example.appsample.framework.presentation.profile
+package com.example.appsample.framework.presentation.profile.screens.main
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -11,21 +11,21 @@ import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
-import com.example.appsample.framework.presentation.common.mappers.AlbumToAlbumModelMapper
-import com.example.appsample.framework.presentation.common.mappers.PhotoToPhotoModelMapper
 import com.example.appsample.framework.presentation.common.mappers.UserToUserModelMapper
-import com.example.appsample.framework.presentation.common.model.AlbumModel
-import com.example.appsample.framework.presentation.common.model.PhotoModel
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.State.Error
 import com.example.appsample.framework.presentation.common.model.State.Loading
 import com.example.appsample.framework.presentation.common.model.State.Success
 import com.example.appsample.framework.presentation.common.model.State.Unknown
 import com.example.appsample.framework.presentation.common.model.UserModel
-import com.example.appsample.framework.presentation.profile.adapters.ProfileTransformator
+import com.example.appsample.framework.presentation.profile.mappers.AlbumToAlbumModelMapper
+import com.example.appsample.framework.presentation.profile.mappers.PhotoToPhotoModelMapper
 import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
+import com.example.appsample.framework.presentation.profile.models.AlbumModel
+import com.example.appsample.framework.presentation.profile.models.PhotoModel
 import com.example.appsample.framework.presentation.profile.models.PostModel
 import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.ProfileTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi

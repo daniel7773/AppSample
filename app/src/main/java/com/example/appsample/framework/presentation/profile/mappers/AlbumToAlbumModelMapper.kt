@@ -1,7 +1,7 @@
-package com.example.appsample.framework.presentation.common.mappers
+package com.example.appsample.framework.presentation.profile.mappers
 
 import com.example.appsample.business.domain.model.Album
-import com.example.appsample.framework.presentation.common.model.AlbumModel
+import com.example.appsample.framework.presentation.profile.models.AlbumModel
 
 object AlbumToAlbumModelMapper {
 

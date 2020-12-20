@@ -1,7 +1,7 @@
-package com.example.appsample.framework.presentation.common.mappers
+package com.example.appsample.framework.presentation.profile.mappers
 
 import com.example.appsample.business.domain.model.Photo
-import com.example.appsample.framework.presentation.common.model.PhotoModel
+import com.example.appsample.framework.presentation.profile.models.PhotoModel
 
 object PhotoToPhotoModelMapper {
 

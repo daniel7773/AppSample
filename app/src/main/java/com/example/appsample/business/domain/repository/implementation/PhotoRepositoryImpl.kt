@@ -1,5 +1,6 @@
 package com.example.appsample.business.domain.repository.implementation
 
+import android.util.Log
 import com.example.appsample.business.data.models.PhotoEntity
 import com.example.appsample.business.data.network.abstraction.GET_ALBUMS_TIMEOUT
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
@@ -22,15 +23,25 @@ class PhotoRepositoryImpl @Inject constructor(
                 return@withTimeout jsonPlaceholderApiSource.getAlbumPhotos(albumId).await()
             }
         } catch (e: Exception) {
+            Log.d("PhotoRepositoryImpl", "catch (e: Exception)")
+            e.printStackTrace()
             return Resource.Error(null, "catch error while calling getPhotoById", e)
         }
 
+        photoEntityList?.forEach {
+            Log.d("PhotoRepositoryImpl", "photo url: ${it.url}")
+        }
+
         if (photoEntityList == null) {
+            Log.d("PhotoRepositoryImpl", "photoEntityList == null")
             return Resource.Error(null, "Data from repository is null", NullPointerException())
         }
 
         val photoList: List<Photo> = PhotoEntityToPhotoMapper.mapPhotoList(photoEntityList)
 
+        photoList.forEach {
+            Log.d("PhotoRepositoryImpl", "photo url: ${it.url}")
+        }
         return Resource.Success(photoList, "Success")
     }
 

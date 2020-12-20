@@ -1,20 +1,21 @@
-package com.example.appsample.framework.presentation.profile.adapters
+package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.R
 import com.example.appsample.databinding.BlockUserAlbumBinding
-import com.example.appsample.framework.presentation.common.model.AlbumModel
-import com.example.appsample.framework.presentation.common.model.PhotoModel
+import com.example.appsample.framework.presentation.profile.models.AlbumModel
+import com.example.appsample.framework.presentation.profile.models.PhotoModel
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-class UserAlbumsChildAdapter :
+class UserAlbumsChildAdapter(private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit)?) :
     ListAdapter<AlbumModel?, UserAlbumsChildAdapter.ViewHolder>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<AlbumModel?>() {
@@ -26,14 +27,15 @@ class UserAlbumsChildAdapter :
         }
 
         override fun areContentsTheSame(oldItem: AlbumModel, albumModel: AlbumModel): Boolean {
-            return true
+            return oldItem.id == albumModel.id && oldItem.userId == albumModel.userId
+                    && oldItem.title == albumModel.title && oldItem.firstPhoto == albumModel.firstPhoto
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
         val blockUserAlbumBinding =
             BlockUserAlbumBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(blockUserAlbumBinding)
+        return ViewHolder(blockUserAlbumBinding, position, onAlbumClick)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -41,7 +43,9 @@ class UserAlbumsChildAdapter :
     }
 
     inner class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: BlockUserAlbumBinding
+        private val binding: BlockUserAlbumBinding,
+        private val itemPosition: Int,
+        private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit)?
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: AlbumModel?) {
@@ -59,6 +63,10 @@ class UserAlbumsChildAdapter :
 
             if (item?.firstPhoto != null) {
                 loadAlbumPicture(item.firstPhoto!!)
+            }
+
+            binding.itemLayout.setOnClickListener {
+                onAlbumClick?.invoke(binding.postIcon, item!!, itemPosition)
             }
         }
 

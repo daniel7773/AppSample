@@ -7,10 +7,11 @@
 
         <variable
             name="album"
-            type="com.example.appsample.framework.presentation.common.model.AlbumModel" />
+            type="com.example.appsample.framework.presentation.profile.models.AlbumModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_layout"
         android:layout_width="@dimen/album_item_card_width"
         android:layout_height="@dimen/album_item_card_height">
 
