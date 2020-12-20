@@ -120,6 +120,12 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     /**
+     * Swiperefreshlayout
+     * https://developer.android.com/jetpack/androidx/releases/swiperefreshlayout?hl=ru
+     */
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
+
+    /**
      * Unit test dependencies
      */
     testImplementation("junit:junit:4.13")

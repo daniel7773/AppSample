@@ -3,6 +3,7 @@ package com.example.appsample.framework.presentation.profile
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.abstraction.Resource
@@ -27,6 +28,7 @@ import com.example.appsample.framework.presentation.profile.models.ProfileElemen
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import javax.inject.Inject
@@ -48,6 +50,9 @@ class ProfileViewModel @Inject constructor(
     private var _adapterItems: MutableLiveData<Sequence<ProfileElement>> =
         MutableLiveData(emptySequence())
     var items: LiveData<Sequence<ProfileElement>> = _adapterItems
+
+    private var _isLoaded = MutableLiveData(true)
+    var isLoaded: LiveData<Boolean> = _isLoaded
 
     init { // TODO: add checking if user logged in
 
@@ -117,12 +122,13 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun getAlbumList() {
         albumList = State.Loading("init Loading")
-        albumList = when (val response = getAlbumListUseCase.getAlbumList(sessionManager.user.id)) {
+        when (val response = getAlbumListUseCase.getAlbumList(sessionManager.user.id)) {
             is Resource.Success -> {
                 Log.d(TAG, "albumList ${response.data}")
                 // force unwrap because null values must be handled earlier
                 val albums = AlbumToAlbumModelMapper.map(response.data!!)
 
+                startLoadingFirstPhotosOfAlbums(albums)
                 Success(albums, "Without first photos")
             }
             is Resource.Error -> {
@@ -130,27 +136,16 @@ class ProfileViewModel @Inject constructor(
                 Error(response.message.toString(), response.exception)
             }
         }
-        refreshData()
-        startLoadingFirstPhotosOfAlbums()
     }
 
-    private suspend fun startLoadingFirstPhotosOfAlbums() { //TODO: remove parameter
-        when (albumList) {
-            is State.Success -> {
-                Log.d(TAG, "start loading first photos for albums")
-                val localAlbumList = albumList.data
-
-                localAlbumList?.map {
-                    it.firstPhoto = getAlbumFirstPhoto(it)
-                }
-
-                albumList = Success(localAlbumList, "With first photos")
-                refreshData()
-            }
-            else -> {
-                Log.d(TAG, "You CANT start loading photos for albums if it's state not SUCCESS")
-            }
+    private suspend fun startLoadingFirstPhotosOfAlbums(localAlbumList: List<AlbumModel>) {
+        localAlbumList.map {
+            it.firstPhoto = getAlbumFirstPhoto(it)
         }
+
+        joinAll()
+        albumList = Success(localAlbumList, "With first photos")
+        refreshData()
     }
 
     private suspend fun getAlbumFirstPhoto(albumModel: AlbumModel): PhotoModel? {
@@ -179,6 +174,7 @@ class ProfileViewModel @Inject constructor(
 
     fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albumList, postList)
+        _isLoaded.value = user is Success && albumList is Success && postList is Success
     }
 
     companion object {

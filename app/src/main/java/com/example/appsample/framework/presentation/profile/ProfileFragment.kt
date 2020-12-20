@@ -1,6 +1,7 @@
 package com.example.appsample.framework.presentation.profile
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,8 +43,16 @@ constructor(
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        _binding?.swipeRefreshLayout?.setOnRefreshListener {
+            viewModel.startSearch()
+        }
+    }
+
     companion object {
-        private const val TAG = "FragmentProfile"
+        private const val TAG = "ProfileFragment"
     }
 }
 
