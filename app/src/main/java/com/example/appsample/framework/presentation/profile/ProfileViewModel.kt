@@ -49,7 +49,7 @@ class ProfileViewModel @Inject constructor(
     var albumList: State<List<AlbumModel>?> = Unknown()
 
     private val _adapterItems: MutableLiveData<Sequence<ProfileElement>> by lazy {
-        MutableLiveData<Sequence<ProfileElement>>(emptySequence())
+        MutableLiveData(emptySequence())
     }
     val items: LiveData<Sequence<ProfileElement>> by lazy { _adapterItems }
 
@@ -63,21 +63,21 @@ class ProfileViewModel @Inject constructor(
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     user =
-                        Error(throwable.message.toString(), Exception("Error launching coroutine"))
+                        Error(throwable.message.toString(), Exception("Error launching coroutine in ViewModel"))
                 }) {
                     getUser()
                 }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     postList =
-                        Error(throwable.message.toString(), Exception("Error launching coroutine"))
+                        Error(throwable.message.toString(), Exception("Error launching coroutine in ViewModel"))
                 }) {
                     getPostList()
                 }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
-                    postList =
-                        Error(throwable.message.toString(), Exception("Error launching coroutine"))
+                    albumList =
+                        Error(throwable.message.toString(), Exception("Error launching coroutine in ViewModel"))
                 }) {
                     getAlbumList()
                 }
@@ -132,7 +132,7 @@ class ProfileViewModel @Inject constructor(
             }
             is Resource.Error -> {
                 Log.d(TAG, "getAlbumList error ${response.exception.localizedMessage}")
-                Error(response.message.toString(), response.exception)
+                albumList = Error(response.message.toString(), response.exception)
             }
         }
     }

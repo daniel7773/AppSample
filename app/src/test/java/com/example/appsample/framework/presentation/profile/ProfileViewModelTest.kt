@@ -3,6 +3,7 @@ package com.example.appsample.framework.presentation.profile
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
+import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.model.State
@@ -28,6 +29,7 @@ class ProfileViewModelTest {
     val getUserUseCase: GetUserUseCase = mockk()
     val getPostListUseCase: GetPostListUseCase = mockk()
     val getAlbumListUseCase: GetAlbumListUseCase = mockk()
+    val getPhotoUseCase: GetPhotoUseCase = mockk()
 
     @get:Extensions
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
@@ -42,7 +44,8 @@ class ProfileViewModelTest {
             sessionManager,
             getPostListUseCase,
             getUserUseCase,
-            getAlbumListUseCase
+            getAlbumListUseCase,
+            getPhotoUseCase
         )
     }
 
@@ -71,17 +74,20 @@ class ProfileViewModelTest {
         fun `Loading Error exception received correctly`() =
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
+                val resourceError = DataFactory.provideResourceError(DataFactory.produceUser())
                 // Given
                 coEvery {
                     getUserUseCase.getUser(any())
-                } returns DataFactory.provideResourceError(DataFactory.produceUser())
+                } returns resourceError
 
                 // When
+
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.user.exception).isNotNull
-                assertThat(profileViewModel.user.exception).isInstanceOf(getUserUseCase.getUser(3).exception!!::class.java)
+                assertThat(profileViewModel.user.message).isEqualTo(resourceError.message)
+                assertThat(profileViewModel.user.exception).isInstanceOf(resourceError.exception::class.java)
 
             }
     }
@@ -95,8 +101,12 @@ class ProfileViewModelTest {
                 // Given
 
                 coEvery {
-                    getAlbumListUseCase.getAlbums(any())
+                    getAlbumListUseCase.getAlbumList(any())
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfAlbums(4))
+
+                coEvery {
+                    getPhotoUseCase.getPhoto(any(), any())
+                } returns DataFactory.provideResourceSuccess(DataFactory.producePhoto())
 
                 // When
                 profileViewModel.startSearch()
@@ -112,21 +122,18 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
                 // Given
+                val resourceError = DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
                 coEvery {
-                    getAlbumListUseCase.getAlbums(any())
-                } returns DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
+                    getAlbumListUseCase.getAlbumList(any())
+                } returns resourceError
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.albumList.exception).isNotNull
-                assertThat(profileViewModel.albumList.exception).isInstanceOf(
-                    getAlbumListUseCase.getAlbums(
-                        3
-                    ).exception!!::class.java
-                )
-
+                assertThat(profileViewModel.albumList.message).isEqualTo(resourceError.message)
+                assertThat(profileViewModel.albumList.exception).isInstanceOf(resourceError.exception::class.java)
             }
     }
 
@@ -137,7 +144,7 @@ class ProfileViewModelTest {
         fun `Loading Success data came`() =
             mainCoroutineRule.testDispatcher.runBlockingTest {
                 // Given
-
+                val exception = Exception("My exception")
                 coEvery {
                     getPostListUseCase.getPostList(any())
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4))
@@ -156,20 +163,18 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
                 // Given
+                val resourceError = DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
                 coEvery {
                     getPostListUseCase.getPostList(any())
-                } returns DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
+                } returns resourceError
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.postList.exception).isNotNull
-                assertThat(profileViewModel.postList.exception).isInstanceOf(
-                    getPostListUseCase.getPostList(
-                        3
-                    ).exception!!::class.java
-                )
+                assertThat(profileViewModel.postList.message).isEqualTo(resourceError.message)
+                assertThat(profileViewModel.postList.exception).isInstanceOf(resourceError.exception::class.java)
 
             }
     }

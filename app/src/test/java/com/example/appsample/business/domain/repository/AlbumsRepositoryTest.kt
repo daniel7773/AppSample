@@ -1,12 +1,14 @@
 package com.example.appsample.business.domain.repository
 
-import com.example.appsample.business.data.network.FORCE_GET_EXCEPTION
-import com.example.appsample.business.data.network.FORCE_GET_TIMEOUT_EXCEPTION
-import com.example.appsample.business.data.network.FakeJsonPlaceHolderApiSource
+import com.example.appsample.business.data.models.AlbumEntity
+import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.AlbumEntityToAlbumMapper
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.implementation.AlbumsRepositoryImpl
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
@@ -22,7 +24,7 @@ class AlbumsRepositoryTest {
     private val albumsRepository: AlbumsRepository
 
     // resources needed
-    val networkApi: JsonPlaceholderApiSource = FakeJsonPlaceHolderApiSource()
+    val networkApi: JsonPlaceholderApiSource = mockk()
 
     init {
         albumsRepository = AlbumsRepositoryImpl(networkApi)
@@ -32,8 +34,12 @@ class AlbumsRepositoryTest {
     fun `getAlbums Success`() = runBlockingTest {
 
         val userId = 1
+        coEvery {
+            networkApi.getAlbumsFromUser(userId).await()
+        } returns DataFactory.produceListOfAlbumsEntity(3)
+
         val networkValue = networkApi.getAlbumsFromUser(userId).await()
-        val repositoryValue = albumsRepository.getAlbums(userId)
+        val repositoryValue = albumsRepository.getAlbumList(userId)
 
         Assertions.assertThat(AlbumEntityToAlbumMapper.map(networkValue!!))
             .isEqualTo(repositoryValue.data)
@@ -42,15 +48,12 @@ class AlbumsRepositoryTest {
     @Test
     fun `getAlbums Error passes through repository`() = runBlockingTest {
 
-        val userId = FORCE_GET_EXCEPTION
+        val userId = 1
+        val exception: Exception = Exception("Any")
 
-        var exception: Exception = Exception("Any")
-        val repositoryValue = albumsRepository.getAlbums(userId)
-        try {
-            networkApi.getAlbumsFromUser(userId).await()
-        } catch (e: Exception) {
-            exception = e
-        }
+        coEvery { networkApi.getAlbumsFromUser(userId).await() } throws exception
+
+        val repositoryValue = albumsRepository.getAlbumList(userId)
 
         Assertions.assertThat(repositoryValue.exception).isInstanceOf(exception::class.java)
         Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception?.message)
@@ -61,9 +64,18 @@ class AlbumsRepositoryTest {
     @Test
     fun `getAlbums TimeoutCancellationException passes through repository`() = runBlockingTest {
 
-        val userId = FORCE_GET_TIMEOUT_EXCEPTION
+        val userId = 1
 
-        val repositoryValue = albumsRepository.getAlbums(userId)
+        coEvery {
+            networkApi.getAlbumsFromUser(userId)
+        }.answers {
+            val deferredAlbumsListEntities = CompletableDeferred<List<AlbumEntity>?>()
+
+            deferredAlbumsListEntities
+        }
+
+
+        val repositoryValue = albumsRepository.getAlbumList(userId)
 
         Assertions.assertThat(repositoryValue.exception).isNotNull
         Assertions.assertThat(repositoryValue.exception)

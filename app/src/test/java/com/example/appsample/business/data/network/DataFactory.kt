@@ -4,15 +4,18 @@ import com.example.appsample.business.data.models.AddressEntity
 import com.example.appsample.business.data.models.AlbumEntity
 import com.example.appsample.business.data.models.CompanyEntity
 import com.example.appsample.business.data.models.GeoEntity
+import com.example.appsample.business.data.models.PhotoEntity
 import com.example.appsample.business.data.models.PostEntity
 import com.example.appsample.business.data.models.UserEntity
 import com.example.appsample.business.domain.model.Address
 import com.example.appsample.business.domain.model.Album
 import com.example.appsample.business.domain.model.Company
 import com.example.appsample.business.domain.model.Geo
+import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.model.Post
 import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.domain.repository.abstraction.Resource
+import com.example.appsample.framework.presentation.common.model.PhotoModel
 import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.models.AddressModel
 import com.example.appsample.framework.presentation.profile.models.CompanyModel
@@ -78,7 +81,7 @@ object DataFactory {
     // Domain layer
 
     fun <T> provideResourceSuccess(data: T) = Resource.Success<T>(data, "SUCCESS")
-    fun <T> provideResourceError(data: T) = Resource.Error<T>(null, "ERROR", Exception("ERROR"))
+    fun <T> provideResourceError(data: T) = Resource.Error<T?>(null, "ERROR", Exception("ERROR"))
 
     fun produceUser() = User(
         id = 2,
@@ -154,5 +157,29 @@ object DataFactory {
             catchPhrase = "catchPhrase",
             bs = "bs"
         )
+    )
+
+    fun produceListOfPhotoEntity(albumNum: Int): List<PhotoEntity> {
+        val albumList: ArrayList<PhotoEntity> = ArrayList()
+        repeat(albumNum) {
+            albumList.add(producePhotoEntity(it))
+        }
+        return albumList
+    }
+
+    fun producePhotoEntity(photoId: Int) = PhotoEntity(
+        albumId = 1,
+        id = photoId,
+        title = "title",
+        url = "url",
+        thumbnailUrl = "thumbnailUrl"
+    )
+
+    fun producePhoto() = Photo(
+        albumId = 1,
+        id = 1,
+        title = "title",
+        url = "url",
+        thumbnailUrl = "thumbnailUrl"
     )
 }
