@@ -63,21 +63,30 @@ class ProfileViewModel @Inject constructor(
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     user =
-                        Error(throwable.message.toString(), Exception("Error launching coroutine in ViewModel"))
+                        Error(
+                            throwable.message.toString(),
+                            Exception("Error launching coroutine in ViewModel")
+                        )
                 }) {
                     getUser()
                 }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     postList =
-                        Error(throwable.message.toString(), Exception("Error launching coroutine in ViewModel"))
+                        Error(
+                            throwable.message.toString(),
+                            Exception("Error launching coroutine in ViewModel")
+                        )
                 }) {
                     getPostList()
                 }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     albumList =
-                        Error(throwable.message.toString(), Exception("Error launching coroutine in ViewModel"))
+                        Error(
+                            throwable.message.toString(),
+                            Exception("Error launching coroutine in ViewModel")
+                        )
                 }) {
                     getAlbumList()
                 }

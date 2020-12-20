@@ -1,7 +1,6 @@
 package com.example.appsample.framework.presentation.profile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +21,7 @@ class ProfileFragment @Inject
 constructor(
     private val viewModelFactory: AuthViewModelFactory
 ) : BaseFragment(R.layout.fragment_profile) {
-
+// checking userName
     private var _binding: FragmentProfileBinding? = null
     private val binding: FragmentProfileBinding get() = _binding!!
 
