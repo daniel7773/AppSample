@@ -50,12 +50,8 @@ class UserAlbumsChildAdapter :
             val isItemNull = item == null
             if (isItemNull) {
                 binding.albumTitle.visibility = View.GONE
-            } else {
-                binding.skeletonTextLine1.visibility = View.GONE
-                binding.skeletonTextLine2.visibility = View.GONE
             }
             if (item?.firstPhoto != null) {
-                Log.d("TASF", "start loading url: ${item.firstPhoto?.url}")
                 loadAlbumPicture(item.firstPhoto!!)
             }
         }
@@ -63,7 +59,7 @@ class UserAlbumsChildAdapter :
         private fun loadAlbumPicture(photo: PhotoModel) =
             Picasso.get()
                 .load(photo.thumbnailUrl)
-                .placeholder(R.drawable.ic_circle_placeholder)
+                .placeholder(R.drawable.ic_square_placeholder)
                 .error(R.drawable.ic_error)
                 .into(binding.postIcon)
     }

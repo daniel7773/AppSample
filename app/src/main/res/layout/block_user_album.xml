@@ -17,42 +17,23 @@
         <ImageView
             android:id="@+id/post_icon"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/album_item_card_width"
+            android:layout_height="80dp"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_circle_placeholder"
+            android:src="@drawable/ic_square_placeholder"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/skeleton_text_line_1"
-            android:layout_width="68dp"
-            android:layout_height="16dp"
-            android:layout_marginTop="2dp"
-            android:background="@color/gray_studio_dark"
-            android:minWidth="68dp"
-            app:layout_constraintEnd_toEndOf="@+id/album_title"
-            app:layout_constraintStart_toStartOf="@+id/album_title"
-            app:layout_constraintTop_toTopOf="@+id/album_title" />
-
-        <View
-            android:id="@+id/skeleton_text_line_2"
-            android:layout_width="46dp"
-            android:layout_height="16dp"
-            android:layout_below="@id/skeleton_text_line_1"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="2dp"
-            android:background="@color/gray_studio_dark"
-            app:layout_constraintEnd_toEndOf="@+id/album_title"
-            app:layout_constraintStart_toStartOf="@+id/album_title"
-            app:layout_constraintTop_toBottomOf="@+id/skeleton_text_line_1" />
 
         <TextView
             android:id="@+id/album_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="2"
@@ -61,7 +42,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/post_icon"
-            tools:text="Строка вторая" />
+            tools:text="Строка вторая третья" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

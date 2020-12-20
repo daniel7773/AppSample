@@ -37,7 +37,7 @@
             android:orientation="horizontal"
             android:paddingLeft="11dp"
             android:paddingRight="11dp"
-            android:paddingBottom="20dp"
+            android:paddingBottom="4dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
