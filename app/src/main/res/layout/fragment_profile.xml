@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:swipeRefreshLayoutProgressSpinnerBackgroundColor="@color/colorAccent"
-        app:refreshing="@{!viewModel.isLoaded}">
+        app:refreshing="@{viewModel.isLoading}">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/profile_rv"

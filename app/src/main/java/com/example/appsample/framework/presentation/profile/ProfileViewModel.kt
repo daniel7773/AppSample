@@ -3,7 +3,6 @@ package com.example.appsample.framework.presentation.profile
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.abstraction.Resource
@@ -19,7 +18,9 @@ import com.example.appsample.framework.presentation.common.model.AlbumModel
 import com.example.appsample.framework.presentation.common.model.PhotoModel
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.State.Error
+import com.example.appsample.framework.presentation.common.model.State.Loading
 import com.example.appsample.framework.presentation.common.model.State.Success
+import com.example.appsample.framework.presentation.common.model.State.Unknown
 import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.adapters.ProfileTransformator
 import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
@@ -43,20 +44,18 @@ class ProfileViewModel @Inject constructor(
     private val getPhotoUseCase: GetPhotoUseCase
 ) : ViewModel() {
 
-    var postList: State<List<PostModel>?> = State.Unknown()
-    var user: State<UserModel?> = State.Unknown()
-    var albumList: State<List<AlbumModel>?> = State.Unknown()
+    var postList: State<List<PostModel>?> = Unknown()
+    var user: State<UserModel?> = Unknown()
+    var albumList: State<List<AlbumModel>?> = Unknown()
 
-    private var _adapterItems: MutableLiveData<Sequence<ProfileElement>> =
-        MutableLiveData(emptySequence())
-    var items: LiveData<Sequence<ProfileElement>> = _adapterItems
-
-    private var _isLoaded = MutableLiveData(true)
-    var isLoaded: LiveData<Boolean> = _isLoaded
-
-    init { // TODO: add checking if user logged in
-
+    private val _adapterItems: MutableLiveData<Sequence<ProfileElement>> by lazy {
+        MutableLiveData<Sequence<ProfileElement>>(emptySequence())
     }
+    val items: LiveData<Sequence<ProfileElement>> by lazy { _adapterItems }
+
+    private val _isLoading by lazy { MutableLiveData(true) }
+    val isLoading: LiveData<Boolean> by lazy { _isLoading }
+
 
     fun startSearch() {
         viewModelScope.launch(mainDispatcher) {
@@ -87,16 +86,16 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun getUser() {
-        user = State.Loading("init Loading")
+        user = Loading("init Loading")
         user = when (val response = getUserUseCase.getUser(sessionManager.user.id)) {
             is Resource.Success -> {
                 Log.d(TAG, "user ${response.data}")
                 // force unwrap because null values must be handled earlier
                 val user = UserToUserModelMapper.map(response.data!!)
-                Success(user, response.message ?: "")
+                Success(user, response.message ?: "getUser Success in ViewModel")
             }
             is Resource.Error -> {
-                Log.d(TAG, "error ${response.exception.localizedMessage}")
+                Log.d(TAG, "getUser error ${response.exception.localizedMessage}")
                 Error(response.message.toString(), response.exception)
             }
         }
@@ -104,16 +103,16 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun getPostList() {
-        postList = State.Loading("init Loading")
+        postList = Loading("init Loading")
         postList = when (val response = getPostListUseCase.getPostList(sessionManager.user.id)) {
             is Resource.Success -> {
                 Log.d(TAG, "postList came, size: ${response.data!!.size}")
                 // force unwrap because null values must be handled earlier
                 val postList = PostToPostModelMapper.map(response.data!!)
-                Success(postList, "")
+                Success(postList, "getPostList Success in ViewModel")
             }
             is Resource.Error -> {
-                Log.d(TAG, "error ${response.exception.localizedMessage}")
+                Log.d(TAG, "getPostList error ${response.exception.localizedMessage}")
                 Error(response.message.toString(), response.exception)
             }
         }
@@ -121,7 +120,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun getAlbumList() {
-        albumList = State.Loading("init Loading")
+        albumList = Loading("init Loading")
         when (val response = getAlbumListUseCase.getAlbumList(sessionManager.user.id)) {
             is Resource.Success -> {
                 Log.d(TAG, "albumList ${response.data}")
@@ -132,7 +131,7 @@ class ProfileViewModel @Inject constructor(
                 Success(albums, "Without first photos")
             }
             is Resource.Error -> {
-                Log.d(TAG, "error ${response.exception.localizedMessage}")
+                Log.d(TAG, "getAlbumList error ${response.exception.localizedMessage}")
                 Error(response.message.toString(), response.exception)
             }
         }
@@ -152,7 +151,7 @@ class ProfileViewModel @Inject constructor(
         if (albumModel.id == null) {
             return null
         }
-        // passing hardcoded one because we using hack in PhotoRepositoryImpl
+        // passing hardcoded photoId because we using hack in PhotoRepositoryImpl
         val photoModel = when (val response = getPhotoUseCase.getPhoto(albumModel.id!!, 1)) {
             is Resource.Success -> {
                 Log.d(
@@ -164,7 +163,7 @@ class ProfileViewModel @Inject constructor(
                 return photoModel
             }
             is Resource.Error -> {
-                Log.d(TAG, "error ${response.exception.localizedMessage}")
+                Log.d(TAG, "getAlbumFirstPhoto error ${response.exception.localizedMessage}")
                 return null
             }
         }
@@ -174,7 +173,7 @@ class ProfileViewModel @Inject constructor(
 
     fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albumList, postList)
-        _isLoaded.value = user is Success && albumList is Success && postList is Success
+        _isLoading.value = user is Loading || albumList is Loading || postList is Loading
     }
 
     companion object {
