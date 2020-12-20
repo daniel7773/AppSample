@@ -15,6 +15,11 @@
     <string name="full_address">Подробный адрес&#8230;</string>
     <string name="hide_full_address">Свернуть подробный адрес</string>
 
+    <!-- -->
+    <string name="albums">Альбомы</string>
+    <string name="photos_number">%d фотографий</string>
+
+
     <!-- Strings related to login -->
     <string name="prompt_email">Почта</string>
     <string name="action_sign_in">Войти или зарегистрироваться</string>

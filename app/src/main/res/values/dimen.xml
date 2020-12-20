@@ -9,8 +9,10 @@
     <dimen name="post_item_footer_height">48dp</dimen>
 
 
-    <dimen name="album_item_card_width">136dp</dimen>
-    <dimen name="album_item_card_height">126dp</dimen>
+    <!-- Albums in profile dimens -->
+    <dimen name="album_item_card_width">248dp</dimen>
+    <dimen name="album_item_card_height">200dp</dimen>
+    <dimen name="album_item_card_image_height">144dp</dimen>
 
     <dimen name="divider_elevation">2dp</dimen>
 </resources>

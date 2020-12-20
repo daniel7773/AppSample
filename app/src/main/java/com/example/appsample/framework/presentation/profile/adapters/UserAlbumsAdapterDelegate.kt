@@ -43,6 +43,9 @@ class UserAlbumsAdapterDelegate :
         fun bind(items: List<AlbumModel>) {
             binding.albumsRecyclerView.adapter = UserAlbumsChildAdapter()
             binding.albumList = items
+            if (items.isNotEmpty()) {
+                binding.albumsSize.text = items.size.toString()
+            }
         }
     }
 }

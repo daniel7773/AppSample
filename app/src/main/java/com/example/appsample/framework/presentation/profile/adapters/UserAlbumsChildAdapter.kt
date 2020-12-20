@@ -49,7 +49,14 @@ class UserAlbumsChildAdapter :
             val isItemNull = item == null
             if (isItemNull) {
                 binding.albumTitle.visibility = View.GONE
+                return
             }
+            val photosNumber: String = String.format(
+                binding.postIcon.context.getString(R.string.photos_number),
+                50
+            )
+            binding.albumSize.text = photosNumber
+
             if (item?.firstPhoto != null) {
                 loadAlbumPicture(item.firstPhoto!!)
             }
