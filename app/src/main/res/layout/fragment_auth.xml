@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
+        <import type="android.view.View"/>
         <variable
             name="viewModel"
             type="com.example.appsample.framework.presentation.auth.AuthViewModel" />
@@ -24,7 +24,7 @@
             android:indeterminateTint="@color/colorAccent"
             android:indeterminateTintMode="src_in"
             android:translationZ="1dp"
-            android:visibility="@{viewModel.isLoading()}"
+            android:visibility="@{viewModel.isLoading ? View.VISIBLE : View.GONE}"
             tools:ignore="UnusedAttribute" />
 
         <ScrollView

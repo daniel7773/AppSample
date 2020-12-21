@@ -22,7 +22,6 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 class AlbumViewModel @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
-    private val sessionManager: SessionManager,
     private val getPhotoListUseCase: GetPhotoListUseCase
 ) : ViewModel() {
 
@@ -44,10 +43,6 @@ class AlbumViewModel @Inject constructor(
             is Loading -> true
             else -> false
         }
-    }
-
-    init {
-
     }
 
     fun searchPhotos(albumId: Int) {

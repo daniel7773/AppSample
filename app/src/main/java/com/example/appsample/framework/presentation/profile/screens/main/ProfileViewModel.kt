@@ -60,39 +60,25 @@ class ProfileViewModel @Inject constructor(
     fun startSearch() {
         viewModelScope.launch(mainDispatcher) {
             supervisorScope {
+                launch(CoroutineExceptionHandler { _, throwable ->
+                    user = getError(throwable)
+                }) { getUser() }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
-                    user =
-                        Error(
-                            throwable.message.toString(),
-                            Exception("Error launching coroutine in ViewModel")
-                        )
-                }) {
-                    getUser()
-                }
+                    postList = getError(throwable)
+                }) { getPostList() }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
-                    postList =
-                        Error(
-                            throwable.message.toString(),
-                            Exception("Error launching coroutine in ViewModel")
-                        )
-                }) {
-                    getPostList()
-                }
-
-                launch(CoroutineExceptionHandler { _, throwable ->
-                    albumList =
-                        Error(
-                            throwable.message.toString(),
-                            Exception("Error launching coroutine in ViewModel")
-                        )
-                }) {
-                    getAlbumList()
-                }
+                    albumList = getError(throwable)
+                }) { getAlbumList() }
             }
         }
     }
+
+    private fun <T> getError(throwable: Throwable) = Error<T>(
+        throwable.message.toString(),
+        Exception("Error launching coroutine in ViewModel")
+    )
 
     private suspend fun getUser() {
         user = Loading("init Loading")
@@ -147,9 +133,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun startLoadingFirstPhotosOfAlbums(localAlbumList: List<AlbumModel>) {
-        localAlbumList.map {
-            it.firstPhoto = getAlbumFirstPhoto(it)
-        }
+        localAlbumList.map { it.firstPhoto = getAlbumFirstPhoto(it) } // adding first photos to album
 
         joinAll()
         albumList = Success(localAlbumList, "With first photos")
@@ -168,8 +152,7 @@ class ProfileViewModel @Inject constructor(
                     "first photo of album with id ${albumModel.id!!} is  ${response.data?.id}"
                 )
 
-                val photoModel = PhotoToPhotoModelMapper.mapPhoto(response.data)
-                return photoModel
+                return PhotoToPhotoModelMapper.mapPhoto(response.data)
             }
             is Resource.Error -> {
                 Log.d(TAG, "getAlbumFirstPhoto error ${response.exception.localizedMessage}")
@@ -180,7 +163,7 @@ class ProfileViewModel @Inject constructor(
         return photoModel
     }
 
-    fun refreshData() = viewModelScope.launch(mainDispatcher) {
+    private fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albumList, postList)
         _isLoading.value = user is Loading || albumList is Loading || postList is Loading
     }

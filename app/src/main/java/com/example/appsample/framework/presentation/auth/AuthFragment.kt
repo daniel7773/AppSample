@@ -26,7 +26,6 @@ constructor(
     private var _binding: FragmentAuthBinding? = null
     private val binding: FragmentAuthBinding get() = _binding!!
 
-
     private val viewModel by lazy {
         ViewModelProvider(this, viewModelFactory).get(AuthViewModel::class.java)
     }

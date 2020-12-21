@@ -26,6 +26,7 @@ import kotlinx.coroutines.FlowPreview
 import java.util.*
 
 /**
+ *  PLEASE READ this before hate me for this shit code -->
  *  This fragment is needed just to show working with xml files
  */
 

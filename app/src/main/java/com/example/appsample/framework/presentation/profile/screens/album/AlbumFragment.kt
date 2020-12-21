@@ -40,7 +40,7 @@ constructor(
         Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show()
     })
 
-    val gridLayoutManager by lazy {
+    private val gridLayoutManager by lazy {
         GridLayoutManager(requireContext(), 6).apply {
             this.spanCount = 3
         }

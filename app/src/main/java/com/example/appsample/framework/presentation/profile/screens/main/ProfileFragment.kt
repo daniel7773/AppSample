@@ -37,10 +37,10 @@ constructor(
         ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
     }
 
-    lateinit var mainNavController: MainNavController
+    private lateinit var mainNavController: MainNavController
 
-    val goToAlbumFragment: ((ImageView, AlbumModel, Int) -> Unit) =
-        { imageView, albumModel, position ->
+    private val goToAlbumFragment: ((ImageView, AlbumModel, Int) -> Unit) =
+        { _, albumModel, _ ->
             val bundle = bundleOf(ALBUM_ID to albumModel.id, ALBUM_TITLE to albumModel.title)
 
             mainNavController.navController()

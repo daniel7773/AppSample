@@ -1,7 +1,6 @@
 package com.example.appsample.framework.presentation.auth
 
 import android.util.Log
-import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -32,30 +31,28 @@ class AuthViewModel @Inject constructor(
 
     private val TAG = "AuthViewModel"
 
-    private val _loadingState: MutableLiveData<State<UserModel>> = MutableLiveData(State.Unknown())
-    val loadingState: LiveData<State<UserModel>> = _loadingState
-    val isLoading = Transformations.map(_loadingState) { state ->
-        when (state) {
-            is State.Loading -> {
-                return@map View.VISIBLE
-            }
-            else -> {
-                return@map View.GONE
-            }
-        }
+    private val _authState: MutableLiveData<State<UserModel>> by lazy {
+        MutableLiveData(State.Unknown())
+    }
+    val authState: LiveData<State<UserModel>> by lazy {
+        _authState
+    }
+
+    val isLoading = Transformations.map(_authState) { state ->
+        return@map state is State.Loading
     }
 
     val userId: MutableLiveData<String> = MutableLiveData()
 
     private val loadingExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _loadingState.value = State.Error(
+        _authState.value = State.Error(
             throwable.message.toString(), Exception(throwable.localizedMessage)
         )
 
         viewModelScope.launch(mainDispatcher) {
             sessionManager.setAuthState(
                 AuthResource.Error(
-                    "ERROR IN RESPONSE",
+                    "ERROR IN RESPONSE OF AUTHENTICATION",
                     java.lang.Exception(throwable.localizedMessage)
                 )
             )
@@ -72,18 +69,19 @@ class AuthViewModel @Inject constructor(
             Log.d(TAG, "error message ${nfe.localizedMessage}")
         }
 
+        // TODO: handle how to get that user is not authenticated
         viewModelScope.launch(mainDispatcher + loadingExceptionHandler) {
-            _loadingState.value = State.Loading("init loading")
+            _authState.value = State.Loading("init loading")
             when (val response = getUserUseCase.getUser(id)) {
                 is Resource.Success -> {
                     // force unwrap because null values must be handled earlier
                     val user = UserToUserModelMapper.map(response.data!!)
-                    _loadingState.value = State.Success(user, "")
+                    _authState.value = State.Success(user, "")
                     setSuccessState(user)
                 }
                 is Resource.Error -> {
                     Log.d(TAG, "error ${response.exception.localizedMessage}")
-                    _loadingState.value =
+                    _authState.value =
                         State.Error(response.message.toString(), response.exception)
                     setErrorState(response)
                 }
