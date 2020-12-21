@@ -20,7 +20,7 @@ class PhotoRepositoryImpl @Inject constructor(
 
         try {
             photoEntityList = withTimeout(GET_ALBUMS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getAlbumPhotos(albumId).await()
+                return@withTimeout jsonPlaceholderApiSource.getAlbumPhotosAsync(albumId).await()
             }
         } catch (e: Exception) {
             Log.d("PhotoRepositoryImpl", "catch (e: Exception)")
@@ -58,7 +58,7 @@ class PhotoRepositoryImpl @Inject constructor(
 
         try {
             photoEntity = withTimeout(GET_ALBUMS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getPhotoById(hackPhotoId).await()
+                return@withTimeout jsonPlaceholderApiSource.getPhotoByIdAsync(hackPhotoId).await()
             }
         } catch (e: Exception) {
             return Resource.Error(null, "catch error while calling getPhotoById", e)

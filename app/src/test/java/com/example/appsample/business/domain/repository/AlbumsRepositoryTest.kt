@@ -35,10 +35,10 @@ class AlbumsRepositoryTest {
 
         val userId = 1
         coEvery {
-            networkApi.getAlbumsFromUser(userId).await()
+            networkApi.getAlbumsFromUserAsync(userId).await()
         } returns DataFactory.produceListOfAlbumsEntity(3)
 
-        val networkValue = networkApi.getAlbumsFromUser(userId).await()
+        val networkValue = networkApi.getAlbumsFromUserAsync(userId).await()
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
         Assertions.assertThat(AlbumEntityToAlbumMapper.map(networkValue!!))
@@ -51,7 +51,7 @@ class AlbumsRepositoryTest {
         val userId = 1
         val exception: Exception = Exception("Any")
 
-        coEvery { networkApi.getAlbumsFromUser(userId).await() } throws exception
+        coEvery { networkApi.getAlbumsFromUserAsync(userId).await() } throws exception
 
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
@@ -67,7 +67,7 @@ class AlbumsRepositoryTest {
         val userId = 1
 
         coEvery {
-            networkApi.getAlbumsFromUser(userId)
+            networkApi.getAlbumsFromUserAsync(userId)
         }.answers {
             val deferredAlbumsListEntities = CompletableDeferred<List<AlbumEntity>?>()
 

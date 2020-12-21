@@ -33,10 +33,10 @@ class UserRepositoryTest {
         val userId = 1
 
         coEvery {
-            networkApi.getUser(userId).await()
+            networkApi.getUserAsync(userId).await()
         } returns DataFactory.produceUserEntity()
 
-        val networkValue = networkApi.getUser(userId).await()
+        val networkValue = networkApi.getUserAsync(userId).await()
         val repositoryValue = userRepository.getUser(userId)
 
         Assertions.assertThat(UserEntityToUserMapper.map(networkValue!!))
@@ -51,7 +51,7 @@ class UserRepositoryTest {
         var exception: Exception = Exception("Any")
 
         coEvery {
-            networkApi.getUser(userId).await()
+            networkApi.getUserAsync(userId).await()
         } throws exception
 
         val repositoryValue = userRepository.getUser(userId)
@@ -69,7 +69,7 @@ class UserRepositoryTest {
         val userId = 1
 
         coEvery {
-            networkApi.getUser(userId)
+            networkApi.getUserAsync(userId)
         }.answers {
             val deferredUserEntity = CompletableDeferred<UserEntity?>()
 

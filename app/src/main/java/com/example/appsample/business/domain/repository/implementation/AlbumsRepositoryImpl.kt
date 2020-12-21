@@ -22,7 +22,7 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         try {
             albumEntityList = withTimeout(GET_ALBUMS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getAlbumsFromUser(userId ?: 0).await()
+                return@withTimeout jsonPlaceholderApiSource.getAlbumsFromUserAsync(userId ?: 0).await()
             }
         } catch (e: Exception) {
             return Error(null, "Catch error while calling getAlbums", e)

@@ -22,7 +22,7 @@ class UserRepositoryImpl @Inject constructor(
 
         try {
             userEntity = withTimeout(GET_USER_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getUser(id ?: 0).await()
+                return@withTimeout jsonPlaceholderApiSource.getUserAsync(id ?: 0).await()
             }
         } catch (e: Exception) {
             return Error(null, "Catch error while calling getUser", e)

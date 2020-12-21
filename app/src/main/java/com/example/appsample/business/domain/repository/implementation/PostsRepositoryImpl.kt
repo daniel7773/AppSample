@@ -21,7 +21,7 @@ class PostsRepositoryImpl @Inject constructor(
 
         try {
             postEntityList = withTimeout(GET_POSTS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getPostsListFromUser(userId ?: 0)
+                return@withTimeout jsonPlaceholderApiSource.getPostsListFromUserAsync(userId ?: 0)
                     .await()
             }
         } catch (e: Exception) {

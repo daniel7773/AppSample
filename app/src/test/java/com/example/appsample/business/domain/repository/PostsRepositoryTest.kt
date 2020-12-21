@@ -35,10 +35,10 @@ class PostsRepositoryTest {
 
         val userId = 1
         coEvery {
-            networkApi.getPostsListFromUser(userId).await()
+            networkApi.getPostsListFromUserAsync(userId).await()
         } returns DataFactory.produceListOfPostsEntity(3)
 
-        val networkValue = networkApi.getPostsListFromUser(userId).await()
+        val networkValue = networkApi.getPostsListFromUserAsync(userId).await()
         val repositoryValue = postsRepository.getPostsList(userId)
 
         Assertions.assertThat(PostEntityToPostMapper.map(networkValue!!))
@@ -52,7 +52,7 @@ class PostsRepositoryTest {
 
         var exception: Exception = Exception("Any")
         coEvery {
-            networkApi.getPostsListFromUser(userId).await()
+            networkApi.getPostsListFromUserAsync(userId).await()
         } throws exception
 
         val repositoryValue = postsRepository.getPostsList(userId)
@@ -69,7 +69,7 @@ class PostsRepositoryTest {
         val userId = 1
 
         coEvery {
-            networkApi.getPostsListFromUser(userId)
+            networkApi.getPostsListFromUserAsync(userId)
         } answers {
             val deferredPostListEntities = CompletableDeferred<List<PostEntity>?>()
 

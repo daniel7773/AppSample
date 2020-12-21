@@ -16,27 +16,27 @@ const val GET_POSTS_TIMEOUT = 15000L
 interface JsonPlaceholderApiSource {
 
     @GET("users/{id}")
-    fun getUser(
+    fun getUserAsync(
         @Path("id") id: Int
     ): Deferred<UserEntity?>
 
     @GET("posts")
-    fun getPostsListFromUser(
+    fun getPostsListFromUserAsync(
         @Query("userId") userId: Int
     ): Deferred<List<PostEntity>?>
 
     @GET("albums")
-    fun getAlbumsFromUser(
+    fun getAlbumsFromUserAsync(
         @Query("userId") userId: Int
     ): Deferred<List<AlbumEntity>?>
 
     @GET("photos")
-    fun getAlbumPhotos(
+    fun getAlbumPhotosAsync(
         @Query("albumId") albumId: Int
     ): Deferred<List<PhotoEntity>?>
 
     @GET("photos/{id}")
-    fun getPhotoById(
+    fun getPhotoByIdAsync(
         @Path("id") photoId: Int // using hack in repository
     ): Deferred<PhotoEntity?>
 }

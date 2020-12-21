@@ -40,10 +40,10 @@ class PhotoRepositoryTest {
             val photoId = 1
 
             coEvery {
-                networkApi.getPhotoById(photoId).await()
+                networkApi.getPhotoByIdAsync(photoId).await()
             } returns DataFactory.producePhotoEntity(photoId)
 
-            val networkValue = networkApi.getPhotoById(photoId).await()
+            val networkValue = networkApi.getPhotoByIdAsync(photoId).await()
             val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
 
             Assertions.assertThat(PhotoEntityToPhotoMapper.mapPhoto(networkValue!!))
@@ -58,7 +58,7 @@ class PhotoRepositoryTest {
 
             var exception: Exception = Exception("Any")
             coEvery {
-                networkApi.getPhotoById(photoId).await()
+                networkApi.getPhotoByIdAsync(photoId).await()
             } throws exception
 
             val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
@@ -76,7 +76,7 @@ class PhotoRepositoryTest {
             val photoId = 1
 
             coEvery {
-                networkApi.getPhotoById(photoId)
+                networkApi.getPhotoByIdAsync(photoId)
             } answers {
                 val deferredPhotoEntity = CompletableDeferred<PhotoEntity?>()
 
@@ -100,10 +100,10 @@ class PhotoRepositoryTest {
             val userId = 1
 
             coEvery {
-                networkApi.getAlbumPhotos(userId).await()
+                networkApi.getAlbumPhotosAsync(userId).await()
             } returns DataFactory.produceListOfPhotoEntity(userId)
 
-            val networkValue = networkApi.getAlbumPhotos(userId).await()
+            val networkValue = networkApi.getAlbumPhotosAsync(userId).await()
             val repositoryValue = photoRepository.getAlbumPhotoList(userId)
 
             Assertions.assertThat(PhotoEntityToPhotoMapper.mapPhotoList(networkValue!!))
@@ -117,7 +117,7 @@ class PhotoRepositoryTest {
 
             var exception: Exception = Exception("Any")
             coEvery {
-                networkApi.getAlbumPhotos(userId).await()
+                networkApi.getAlbumPhotosAsync(userId).await()
             } throws exception
 
             val repositoryValue = photoRepository.getAlbumPhotoList(userId)
@@ -135,7 +135,7 @@ class PhotoRepositoryTest {
                 val userId = 1
 
                 coEvery {
-                    networkApi.getAlbumPhotos(userId)
+                    networkApi.getAlbumPhotosAsync(userId)
                 } answers {
                     val deferredPhotoListEntities = CompletableDeferred<List<PhotoEntity>?>()
 
