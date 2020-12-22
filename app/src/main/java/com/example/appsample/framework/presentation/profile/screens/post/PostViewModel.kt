@@ -24,7 +24,7 @@ import javax.inject.Inject
 private const val POST_ID_KEY = "userId"
 
 @ExperimentalCoroutinesApi
-class PostViewModel @Inject constructor(
+class PostViewModel constructor(
     private val mainDispatcher: CoroutineDispatcher,
     private val getCommentListUseCase: GetCommentListUseCase,
     private val getPostUseCase: GetPostUseCase,
