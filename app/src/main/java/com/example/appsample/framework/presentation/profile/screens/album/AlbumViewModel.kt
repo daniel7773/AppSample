@@ -6,13 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appsample.business.domain.repository.abstraction.Resource
+import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
-import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.State.*
 import com.example.appsample.framework.presentation.profile.mappers.PhotoToPhotoModelMapper
-import com.example.appsample.framework.presentation.profile.models.PhotoModel
+import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch

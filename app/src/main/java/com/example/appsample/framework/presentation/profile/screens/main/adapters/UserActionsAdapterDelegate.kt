@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.databinding.BlockUserActionsBinding
-import com.example.appsample.framework.presentation.profile.models.ProfileElement
-import com.example.appsample.framework.presentation.profile.models.UserActionsElement
+import com.example.appsample.framework.presentation.profile.model.ProfileElement
+import com.example.appsample.framework.presentation.profile.model.UserActionsElement
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

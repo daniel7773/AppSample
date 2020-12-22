@@ -5,9 +5,9 @@ import com.example.appsample.business.domain.model.Company
 import com.example.appsample.business.domain.model.Geo
 import com.example.appsample.business.domain.model.User
 import com.example.appsample.framework.presentation.common.model.UserModel
-import com.example.appsample.framework.presentation.profile.models.AddressModel
-import com.example.appsample.framework.presentation.profile.models.CompanyModel
-import com.example.appsample.framework.presentation.profile.models.GeoModel
+import com.example.appsample.framework.presentation.profile.model.AddressModel
+import com.example.appsample.framework.presentation.profile.model.CompanyModel
+import com.example.appsample.framework.presentation.profile.model.GeoModel
 
 object UserToUserModelMapper {
 

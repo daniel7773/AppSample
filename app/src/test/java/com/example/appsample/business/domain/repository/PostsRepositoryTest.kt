@@ -41,7 +41,7 @@ class PostsRepositoryTest {
         val networkValue = networkApi.getPostsListFromUserAsync(userId).await()
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat(PostEntityToPostMapper.map(networkValue!!))
+        Assertions.assertThat(PostEntityToPostMapper.mapList(networkValue!!))
             .isEqualTo(repositoryValue.data)
     }
 

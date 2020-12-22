@@ -6,6 +6,7 @@ import com.example.appsample.framework.presentation.profile.di.factories.fragmen
 import com.example.appsample.framework.presentation.profile.di.keys.ProfileFragmentKey
 import com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment
 import com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment
+import com.example.appsample.framework.presentation.profile.screens.post.PostFragment
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -31,9 +32,9 @@ abstract class ProfileFragmentBuildersModule {
     @IntoMap
     @ProfileFragmentKey(AlbumFragment::class)
     abstract fun bindAlbumFragment(albumFragment: AlbumFragment): Fragment
-//
-//    @Binds
-//    @IntoMap
-//    @ProfileFragmentKey(Feature1FinalFragment::class)
-//    abstract fun bindFinalFragment(feature1FinalFragment: Feature1FinalFragment): Fragment
+
+    @Binds
+    @IntoMap
+    @ProfileFragmentKey(PostFragment::class)
+    abstract fun bindPostFragment(postFragment: PostFragment): Fragment
 }

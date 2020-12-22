@@ -42,7 +42,7 @@ class AuthViewModelTest {
         authViewModel.startLoading()
 
         // Then
-        assertThat(authViewModel.loadingState.value).isInstanceOf(State.Success::class.java)
+        assertThat(authViewModel.authState.value).isInstanceOf(State.Success::class.java)
     }
 
     @Test
@@ -58,8 +58,8 @@ class AuthViewModelTest {
             authViewModel.startLoading()
 
             // Then
-            assertThat(authViewModel.loadingState.value!!.exception).isNotNull
-            assertThat(authViewModel.loadingState.value?.exception).isInstanceOf(
+            assertThat(authViewModel.authState.value!!.exception).isNotNull
+            assertThat(authViewModel.authState.value?.exception).isInstanceOf(
                 getUserUseCase.getUser(
                     3
                 ).exception!!::class.java

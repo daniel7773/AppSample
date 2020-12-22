@@ -5,10 +5,10 @@ import com.example.appsample.business.data.network.abstraction.GET_ALBUMS_TIMEOU
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.AlbumEntityToAlbumMapper
 import com.example.appsample.business.domain.model.Album
+import com.example.appsample.business.domain.repository.Resource
+import com.example.appsample.business.domain.repository.Resource.Error
+import com.example.appsample.business.domain.repository.Resource.Success
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
-import com.example.appsample.business.domain.repository.abstraction.Resource
-import com.example.appsample.business.domain.repository.abstraction.Resource.Error
-import com.example.appsample.business.domain.repository.abstraction.Resource.Success
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
@@ -16,13 +16,13 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
 ) : AlbumsRepository {
 
-    override suspend fun getAlbumList(userId: Int?): Resource<List<Album>?> {
+    override suspend fun getAlbumList(userId: Int): Resource<List<Album>?> {
 
         var albumEntityList: List<AlbumEntity>? = null
 
         try {
             albumEntityList = withTimeout(GET_ALBUMS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getAlbumsFromUserAsync(userId ?: 0).await()
+                return@withTimeout jsonPlaceholderApiSource.getAlbumsFromUserAsync(userId).await()
             }
         } catch (e: Exception) {
             return Error(null, "Catch error while calling getAlbums", e)

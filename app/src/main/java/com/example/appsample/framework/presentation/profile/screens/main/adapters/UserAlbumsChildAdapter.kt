@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.R
 import com.example.appsample.databinding.BlockUserAlbumBinding
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
-import com.example.appsample.framework.presentation.profile.models.PhotoModel
+import com.example.appsample.framework.presentation.profile.model.AlbumModel
+import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 

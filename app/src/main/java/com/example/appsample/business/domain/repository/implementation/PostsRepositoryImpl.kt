@@ -2,13 +2,14 @@ package com.example.appsample.business.domain.repository.implementation
 
 import com.example.appsample.business.data.models.PostEntity
 import com.example.appsample.business.data.network.abstraction.GET_POSTS_TIMEOUT
+import com.example.appsample.business.data.network.abstraction.GET_POST_TIMEOUT
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.PostEntityToPostMapper
 import com.example.appsample.business.domain.model.Post
+import com.example.appsample.business.domain.repository.Resource
+import com.example.appsample.business.domain.repository.Resource.Error
+import com.example.appsample.business.domain.repository.Resource.Success
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
-import com.example.appsample.business.domain.repository.abstraction.Resource
-import com.example.appsample.business.domain.repository.abstraction.Resource.Error
-import com.example.appsample.business.domain.repository.abstraction.Resource.Success
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
@@ -16,12 +17,12 @@ class PostsRepositoryImpl @Inject constructor(
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
 ) : PostsRepository {
 
-    override suspend fun getPostsList(userId: Int?): Resource<List<Post>?> {
+    override suspend fun getPostsList(userId: Int): Resource<List<Post>?> {
         var postEntityList: List<PostEntity>? = null
 
         try {
             postEntityList = withTimeout(GET_POSTS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getPostsListFromUserAsync(userId ?: 0)
+                return@withTimeout jsonPlaceholderApiSource.getPostsListFromUserAsync(userId)
                     .await()
             }
         } catch (e: Exception) {
@@ -32,8 +33,29 @@ class PostsRepositoryImpl @Inject constructor(
             return Error(null, "Data from repository is null", NullPointerException())
         }
 
-        val postList = PostEntityToPostMapper.map(postEntityList)
+        val postList = PostEntityToPostMapper.mapList(postEntityList)
 
         return Success(postList, "Success")
+    }
+
+    override suspend fun getPost(postId: Int): Resource<Post?> {
+        var postEntity: PostEntity? = null
+
+        try {
+            postEntity = withTimeout(GET_POST_TIMEOUT) {
+                return@withTimeout jsonPlaceholderApiSource.getPostByIdAsync(postId)
+                    .await()
+            }
+        } catch (e: Exception) {
+            return Error(null, "Catch error while calling getPost", e)
+        }
+
+        if (postEntity == null) {
+            return Error(null, "Data from repository is null", NullPointerException())
+        }
+
+        val post = PostEntityToPostMapper.map(postEntity)
+
+        return Success(post, "Success")
     }
 }

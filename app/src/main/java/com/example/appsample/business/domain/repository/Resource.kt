@@ -1,4 +1,4 @@
-package com.example.appsample.business.domain.repository.abstraction
+package com.example.appsample.business.domain.repository
 
 sealed class Resource<T>(
     open val data: T?,

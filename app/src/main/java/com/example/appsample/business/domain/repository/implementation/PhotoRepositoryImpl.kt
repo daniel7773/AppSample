@@ -6,8 +6,8 @@ import com.example.appsample.business.data.network.abstraction.GET_ALBUMS_TIMEOU
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.PhotoEntityToPhotoMapper
 import com.example.appsample.business.domain.model.Photo
+import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
-import com.example.appsample.business.domain.repository.abstraction.Resource
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 

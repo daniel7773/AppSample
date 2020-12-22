@@ -7,5 +7,5 @@ class GetPostListUseCase @Inject constructor(
     private val postsRepository: PostsRepository
 ) {
 
-    suspend fun getPostList(userId: Int?) = postsRepository.getPostsList(userId)
+    suspend fun getPostList(userId: Int) = postsRepository.getPostsList(userId)
 }

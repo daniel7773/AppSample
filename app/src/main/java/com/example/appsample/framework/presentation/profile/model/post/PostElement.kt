@@ -1,22 +1,21 @@
-package com.example.appsample.framework.presentation.profile.models
+package com.example.appsample.framework.presentation.profile.model.post
 
-import com.example.appsample.framework.presentation.common.model.UserModel
+import com.example.appsample.framework.presentation.profile.model.CommentModel
+import com.example.appsample.framework.presentation.profile.model.PostModel
 
-sealed class ProfileElement(open val id: String)
+sealed class PostElement(open val id: String)
 
-data class UserInfoElement(val user: UserModel) : ProfileElement("user_main_info_block")
+data class PostSourceElement(val postModel: PostModel) : PostElement("post_source_block")
 
-data class UserActionsElement(val user: UserModel) : ProfileElement("user_action_block")
+data class PostBodyElement(val postModel: PostModel) : PostElement("post_body_block")
 
-data class UserDetailsElement(val user: UserModel) : ProfileElement("user_details_block")
+data class PostCommentsHeader(val commentListSize: Int) : PostElement("post_comments_header_block")
 
-data class UserPostsElement(val post: PostModel) :
-    ProfileElement("${post.id}_${post.title}_${post.userId}")
-
-data class AlbumsBlockElement(val postList: List<AlbumModel>) : ProfileElement("user_albums_block")
+data class PostCommentElement(val comment: CommentModel) :
+    PostElement("${comment.id} ${comment.name} ${comment.postId}")
 
 // id дивайдерам нужен чтобы диффер с ними правильно работал
-class Divider(id: String?) : ProfileElement(id ?: "divider") {
+class Divider(id: String?) : PostElement(id ?: "divider") {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -32,7 +31,7 @@ class Divider(id: String?) : ProfileElement(id ?: "divider") {
 }
 
 // id пробелам нужен чтобы диффер с ними правильно работал
-class EmptySpace(id: String) : ProfileElement(id) {
+class EmptySpace(id: String) : PostElement(id) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

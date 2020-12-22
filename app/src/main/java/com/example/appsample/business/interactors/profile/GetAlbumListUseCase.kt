@@ -7,5 +7,5 @@ class GetAlbumListUseCase @Inject constructor(
     private val albumsRepository: AlbumsRepository
 ) {
 
-    suspend fun getAlbumList(userId: Int?) = albumsRepository.getAlbumList(userId)
+    suspend fun getAlbumList(userId: Int) = albumsRepository.getAlbumList(userId)
 }

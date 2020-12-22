@@ -2,15 +2,19 @@ package com.example.appsample.framework.presentation.profile.di
 
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
+import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
 import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import com.example.appsample.business.domain.repository.implementation.AlbumsRepositoryImpl
+import com.example.appsample.business.domain.repository.implementation.CommentsRepositoryImpl
 import com.example.appsample.business.domain.repository.implementation.PhotoRepositoryImpl
 import com.example.appsample.business.domain.repository.implementation.PostsRepositoryImpl
 import com.example.appsample.business.domain.repository.implementation.UserRepositoryImpl
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
+import com.example.appsample.business.interactors.profile.GetCommentListUseCase
+import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.presentation.auth.di.BASE_URL
@@ -84,5 +88,23 @@ object ProfileModule {
     @Provides
     fun provideGetPhotoUseCase(photoRepository: PhotoRepository): GetPhotoUseCase {
         return GetPhotoUseCase(photoRepository)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideGetPhotoListUseCase(photoRepository: PhotoRepository): GetPhotoListUseCase {
+        return GetPhotoListUseCase(photoRepository)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideCommentsRepository(jsonPlaceholderApiSource: JsonPlaceholderApiSource): CommentsRepository {
+        return CommentsRepositoryImpl(jsonPlaceholderApiSource)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideGetCommentListUseCase(commentsRepository: CommentsRepository): GetCommentListUseCase {
+        return GetCommentListUseCase(commentsRepository)
     }
 }

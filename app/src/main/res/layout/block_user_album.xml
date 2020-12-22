@@ -7,7 +7,7 @@
 
         <variable
             name="album"
-            type="com.example.appsample.framework.presentation.profile.models.AlbumModel" />
+            type="com.example.appsample.framework.presentation.profile.model.AlbumModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -6,6 +6,7 @@ import com.example.appsample.framework.presentation.profile.di.factories.viewmod
 import com.example.appsample.framework.presentation.profile.di.keys.ProfileViewModelKey
 import com.example.appsample.framework.presentation.profile.screens.album.AlbumViewModel
 import com.example.appsample.framework.presentation.profile.screens.main.ProfileViewModel
+import com.example.appsample.framework.presentation.profile.screens.post.PostViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -27,5 +28,10 @@ abstract class ProfileViewModelsModule {
     @IntoMap
     @ProfileViewModelKey(AlbumViewModel::class)
     abstract fun bindAlbumViewModel(albumViewModel: AlbumViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ProfileViewModelKey(PostViewModel::class)
+    abstract fun bindPostViewModel(postViewModel: PostViewModel): ViewModel
 
 }

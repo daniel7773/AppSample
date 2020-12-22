@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.databinding.DividerProfileBinding
-import com.example.appsample.framework.presentation.profile.models.Divider
-import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import com.example.appsample.framework.presentation.profile.model.Divider
+import com.example.appsample.framework.presentation.profile.model.ProfileElement
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 

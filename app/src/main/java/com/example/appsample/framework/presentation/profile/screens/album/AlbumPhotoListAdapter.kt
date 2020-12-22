@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.R
 import com.example.appsample.databinding.ItemImageBinding
-import com.example.appsample.framework.presentation.profile.models.PhotoModel
+import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import com.squareup.picasso.Picasso
 
 

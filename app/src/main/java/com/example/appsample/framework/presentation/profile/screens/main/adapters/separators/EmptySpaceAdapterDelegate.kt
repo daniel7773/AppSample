@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.R
-import com.example.appsample.framework.presentation.profile.models.EmptySpace
-import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import com.example.appsample.framework.presentation.profile.model.EmptySpace
+import com.example.appsample.framework.presentation.profile.model.ProfileElement
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.separators.EmptySpaceAdapterDelegate.ViewHolder
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.android.extensions.LayoutContainer

@@ -14,9 +14,11 @@ import com.example.appsample.databinding.FragmentProfileBinding
 import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
 import com.example.appsample.framework.presentation.auth.di.factories.viewmodels.AuthViewModelFactory
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
+import com.example.appsample.framework.presentation.profile.model.AlbumModel
+import com.example.appsample.framework.presentation.profile.model.PostModel
 import com.example.appsample.framework.presentation.profile.screens.album.ALBUM_ID
 import com.example.appsample.framework.presentation.profile.screens.album.ALBUM_TITLE
+import com.example.appsample.framework.presentation.profile.screens.post.POST_ID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -47,6 +49,15 @@ constructor(
                 .navigate(R.id.action_profileFragment_to_albumFragment, bundle)
         }
 
+    private val goToPostFragment: ((PostModel) -> Unit) =
+        { postModel ->
+            Log.d(TAG, "goToPostFragment called")
+            val bundle = bundleOf(POST_ID to postModel.id)
+
+            mainNavController.navController()
+                .navigate(R.id.action_profileFragment_to_postFragment, bundle)
+        }
+
     override fun onAttach(context: Context) {
         try {
             mainNavController = context as MainNavController
@@ -67,7 +78,7 @@ constructor(
             viewModel.startSearch()
         }
 
-        _binding!!.profileRv.adapter = ProfileAdapter(goToAlbumFragment)
+        _binding!!.profileRv.adapter = ProfileAdapter(goToAlbumFragment, goToPostFragment)
 
         return binding.root
     }

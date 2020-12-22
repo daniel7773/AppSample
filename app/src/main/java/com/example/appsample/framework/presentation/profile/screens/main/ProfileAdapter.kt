@@ -2,8 +2,9 @@ package com.example.appsample.framework.presentation.profile.screens.main
 
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
-import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import com.example.appsample.framework.presentation.profile.model.AlbumModel
+import com.example.appsample.framework.presentation.profile.model.PostModel
+import com.example.appsample.framework.presentation.profile.model.ProfileElement
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserActionsAdapterDelegate
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserAlbumsAdapterDelegate
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserDetailsAdapterDelegate
@@ -18,7 +19,8 @@ import kotlinx.coroutines.FlowPreview
 @ExperimentalCoroutinesApi
 @FlowPreview
 class ProfileAdapter @ExperimentalCoroutinesApi constructor(
-    private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit)? = null
+    private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit),
+    private val onPostClick: ((PostModel) -> Unit)
 ) :
     AsyncListDifferDelegationAdapter<ProfileElement>(DiffCallback) {
 
@@ -49,7 +51,7 @@ class ProfileAdapter @ExperimentalCoroutinesApi constructor(
 
             .addDelegate(UserAlbumsAdapterDelegate(onAlbumClick))
 
-            .addDelegate(UserPostAdapterDelegate())
+            .addDelegate(UserPostAdapterDelegate(onPostClick))
 
             .addDelegate(DividerAdapterDelegate())
             .addDelegate(EmptySpaceAdapterDelegate())

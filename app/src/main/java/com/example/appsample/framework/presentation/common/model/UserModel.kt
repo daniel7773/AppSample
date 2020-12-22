@@ -1,10 +1,10 @@
 package com.example.appsample.framework.presentation.common.model
 
-import com.example.appsample.framework.presentation.profile.models.AddressModel
-import com.example.appsample.framework.presentation.profile.models.CompanyModel
+import com.example.appsample.framework.presentation.profile.model.AddressModel
+import com.example.appsample.framework.presentation.profile.model.CompanyModel
 
 data class UserModel(
-    var id: Int = 0,
+    var id: Int? = null,
     var username: String? = null,
     var email: String? = null,
     var address: AddressModel? = null,

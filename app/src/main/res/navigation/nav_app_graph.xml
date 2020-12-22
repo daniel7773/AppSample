@@ -11,16 +11,24 @@
             android:id="@+id/action_profileFragment_to_albumFragment"
             app:destination="@id/albumFragment" />
 
+        <action
+            android:id="@+id/action_profileFragment_to_postFragment"
+            app:destination="@id/postFragment" />
+
     </fragment>
 
     <fragment
         android:id="@+id/albumFragment"
         android:name="com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment">
 
-        <argument
-            android:name="albumId"
-            app:argType="string" />
+        <!-- TODO:  add args instead of hardcoded bundles-->
 
+    </fragment>
+
+    <fragment
+        android:id="@+id/postFragment"
+        android:name="com.example.appsample.framework.presentation.profile.screens.post.PostFragment">
+        <!-- TODO:  add args instead of hardcoded bundles-->
     </fragment>
 
 </navigation>

@@ -1,8 +1,11 @@
 package com.example.appsample.framework.presentation.profile
 
 import com.example.appsample.business.data.network.DataFactory
+import com.example.appsample.business.domain.model.Comment
+import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
+import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
@@ -31,6 +34,7 @@ class ProfileViewModelTest {
     val getPostListUseCase: GetPostListUseCase = mockk()
     val getAlbumListUseCase: GetAlbumListUseCase = mockk()
     val getPhotoUseCase: GetPhotoUseCase = mockk()
+    val getCommentListUseCase: GetCommentListUseCase = mockk()
 
     @get:Extensions
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
@@ -44,6 +48,7 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher,
             sessionManager,
             getPostListUseCase,
+            getCommentListUseCase,
             getUserUseCase,
             getAlbumListUseCase,
             getPhotoUseCase
@@ -149,7 +154,9 @@ class ProfileViewModelTest {
                 coEvery {
                     getPostListUseCase.getPostList(any())
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4))
-
+                coEvery {
+                    getCommentListUseCase.getCommentList(any())
+                } returns Resource.Success(emptyList<Comment>(), "")
                 // When
                 profileViewModel.startSearch()
 
@@ -168,7 +175,9 @@ class ProfileViewModelTest {
                 coEvery {
                     getPostListUseCase.getPostList(any())
                 } returns resourceError
-
+                coEvery {
+                    getCommentListUseCase.getCommentList(any())
+                } returns Resource.Success(emptyList<Comment>(), "")
                 // When
                 profileViewModel.startSearch()
 

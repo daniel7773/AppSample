@@ -5,9 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appsample.business.domain.repository.abstraction.Resource
+import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
+import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
@@ -21,10 +22,10 @@ import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.mappers.AlbumToAlbumModelMapper
 import com.example.appsample.framework.presentation.profile.mappers.PhotoToPhotoModelMapper
 import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
-import com.example.appsample.framework.presentation.profile.models.AlbumModel
-import com.example.appsample.framework.presentation.profile.models.PhotoModel
-import com.example.appsample.framework.presentation.profile.models.PostModel
-import com.example.appsample.framework.presentation.profile.models.ProfileElement
+import com.example.appsample.framework.presentation.profile.model.AlbumModel
+import com.example.appsample.framework.presentation.profile.model.PhotoModel
+import com.example.appsample.framework.presentation.profile.model.PostModel
+import com.example.appsample.framework.presentation.profile.model.ProfileElement
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.ProfileTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -39,6 +40,7 @@ class ProfileViewModel @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostListUseCase: GetPostListUseCase,
+    private val getCommentListUseCase: GetCommentListUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val getAlbumListUseCase: GetAlbumListUseCase,
     private val getPhotoUseCase: GetPhotoUseCase
@@ -82,7 +84,10 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun getUser() {
         user = Loading("init Loading")
-        user = when (val response = getUserUseCase.getUser(sessionManager.user.id)) {
+        if (sessionManager.user.id == null) {
+            throw java.lang.Exception("User id cant be NULL")
+        }
+        user = when (val response = getUserUseCase.getUser(sessionManager.user.id!!)) {
             is Resource.Success -> {
                 Log.d(TAG, "user ${response.data}")
                 // force unwrap because null values must be handled earlier
@@ -99,24 +104,62 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun getPostList() {
         postList = Loading("init Loading")
-        postList = when (val response = getPostListUseCase.getPostList(sessionManager.user.id)) {
+        if (sessionManager.user.id == null) {
+            throw java.lang.Exception("User id cant be NULL")
+        }
+        when (val response = getPostListUseCase.getPostList(sessionManager.user.id!!)) {
             is Resource.Success -> {
                 Log.d(TAG, "postList came, size: ${response.data!!.size}")
                 // force unwrap because null values must be handled earlier
-                val postList = PostToPostModelMapper.map(response.data!!)
-                Success(postList, "getPostList Success in ViewModel")
+                val postList = PostToPostModelMapper.mapList(response.data!!)
+                startLoadingCommentsOfPost(postList)
             }
             is Resource.Error -> {
                 Log.d(TAG, "getPostList error ${response.exception.localizedMessage}")
-                Error(response.message.toString(), response.exception)
+                postList = Error(response.message.toString(), response.exception)
             }
         }
+    }
+
+    private suspend fun startLoadingCommentsOfPost(postModelList: List<PostModel>) {
+
+        postModelList.map { it.commentsSize = getCommentsSize(it) } // adding comments size to posts
+
+        joinAll()
+        postList = Success(postModelList, "With comments size")
         refreshData()
+    }
+
+    private suspend fun getCommentsSize(postModel: PostModel): Int? {
+        if (postModel.id == null) {
+            return null
+        }
+        // passing hardcoded photoId because we using hack in PhotoRepositoryImpl
+        val postCommentListSize =
+            when (val response = getCommentListUseCase.getCommentList(postModel.id!!)) {
+                is Resource.Success -> {
+                    Log.d(
+                        TAG,
+                        "comments size of post with id ${postModel.id!!} is  ${response.data?.size}"
+                    )
+
+                    return response.data?.size
+                }
+                is Resource.Error -> {
+                    Log.d(TAG, "getAlbumFirstPhoto error ${response.exception.localizedMessage}")
+                    return null
+                }
+            }
+
+        return postCommentListSize
     }
 
     private suspend fun getAlbumList() {
         albumList = Loading("init Loading")
-        when (val response = getAlbumListUseCase.getAlbumList(sessionManager.user.id)) {
+        if (sessionManager.user.id == null) {
+            throw java.lang.Exception("User id cant be NULL")
+        }
+        when (val response = getAlbumListUseCase.getAlbumList(sessionManager.user.id!!)) {
             is Resource.Success -> {
                 Log.d(TAG, "albumList ${response.data}")
                 // force unwrap because null values must be handled earlier
@@ -133,7 +176,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun startLoadingFirstPhotosOfAlbums(localAlbumList: List<AlbumModel>) {
-        localAlbumList.map { it.firstPhoto = getAlbumFirstPhoto(it) } // adding first photos to album
+        localAlbumList.map {
+            it.firstPhoto = getAlbumFirstPhoto(it)
+        } // adding first photos to album
 
         joinAll()
         albumList = Success(localAlbumList, "With first photos")
