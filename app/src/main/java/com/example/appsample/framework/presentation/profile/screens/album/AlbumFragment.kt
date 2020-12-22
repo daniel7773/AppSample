@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentAlbumBinding
 import com.example.appsample.framework.base.presentation.BaseFragment
-import com.example.appsample.framework.presentation.auth.di.factories.viewmodels.AuthViewModelFactory
+import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
+import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.AlbumViewModelFactory
 import com.example.appsample.framework.presentation.profile.screens.album.itemdecoration.GridMarginDecoration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -25,14 +26,14 @@ const val ALBUM_TITLE: String = "ALBUM_TITLE"
 @FlowPreview
 class AlbumFragment @Inject
 constructor(
-    private val viewModelFactory: AuthViewModelFactory
+    private val albumViewModelFactory: AlbumViewModelFactory
 ) : BaseFragment(R.layout.fragment_album) {
 
     private var _binding: FragmentAlbumBinding? = null
     private val binding: FragmentAlbumBinding get() = _binding!!
 
-    private val viewModel by lazy {
-        ViewModelProvider(this, viewModelFactory).get(AlbumViewModel::class.java)
+    private val viewModel: AlbumViewModel by viewModels {
+        GenericSavedStateViewModelFactory(albumViewModelFactory, this)
     }
 
     val listAdapter = AlbumPhotoListAdapter({ imageView, photoModel, position ->
@@ -46,15 +47,13 @@ constructor(
         }
     }
 
-    private var albumId: Int = 1
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-        albumId = arguments?.getInt(ALBUM_ID) ?: 1
+        val albumId = arguments?.getInt(ALBUM_ID) ?: 1
         val albumTitle = arguments?.getString(ALBUM_TITLE) ?: "AlbumTitle"
 
         _binding = FragmentAlbumBinding.inflate(inflater, container, false).also {
@@ -67,16 +66,13 @@ constructor(
             layoutManager = gridLayoutManager
             addItemDecoration(GridMarginDecoration(2))
         }
+
+        if (viewModel.isAlbumIdNull()) {
+            viewModel.setAlbumId(albumId)
+            viewModel.searchPhotos()
+        }
         return binding.root
     }
 
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            viewModel.searchPhotos(albumId)
-        }
-        viewModel.searchPhotos(albumId)
-    }
 }

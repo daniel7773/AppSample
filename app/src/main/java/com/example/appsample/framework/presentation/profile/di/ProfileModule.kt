@@ -17,6 +17,7 @@ import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
+import com.example.appsample.business.interactors.profile.GetPostUseCase
 import com.example.appsample.framework.presentation.auth.di.BASE_URL
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
@@ -64,6 +65,12 @@ object ProfileModule {
     @Provides
     fun provideGetPostsUseCase(postsRepository: PostsRepository): GetPostListUseCase {
         return GetPostListUseCase(postsRepository)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideGetPostUseCase(postsRepository: PostsRepository): GetPostUseCase {
+        return GetPostUseCase(postsRepository)
     }
 
     @ProfileFragmentScope

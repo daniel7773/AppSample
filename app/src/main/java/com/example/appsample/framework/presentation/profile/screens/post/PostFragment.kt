@@ -4,11 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentPostBinding
 import com.example.appsample.framework.base.presentation.BaseFragment
-import com.example.appsample.framework.presentation.auth.di.factories.viewmodels.AuthViewModelFactory
+import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
+import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.PostViewModelFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -21,36 +22,35 @@ const val POST_ID: String = "POST_ID"
 @FlowPreview
 class PostFragment @Inject
 constructor(
-    private val viewModelFactory: AuthViewModelFactory
+    private val postViewModelFactory: PostViewModelFactory
 ) : BaseFragment(R.layout.fragment_post) {
 
     private var _binding: FragmentPostBinding? = null
     private val binding: FragmentPostBinding get() = _binding!!
 
-    private val viewModel by lazy {
-        ViewModelProvider(this, viewModelFactory).get(PostViewModel::class.java)
+    private val viewModel: PostViewModel by viewModels {
+        GenericSavedStateViewModelFactory(postViewModelFactory, this)
     }
 
-    var postId = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        postId = arguments?.getInt(POST_ID) ?: 1
+        val postId = arguments?.getInt(POST_ID) ?: 1
 
         _binding = FragmentPostBinding.inflate(inflater, container, false).also {
             it.viewModel = viewModel
             it.lifecycleOwner = viewLifecycleOwner
         }
         _binding!!.recyclerView.adapter = PostAdapter()
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.searchCommentList(postId)
-        viewModel.searchPost(postId)
+        if (viewModel.isPostIdNull()) {
+            viewModel.setPostId(postId)
+            viewModel.startSearch()
+        }
+
+        return binding.root
     }
 }

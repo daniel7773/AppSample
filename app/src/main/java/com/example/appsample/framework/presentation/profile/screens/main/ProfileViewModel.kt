@@ -3,6 +3,7 @@ package com.example.appsample.framework.presentation.profile.screens.main
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.Resource
@@ -33,21 +34,26 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import javax.inject.Inject
+
+private const val USER_ID_KEY = "userId"
+private const val USER_KEY = "user"
+private const val POST_LIST_KEY = "postList"
+private const val ALBUM_LIST_KEY = "albumList"
 
 @ExperimentalCoroutinesApi
-class ProfileViewModel @Inject constructor(
+class ProfileViewModel constructor(
     private val mainDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostListUseCase: GetPostListUseCase,
     private val getCommentListUseCase: GetCommentListUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val getAlbumListUseCase: GetAlbumListUseCase,
-    private val getPhotoUseCase: GetPhotoUseCase
+    private val getPhotoUseCase: GetPhotoUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    var postList: State<List<PostModel>?> = Unknown()
     var user: State<UserModel?> = Unknown()
+    var postList: State<List<PostModel>?> = Unknown()
     var albumList: State<List<AlbumModel>?> = Unknown()
 
     private val _adapterItems: MutableLiveData<Sequence<ProfileElement>> by lazy {
@@ -58,6 +64,18 @@ class ProfileViewModel @Inject constructor(
     private val _isLoading by lazy { MutableLiveData(true) }
     val isLoading: LiveData<Boolean> by lazy { _isLoading }
 
+    private val _userId: MutableLiveData<Int> = savedStateHandle.getLiveData(USER_ID_KEY)
+
+    val userId: LiveData<Int> = _userId
+
+    init {
+//        savedStateHandle.set(USER_ID_KEY, sessionManager.user.id!!) // TODO: add back when find out how make tests not to crash here
+        if (isLoadingNeeded()) {
+            startSearch()
+        } else {
+            getSavedState()
+        }
+    }
 
     fun startSearch() {
         viewModelScope.launch(mainDispatcher) {
@@ -84,10 +102,10 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun getUser() {
         user = Loading("init Loading")
-        if (sessionManager.user.id == null) {
+        if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
-        user = when (val response = getUserUseCase.getUser(sessionManager.user.id!!)) {
+        user = when (val response = getUserUseCase.getUser(userId.value!!)) {
             is Resource.Success -> {
                 Log.d(TAG, "user ${response.data}")
                 // force unwrap because null values must be handled earlier
@@ -104,10 +122,10 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun getPostList() {
         postList = Loading("init Loading")
-        if (sessionManager.user.id == null) {
+        if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
-        when (val response = getPostListUseCase.getPostList(sessionManager.user.id!!)) {
+        when (val response = getPostListUseCase.getPostList(userId.value!!)) {
             is Resource.Success -> {
                 Log.d(TAG, "postList came, size: ${response.data!!.size}")
                 // force unwrap because null values must be handled earlier
@@ -156,17 +174,16 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun getAlbumList() {
         albumList = Loading("init Loading")
-        if (sessionManager.user.id == null) {
+        if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
-        when (val response = getAlbumListUseCase.getAlbumList(sessionManager.user.id!!)) {
+        when (val response = getAlbumListUseCase.getAlbumList(userId.value!!)) {
             is Resource.Success -> {
                 Log.d(TAG, "albumList ${response.data}")
                 // force unwrap because null values must be handled earlier
                 val albums = AlbumToAlbumModelMapper.map(response.data!!)
 
                 startLoadingFirstPhotosOfAlbums(albums)
-                Success(albums, "Without first photos")
             }
             is Resource.Error -> {
                 Log.d(TAG, "getAlbumList error ${response.exception.localizedMessage}")
@@ -211,6 +228,29 @@ class ProfileViewModel @Inject constructor(
     private fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albumList, postList)
         _isLoading.value = user is Loading || albumList is Loading || postList is Loading
+    }
+
+    private fun isLoadingNeeded(): Boolean {
+        val user = savedStateHandle.get<UserModel>(USER_KEY)
+        val postList = savedStateHandle.get<List<PostModel>>(POST_LIST_KEY)
+        val albumList = savedStateHandle.get<List<AlbumModel>>(ALBUM_LIST_KEY)
+        return user == null || postList == null || albumList == null
+    }
+
+    private fun getSavedState() {
+        Log.d(TAG, "getSavedState called... ")
+        val userModel = savedStateHandle.get<UserModel>(USER_KEY)
+        val postModelList = savedStateHandle.get<List<PostModel>>(POST_LIST_KEY)
+        val albumModelList = savedStateHandle.get<List<AlbumModel>>(ALBUM_LIST_KEY)
+        if (userModel != null) {
+            this.user = Success(userModel, "get from saved state")
+        }
+        if (postModelList != null) {
+            this.postList = Success(postModelList, "get from saved state")
+        }
+        if (albumModelList != null) {
+            this.albumList = Success(albumModelList, "get from saved state")
+        }
     }
 
     companion object {

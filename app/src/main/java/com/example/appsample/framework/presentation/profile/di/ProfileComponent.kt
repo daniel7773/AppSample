@@ -14,7 +14,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @Subcomponent(
     modules = [
         ProfileModule::class,
-        ProfileViewModelsModule::class,
         ProfileFragmentBuildersModule::class
     ]
 )

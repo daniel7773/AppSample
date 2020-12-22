@@ -8,12 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentProfileBinding
 import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
-import com.example.appsample.framework.presentation.auth.di.factories.viewmodels.AuthViewModelFactory
+import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
+import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.ProfileViewModelFactory
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
 import com.example.appsample.framework.presentation.profile.screens.album.ALBUM_ID
@@ -29,14 +30,14 @@ import javax.inject.Inject
 @FlowPreview
 class ProfileFragment @Inject
 constructor(
-    private val viewModelFactory: AuthViewModelFactory
+    private val profileViewModelFactory: ProfileViewModelFactory
 ) : BaseFragment(R.layout.fragment_profile) {
     // checking userName
     private var _binding: FragmentProfileBinding? = null
     private val binding: FragmentProfileBinding get() = _binding!!
 
-    private val viewModel by lazy {
-        ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
+    private val viewModel: ProfileViewModel by viewModels {
+        GenericSavedStateViewModelFactory(profileViewModelFactory, this)
     }
 
     private lateinit var mainNavController: MainNavController
@@ -75,20 +76,15 @@ constructor(
         _binding = FragmentProfileBinding.inflate(inflater, container, false).also {
             it.viewModel = viewModel
             it.lifecycleOwner = viewLifecycleOwner
-            viewModel.startSearch()
         }
 
         _binding!!.profileRv.adapter = ProfileAdapter(goToAlbumFragment, goToPostFragment)
 
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         _binding?.swipeRefreshLayout?.setOnRefreshListener {
             viewModel.startSearch()
         }
+
+        return binding.root
     }
 
     companion object {

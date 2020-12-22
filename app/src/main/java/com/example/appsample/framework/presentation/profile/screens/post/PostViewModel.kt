@@ -3,6 +3,7 @@ package com.example.appsample.framework.presentation.profile.screens.post
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.Resource
@@ -20,11 +21,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val POST_ID_KEY = "userId"
+
 @ExperimentalCoroutinesApi
 class PostViewModel @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
     private val getCommentListUseCase: GetCommentListUseCase,
-    private val getPostUseCase: GetPostUseCase
+    private val getPostUseCase: GetPostUseCase,
+    private val handle: SavedStateHandle
 ) : ViewModel() {
 
     private val _items: MutableLiveData<Sequence<PostElement>?> by lazy {
@@ -46,6 +50,25 @@ class PostViewModel @Inject constructor(
     val isLoading: MutableLiveData<Boolean> by lazy {
         _isLoading
     }
+
+    fun isPostIdNull(): Boolean {
+        val id = handle[POST_ID_KEY] ?: -1
+        return id == -1
+    }
+
+    fun setPostId(postId: Int) {
+        handle[POST_ID_KEY] = postId
+    }
+
+    fun startSearch() {
+        if (isPostIdNull()) throw Exception("postId should not be NULL when starting search")
+        val albumId = handle[POST_ID_KEY] ?: 1
+        albumId.run {
+            searchCommentList(this)
+            searchPost(this)
+        }
+    }
+
 
     fun searchCommentList(postId: Int) {
         viewModelScope.launch(mainDispatcher) {

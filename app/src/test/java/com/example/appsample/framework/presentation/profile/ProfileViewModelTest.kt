@@ -1,5 +1,7 @@
 package com.example.appsample.framework.presentation.profile
 
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.domain.model.Comment
 import com.example.appsample.business.domain.repository.Resource
@@ -14,6 +16,7 @@ import com.example.appsample.framework.presentation.profile.screens.main.Profile
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -35,6 +38,7 @@ class ProfileViewModelTest {
     val getAlbumListUseCase: GetAlbumListUseCase = mockk()
     val getPhotoUseCase: GetPhotoUseCase = mockk()
     val getCommentListUseCase: GetCommentListUseCase = mockk()
+    val savedStateHandle: SavedStateHandle = mockk()
 
     @get:Extensions
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
@@ -44,6 +48,9 @@ class ProfileViewModelTest {
 
     init {
         sessionManager.user = DataFactory.produceUserModel()
+        every { savedStateHandle.getLiveData<Int>(any()) } returns MutableLiveData(1)
+        every { savedStateHandle.get<Any>(any()) } returns null
+
         profileViewModel = ProfileViewModel(
             mainCoroutineRule.testDispatcher,
             sessionManager,
@@ -51,7 +58,8 @@ class ProfileViewModelTest {
             getCommentListUseCase,
             getUserUseCase,
             getAlbumListUseCase,
-            getPhotoUseCase
+            getPhotoUseCase,
+            savedStateHandle
         )
     }
 

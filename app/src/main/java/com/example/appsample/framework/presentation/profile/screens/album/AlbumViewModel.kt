@@ -3,6 +3,7 @@ package com.example.appsample.framework.presentation.profile.screens.album
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,12 +17,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import javax.inject.Inject
+
+private const val ALBUM_ID_KEY = "albumId"
 
 @ExperimentalCoroutinesApi
-class AlbumViewModel @Inject constructor(
+class AlbumViewModel constructor(
     private val mainDispatcher: CoroutineDispatcher,
-    private val getPhotoListUseCase: GetPhotoListUseCase
+    private val getPhotoListUseCase: GetPhotoListUseCase,
+    private val handle: SavedStateHandle
 ) : ViewModel() {
 
     private val _items: MutableLiveData<State<List<PhotoModel>?>> by lazy {
@@ -44,7 +47,19 @@ class AlbumViewModel @Inject constructor(
         }
     }
 
-    fun searchPhotos(albumId: Int) {
+    fun isAlbumIdNull(): Boolean {
+        val id = handle[ALBUM_ID_KEY] ?: -1
+        return id == -1
+    }
+
+    fun setAlbumId(albumId: Int) {
+        handle[ALBUM_ID_KEY] = albumId
+    }
+
+    fun searchPhotos() {
+        if (isAlbumIdNull()) throw Exception("albumId should not be NULL when starting search")
+        val albumId = handle[ALBUM_ID_KEY] ?: 1
+
         viewModelScope.launch(mainDispatcher) {
             supervisorScope {
                 _items.value = when (val response = getPhotoListUseCase.getPhotoList(albumId)) {
