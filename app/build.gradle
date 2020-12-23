@@ -127,6 +127,14 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
 
     /**
+     * Room
+     * https://developer.android.com/reference/androidx/room/package-summary?hl=ru
+     */
+    implementation 'androidx.room:room-runtime:2.2.6'
+    implementation 'androidx.room:room-ktx:2.2.6'
+    kapt "androidx.room:room-compiler:2.2.6"
+
+    /**
      * Unit test dependencies
      */
     testImplementation("junit:junit:4.13")

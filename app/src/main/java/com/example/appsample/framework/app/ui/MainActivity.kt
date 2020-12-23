@@ -1,7 +1,6 @@
 package com.example.appsample.framework.app.ui
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import androidx.annotation.NavigationRes
 import androidx.navigation.NavController
@@ -162,7 +161,7 @@ class MainActivity : MainNavController, BaseActivity() {
     override fun onError() {
         // TODO: think about what to put here
     }
-    
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         graphId = savedInstanceState.getInt(NAV_HOST_ID)

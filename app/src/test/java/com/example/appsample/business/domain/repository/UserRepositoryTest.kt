@@ -1,5 +1,6 @@
 package com.example.appsample.business.domain.repository
 
+import com.example.appsample.business.data.cache.abstraction.UserCacheDataSource
 import com.example.appsample.business.data.models.UserEntity
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
@@ -22,9 +23,16 @@ class UserRepositoryTest {
 
     private val userRepository: UserRepository
     private val networkApi: JsonPlaceholderApiSource = mockk()
+    private val userCacheDataSource: UserCacheDataSource = mockk()
 
     init {
-        userRepository = UserRepositoryImpl(networkApi)
+        userRepository = UserRepositoryImpl(userCacheDataSource, networkApi)
+        coEvery {
+            userCacheDataSource.searchUserById(any())
+        } returns null // TODO: rework and add to tests logic
+        coEvery {
+            userCacheDataSource.insertUser(any())
+        } returns 1L // TODO: rework and add to tests logic
     }
 
     @Test

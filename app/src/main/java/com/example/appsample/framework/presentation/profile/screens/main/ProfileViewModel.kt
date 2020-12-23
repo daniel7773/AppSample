@@ -66,7 +66,10 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     val userId: LiveData<Int> = _userId
 
     init {
-        savedStateHandle.set(USER_ID_KEY, sessionManager.user.id!!) // TODO: add back when find out how make tests not to crash here
+        savedStateHandle.set(
+            USER_ID_KEY,
+            sessionManager.user.id!!
+        ) // TODO: add back when find out how make tests not to crash here
         startSearch()
     }
 

@@ -1,6 +1,5 @@
 package com.example.appsample.framework.app.di
 
-import android.app.Application
 import com.example.appsample.framework.base.presentation.BaseApplication
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.auth.di.AuthComponent
@@ -27,13 +26,10 @@ interface AppComponent {
 
     fun sessionManager(): SessionManager
 
-    @Component.Builder
-    interface Builder {
+    @Component.Factory
+    interface Factory {
 
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun build(): AppComponent
+        fun create(@BindsInstance app: BaseApplication): AppComponent
     }
 
     fun inject(application: BaseApplication)
