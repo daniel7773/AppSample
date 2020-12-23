@@ -5,6 +5,7 @@ import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.profile.model.CommentModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
 import com.example.appsample.framework.presentation.profile.model.post.Divider
+import com.example.appsample.framework.presentation.profile.model.post.EmptySpace
 import com.example.appsample.framework.presentation.profile.model.post.PostBodyElement
 import com.example.appsample.framework.presentation.profile.model.post.PostCommentElement
 import com.example.appsample.framework.presentation.profile.model.post.PostElement
@@ -19,6 +20,7 @@ object PostTransformator {
         post: State<PostModel?>,
         comments: State<List<CommentModel>?>
     ) = emptySequence<PostElement>()
+        .plus(Divider("divider_after_toolbar"))
         .plus(getPost(post))
         .plus(getCommentList(comments))
 
@@ -26,11 +28,11 @@ object PostTransformator {
         is State.Success -> {
             if (postModel.data == null) emptySequence<PostElement>()
             Log.d(TAG, "added success to userAdapterItem")
-            emptySequence<PostElement>().plus(
-                PostSourceElement(postModel.data!!)
-            )
+            emptySequence<PostElement>()
+                .plus(PostSourceElement(postModel.data!!))
                 .plus(Divider("divider_after_post_source"))
                 .plus(PostBodyElement(postModel.data!!))
+                .plus(EmptySpace("empty_space_after_post_body"))
                 .plus(Divider("divider_after_post_body"))
         }
         else -> {
@@ -46,7 +48,6 @@ object PostTransformator {
                     .plus(
                         commentListState.data!!.flatMap { commentModel ->
                             emptySequence<PostElement>().plus(PostCommentElement(commentModel))
-                                .plus(Divider("divider_after_comment_${commentModel.id}_for_post_${commentModel.postId}"))
                         })
             }
             else -> {

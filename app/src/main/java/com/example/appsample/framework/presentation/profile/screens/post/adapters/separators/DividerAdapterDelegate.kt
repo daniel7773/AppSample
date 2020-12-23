@@ -3,7 +3,7 @@ package com.example.appsample.framework.presentation.profile.screens.post.adapte
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.appsample.databinding.DividerProfileBinding
+import com.example.appsample.databinding.DividerPostBinding
 import com.example.appsample.framework.presentation.profile.model.post.Divider
 import com.example.appsample.framework.presentation.profile.model.post.PostElement
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
@@ -14,9 +14,9 @@ class DividerAdapterDelegate :
     AbsListItemAdapterDelegate<Divider, PostElement, DividerAdapterDelegate.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
-        val dividerProfileBinding =
-            DividerProfileBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(dividerProfileBinding)
+        val dividerPostBinding =
+            DividerPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(dividerPostBinding)
     }
 
     override fun isForViewType(
@@ -32,7 +32,7 @@ class DividerAdapterDelegate :
     }
 
     class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: DividerProfileBinding
+        private val binding: DividerPostBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind() {}

@@ -16,7 +16,7 @@ class EmptySpaceAdapterDelegate :
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.empty_space, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.empty_space_post, parent, false)
         )
     }
 
