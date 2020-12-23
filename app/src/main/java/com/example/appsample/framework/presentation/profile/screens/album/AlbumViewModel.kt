@@ -21,10 +21,10 @@ import kotlinx.coroutines.supervisorScope
 private const val ALBUM_ID_KEY = "albumId"
 
 @ExperimentalCoroutinesApi
-class AlbumViewModel constructor(
+class AlbumViewModel constructor( // I suppose it is better to use database instead of SavedStateHandle for complex data
     private val mainDispatcher: CoroutineDispatcher,
     private val getPhotoListUseCase: GetPhotoListUseCase,
-    private val handle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _items: MutableLiveData<State<List<PhotoModel>?>> by lazy {
@@ -40,6 +40,9 @@ class AlbumViewModel constructor(
         }
     }
 
+    private val _albumId: MutableLiveData<Int> = savedStateHandle.getLiveData(ALBUM_ID_KEY)
+    val albumId: LiveData<Int> = _albumId
+
     val isLoading: LiveData<Boolean> = Transformations.map(_items) {
         return@map when (it) {
             is Loading -> true
@@ -47,18 +50,19 @@ class AlbumViewModel constructor(
         }
     }
 
-    fun isAlbumIdNull(): Boolean {
-        val id = handle[ALBUM_ID_KEY] ?: -1
-        return id == -1
+    init {
+        if (_albumId.value != null) { // it means viewModel is recreating and will not be called from fragment
+            searchPhotos()
+        }
     }
 
-    fun setAlbumId(albumId: Int) {
-        handle[ALBUM_ID_KEY] = albumId
-    }
+    fun isAlbumIdNull() = _albumId.value == null
+
+    fun setAlbumId(albumId: Int) = savedStateHandle.set(ALBUM_ID_KEY, albumId)
 
     fun searchPhotos() {
         if (isAlbumIdNull()) throw Exception("albumId should not be NULL when starting search")
-        val albumId = handle[ALBUM_ID_KEY] ?: 1
+        val albumId = _albumId.value!!
 
         viewModelScope.launch(mainDispatcher) {
             supervisorScope {

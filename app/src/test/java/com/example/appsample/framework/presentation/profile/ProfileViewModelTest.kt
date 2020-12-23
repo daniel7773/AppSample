@@ -50,6 +50,7 @@ class ProfileViewModelTest {
         sessionManager.user = DataFactory.produceUserModel()
         every { savedStateHandle.getLiveData<Int>(any()) } returns MutableLiveData(1)
         every { savedStateHandle.get<Any>(any()) } returns null
+        every { savedStateHandle.set<Any>(any(), any()) } returns Unit
 
         profileViewModel = ProfileViewModel(
             mainCoroutineRule.testDispatcher,

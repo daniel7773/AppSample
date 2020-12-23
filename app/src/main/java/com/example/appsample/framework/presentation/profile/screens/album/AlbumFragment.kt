@@ -67,6 +67,7 @@ constructor(
             addItemDecoration(GridMarginDecoration(2))
         }
 
+        // will be called only once, we consider postId should not be null in ViewModel after setting once
         if (viewModel.isAlbumIdNull()) {
             viewModel.setAlbumId(albumId)
             viewModel.searchPhotos()

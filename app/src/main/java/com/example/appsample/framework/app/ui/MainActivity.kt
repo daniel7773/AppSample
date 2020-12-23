@@ -1,6 +1,7 @@
 package com.example.appsample.framework.app.ui
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.annotation.NavigationRes
 import androidx.navigation.NavController
@@ -41,18 +42,28 @@ import kotlinx.coroutines.runBlocking
 
 
  */
+
+private const val NAV_HOST_ID = "NavHostFragment"
+private const val FRAGMENT_FACTORY_NAME = "FragmentFactoryName"
+private const val ENTERED_ID = "EnteredId"
+
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @FlowPreview
 class MainActivity : MainNavController, BaseActivity() {
 
-    private val TAG: String = "MainActivity"
+    private val TAG: String = "MyMainActivity"
 
     private lateinit var navController: NavController
+
+    private var fragmentFactoryName: String? = null
+    private var graphId: Int? = null
 
     val supervisor = SupervisorJob()
 
     private fun createNavHost(@NavigationRes graphId: Int, fragmentFactoryName: String) {
+        this.fragmentFactoryName = fragmentFactoryName
+        this.graphId = graphId
 
         val newNavHostFragment = when (fragmentFactoryName) {
 
@@ -89,7 +100,13 @@ class MainActivity : MainNavController, BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         observeSessionManager()
-        navAuth()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (fragmentFactoryName == null || graphId == null) {
+            navAuth()
+        }
     }
 
     override fun navProfile() {
@@ -144,6 +161,18 @@ class MainActivity : MainNavController, BaseActivity() {
 
     override fun onError() {
         // TODO: think about what to put here
+    }
+    
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        graphId = savedInstanceState.getInt(NAV_HOST_ID)
+        fragmentFactoryName = savedInstanceState.getString(FRAGMENT_FACTORY_NAME)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        graphId?.let { outState.putInt(NAV_HOST_ID, it) }
+        fragmentFactoryName?.let { outState.putString(FRAGMENT_FACTORY_NAME, it) }
     }
 
     override fun onDestroy() {

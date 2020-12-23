@@ -19,50 +19,43 @@ import com.example.appsample.framework.presentation.profile.screens.post.adapter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val POST_ID_KEY = "userId"
 
 @ExperimentalCoroutinesApi
-class PostViewModel constructor(
+class PostViewModel constructor( // I suppose it is better to use database instead of SavedStateHandle for complex data
     private val mainDispatcher: CoroutineDispatcher,
     private val getCommentListUseCase: GetCommentListUseCase,
     private val getPostUseCase: GetPostUseCase,
-    private val handle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _items: MutableLiveData<Sequence<PostElement>?> by lazy {
-        MutableLiveData(emptySequence())
-    }
-    val items: LiveData<Sequence<PostElement>?> by lazy {
-        _items
-    }
+    private val _items: MutableLiveData<Sequence<PostElement>?> = MutableLiveData(emptySequence())
+    val items: LiveData<Sequence<PostElement>?> by lazy { _items }
 
-    var post: State<PostModel?> = State.Success(
-        PostModel(1, 1, 5, "title", "body"),
-        "Holder, remove later"
-    )
+    private val _postId: MutableLiveData<Int> = savedStateHandle.getLiveData(POST_ID_KEY)
+    val postId: LiveData<Int> = _postId
+
+    var post: State<PostModel?> = State.Success(PostModel(), "Holder, remove later")
+
     var commentList: State<List<CommentModel>?> = State.Unknown()
 
-    private val _isLoading: MutableLiveData<Boolean> by lazy {
-        MutableLiveData(true)
-    }
-    val isLoading: MutableLiveData<Boolean> by lazy {
-        _isLoading
+    private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(true)
+    val isLoading: MutableLiveData<Boolean> by lazy { _isLoading }
+
+    init {
+        if (_postId.value != null) { // it means viewModel is recreating and will not be called from fragment
+            startSearch()
+        }
     }
 
-    fun isPostIdNull(): Boolean {
-        val id = handle[POST_ID_KEY] ?: -1
-        return id == -1
-    }
+    fun isPostIdNull() = _postId.value == null
 
-    fun setPostId(postId: Int) {
-        handle[POST_ID_KEY] = postId
-    }
+    fun setPostId(postId: Int) = savedStateHandle.set(POST_ID_KEY, postId)
 
     fun startSearch() {
         if (isPostIdNull()) throw Exception("postId should not be NULL when starting search")
-        val albumId = handle[POST_ID_KEY] ?: 1
+        val albumId = postId.value!!
         albumId.run {
             searchCommentList(this)
             searchPost(this)

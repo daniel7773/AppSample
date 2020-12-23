@@ -36,12 +36,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
 private const val USER_ID_KEY = "userId"
-private const val USER_KEY = "user"
-private const val POST_LIST_KEY = "postList"
-private const val ALBUM_LIST_KEY = "albumList"
 
 @ExperimentalCoroutinesApi
-class ProfileViewModel constructor(
+class ProfileViewModel constructor( // I suppose it is better to use database instead of SavedStateHandle for complex data
     private val mainDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostListUseCase: GetPostListUseCase,
@@ -69,12 +66,8 @@ class ProfileViewModel constructor(
     val userId: LiveData<Int> = _userId
 
     init {
-//        savedStateHandle.set(USER_ID_KEY, sessionManager.user.id!!) // TODO: add back when find out how make tests not to crash here
-        if (isLoadingNeeded()) {
-            startSearch()
-        } else {
-            getSavedState()
-        }
+        savedStateHandle.set(USER_ID_KEY, sessionManager.user.id!!) // TODO: add back when find out how make tests not to crash here
+        startSearch()
     }
 
     fun startSearch() {
@@ -82,15 +75,15 @@ class ProfileViewModel constructor(
             supervisorScope {
                 launch(CoroutineExceptionHandler { _, throwable ->
                     user = getError(throwable)
-                }) { getUser() }
+                }) { searchUser() }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     postList = getError(throwable)
-                }) { getPostList() }
+                }) { searchPostList() }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     albumList = getError(throwable)
-                }) { getAlbumList() }
+                }) { searchAlbumList() }
             }
         }
     }
@@ -100,7 +93,7 @@ class ProfileViewModel constructor(
         Exception("Error launching coroutine in ViewModel")
     )
 
-    private suspend fun getUser() {
+    private suspend fun searchUser() {
         user = Loading("init Loading")
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
@@ -120,7 +113,7 @@ class ProfileViewModel constructor(
         refreshData()
     }
 
-    private suspend fun getPostList() {
+    private suspend fun searchPostList() {
         postList = Loading("init Loading")
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
@@ -172,7 +165,7 @@ class ProfileViewModel constructor(
         return postCommentListSize
     }
 
-    private suspend fun getAlbumList() {
+    private suspend fun searchAlbumList() {
         albumList = Loading("init Loading")
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
@@ -228,29 +221,6 @@ class ProfileViewModel constructor(
     private fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albumList, postList)
         _isLoading.value = user is Loading || albumList is Loading || postList is Loading
-    }
-
-    private fun isLoadingNeeded(): Boolean {
-        val user = savedStateHandle.get<UserModel>(USER_KEY)
-        val postList = savedStateHandle.get<List<PostModel>>(POST_LIST_KEY)
-        val albumList = savedStateHandle.get<List<AlbumModel>>(ALBUM_LIST_KEY)
-        return user == null || postList == null || albumList == null
-    }
-
-    private fun getSavedState() {
-        Log.d(TAG, "getSavedState called... ")
-        val userModel = savedStateHandle.get<UserModel>(USER_KEY)
-        val postModelList = savedStateHandle.get<List<PostModel>>(POST_LIST_KEY)
-        val albumModelList = savedStateHandle.get<List<AlbumModel>>(ALBUM_LIST_KEY)
-        if (userModel != null) {
-            this.user = Success(userModel, "get from saved state")
-        }
-        if (postModelList != null) {
-            this.postList = Success(postModelList, "get from saved state")
-        }
-        if (albumModelList != null) {
-            this.albumList = Success(albumModelList, "get from saved state")
-        }
     }
 
     companion object {

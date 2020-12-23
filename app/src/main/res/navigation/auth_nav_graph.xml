@@ -12,11 +12,13 @@
 
         <action
             android:id="@+id/action_loadingFragment_to_mainFragment"
-            app:destination="@id/profileFragment" />
+            app:destination="@id/profileFragment"
+            app:launchSingleTop="true"/>
 
         <action
             android:id="@+id/action_authFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
+            app:destination="@id/registrationFragment"
+            app:launchSingleTop="true"/>
 
     </fragment>
 
@@ -26,7 +28,8 @@
 
         <action
             android:id="@+id/action_registrationFragment_to_authFragment"
-            app:destination="@id/authFragment" />
+            app:destination="@id/authFragment"
+            app:launchSingleTop="true"/>
 
     </fragment>
 </navigation>

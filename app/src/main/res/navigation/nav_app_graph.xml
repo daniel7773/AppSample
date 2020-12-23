@@ -9,11 +9,13 @@
 
         <action
             android:id="@+id/action_profileFragment_to_albumFragment"
-            app:destination="@id/albumFragment" />
+            app:destination="@id/albumFragment"
+            app:launchSingleTop="true"/>
 
         <action
             android:id="@+id/action_profileFragment_to_postFragment"
-            app:destination="@id/postFragment" />
+            app:destination="@id/postFragment"
+            app:launchSingleTop="true"/>
 
     </fragment>
 

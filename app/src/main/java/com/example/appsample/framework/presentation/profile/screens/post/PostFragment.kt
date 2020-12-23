@@ -38,7 +38,7 @@ constructor(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val postId = arguments?.getInt(POST_ID) ?: 1
+        val postId = arguments?.getInt(POST_ID)
 
         _binding = FragmentPostBinding.inflate(inflater, container, false).also {
             it.viewModel = viewModel
@@ -46,7 +46,8 @@ constructor(
         }
         _binding!!.recyclerView.adapter = PostAdapter()
 
-        if (viewModel.isPostIdNull()) {
+        // will be called only once, we consider postId should not be null in ViewModel after setting once
+        if (viewModel.isPostIdNull() && postId != null) {
             viewModel.setPostId(postId)
             viewModel.startSearch()
         }
