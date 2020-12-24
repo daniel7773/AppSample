@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
@@ -18,6 +17,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,20 +72,27 @@ class AuthViewModel @Inject constructor(
         // TODO: handle how to get that user is not authenticated
         viewModelScope.launch(mainDispatcher + loadingExceptionHandler) {
             _authState.value = State.Loading("init loading")
-            when (val response = getUserUseCase.getUser(id)) {
-                is Resource.Success -> {
-                    // force unwrap because null values must be handled earlier
-                    val user = UserToUserModelMapper.map(response.data!!)
-                    _authState.value = State.Success(user, "")
-                    setSuccessState(user)
-                }
-                is Resource.Error -> {
-                    Log.d(TAG, "error ${response.exception.localizedMessage}")
-                    _authState.value =
-                        State.Error(response.message.toString(), response.exception)
-                    setErrorState(response)
+            getUserUseCase.getUser(id).collect { response ->
+                when (response) {
+                    is Resource.Success -> {
+                        Log.d(TAG, "user ${response.data}")
+                        // force unwrap because null values must be handled earlier
+                        val user = UserToUserModelMapper.map(response.data!!)
+                        _authState.value = State.Success(user, "get data successfully")
+                        setSuccessState(user)
+                    }
+                    is Resource.Error -> {
+                        Log.e(TAG, "getUser error ${response.exception.localizedMessage}")
+                        _authState.value = State.Error("get data successfully", response.exception)
+                        setErrorState(response)
+                    }
+                    else -> {
+                        _authState.value = State.Loading("Loading")
+                        sessionManager.setAuthState(AuthResource.Loading("Loading"))
+                    }
                 }
             }
+
         }
     }
 
@@ -97,7 +104,7 @@ class AuthViewModel @Inject constructor(
             )
         )
 
-    private suspend fun setErrorState(response: Resource.Error<User?>) =
+    private suspend fun setErrorState(response: Resource.Error) =
         sessionManager.setAuthState(
             AuthResource.Error(
                 response.message,

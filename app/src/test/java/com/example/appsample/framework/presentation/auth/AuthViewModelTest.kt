@@ -31,39 +31,38 @@ class AuthViewModelTest {
         AuthViewModel(mainCoroutineRule.testDispatcher, getUserUseCase, sessionManager)
 
     @Test
-    fun `Loading Success data came`() = mainCoroutineRule.testDispatcher.runBlockingTest {
+    fun `Loading Success data came`() = runBlockingTest {
 
         // Given
         coEvery {
             getUserUseCase.getUser(any())
-        } returns DataFactory.provideResourceSuccess(DataFactory.produceUser())
+        } returns DataFactory.provideResourceSuccessFlow(DataFactory.produceUser())
+        authViewModel.userId.value = "2"
+
+        // When
+        authViewModel.startLoading()
+        advanceTimeBy(5000)
+        val user = (authViewModel.authState.value as State.Success)
+
+        // Then
+        assertThat(user).isInstanceOf(State.Success::class.java)
+    }
+
+    @Test
+    fun `Loading Error exception received correctly`() = runBlockingTest {
+
+        // Given
+        coEvery {
+            getUserUseCase.getUser(any())
+        } returns DataFactory.provideResourceErrorFlow(DataFactory.produceUser())
+        authViewModel.userId.value = "2"
 
         // When
         authViewModel.startLoading()
 
+        val user = (authViewModel.authState.value as State.Error)
         // Then
-        assertThat(authViewModel.authState.value).isInstanceOf(State.Success::class.java)
+        assertThat(authViewModel.authState.value!!.exception).isNotNull
+        assertThat(authViewModel.authState.value?.exception).isInstanceOf(user.exception::class.java)
     }
-
-    @Test
-    fun `Loading Error exception received correctly`() =
-        mainCoroutineRule.testDispatcher.runBlockingTest {
-
-            // Given
-            coEvery {
-                getUserUseCase.getUser(any())
-            } returns DataFactory.provideResourceError(DataFactory.produceUser())
-
-            // When
-            authViewModel.startLoading()
-
-            // Then
-            assertThat(authViewModel.authState.value!!.exception).isNotNull
-            assertThat(authViewModel.authState.value?.exception).isInstanceOf(
-                getUserUseCase.getUser(
-                    3
-                ).exception!!::class.java
-            )
-
-        }
 }

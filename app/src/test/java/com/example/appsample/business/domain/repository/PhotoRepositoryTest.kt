@@ -1,34 +1,61 @@
 package com.example.appsample.business.domain.repository
 
+import com.example.appsample.business.data.cache.abstraction.PhotoCacheDataSource
 import com.example.appsample.business.data.models.PhotoEntity
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.PhotoEntityToPhotoMapper
+import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import com.example.appsample.business.domain.repository.implementation.PhotoRepositoryImpl
+import com.example.appsample.rules.InstantExecutorExtension
+import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.Extensions
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
+@ExtendWith(InstantExecutorExtension::class)
 class PhotoRepositoryTest {
 
     // system in test
     private val photoRepository: PhotoRepository
 
     // resources needed
+    @get:Extensions
+    val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
+
     val networkApi: JsonPlaceholderApiSource = mockk()
+    private val photoCacheDataSource: PhotoCacheDataSource = mockk()
 
     init {
-        photoRepository = PhotoRepositoryImpl(networkApi)
+        photoRepository = PhotoRepositoryImpl(
+            mainDispatcher = mainCoroutineRule.testDispatcher,
+            photoCacheDataSource = photoCacheDataSource,
+            jsonPlaceholderApiSource = networkApi
+        )
+
+
+        coEvery {
+            photoCacheDataSource.insertPhoto(any())
+        } returns 1L
+
+        coEvery {
+            photoCacheDataSource.insertPhotoList(any())
+        } returns LongArray(1)
     }
 
     @Nested
@@ -42,12 +69,17 @@ class PhotoRepositoryTest {
             coEvery {
                 networkApi.getPhotoByIdAsync(photoId).await()
             } returns DataFactory.producePhotoEntity(photoId)
+//
+
+            coEvery {
+                photoCacheDataSource.searchPhotoById(photoId)
+            } returns DataFactory.producePhotoEntity(photoId)
 
             val networkValue = networkApi.getPhotoByIdAsync(photoId).await()
             val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
 
             Assertions.assertThat(PhotoEntityToPhotoMapper.mapPhoto(networkValue!!))
-                .isEqualTo(repositoryValue.data)
+                .isEqualTo((repositoryValue as Resource.Success).data)
         }
 
         @Test
@@ -61,33 +93,16 @@ class PhotoRepositoryTest {
                 networkApi.getPhotoByIdAsync(photoId).await()
             } throws exception
 
-            val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
-
-            Assertions.assertThat(repositoryValue.exception).isInstanceOf(exception::class.java)
-            Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception?.message)
-            Assertions.assertThat(exception.localizedMessage)
-                .isEqualTo(repositoryValue.exception?.localizedMessage)
-        }
-
-        @Test
-        fun `getPhoto TimeoutCancellationException passes through repository`() = runBlockingTest {
-
-            val albumId = 1
-            val photoId = 1
-
             coEvery {
-                networkApi.getPhotoByIdAsync(photoId)
-            } answers {
-                val deferredPhotoEntity = CompletableDeferred<PhotoEntity?>()
-
-                deferredPhotoEntity
-            }
+                photoCacheDataSource.searchPhotoById(photoId)
+            } throws exception
 
             val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
 
-            Assertions.assertThat(repositoryValue.exception).isNotNull
-            Assertions.assertThat(repositoryValue.exception)
-                .isInstanceOf(TimeoutCancellationException::class.java)
+            Assertions.assertThat((repositoryValue as Resource.Error).exception).isInstanceOf(exception::class.java)
+            Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
+            Assertions.assertThat(exception.localizedMessage)
+                .isEqualTo(repositoryValue.exception.localizedMessage)
         }
     }
 
@@ -95,58 +110,47 @@ class PhotoRepositoryTest {
     inner class AlbumPhotos {
 
         @Test
-        fun `getAlbumPhotos Success`() = runBlockingTest {
+        fun `getAlbumPhotoList Success`() = runBlockingTest {
 
-            val userId = 1
+            val albumId = 1
+            val photoNum = 3
 
             coEvery {
-                networkApi.getAlbumPhotosAsync(userId).await()
-            } returns DataFactory.produceListOfPhotoEntity(userId)
+                networkApi.getAlbumPhotosAsync(albumId).await()
+            } returns DataFactory.produceListOfPhotoEntity(photoNum)
 
-            val networkValue = networkApi.getAlbumPhotosAsync(userId).await()
-            val repositoryValue = photoRepository.getAlbumPhotoList(userId)
+            coEvery {
+                photoCacheDataSource.getAllPhotos(albumId)
+            } returns DataFactory.produceListOfPhotoEntity(photoNum)
+
+            val networkValue = networkApi.getAlbumPhotosAsync(albumId).await()
+            val repositoryValue = photoRepository.getAlbumPhotoList(albumId).first()
 
             Assertions.assertThat(PhotoEntityToPhotoMapper.mapPhotoList(networkValue!!))
-                .isEqualTo(repositoryValue.data)
+                .isEqualTo((repositoryValue as Resource.Success).data)
         }
 
         @Test
-        fun `getAlbumPhotos Error passes through repository`() = runBlockingTest {
+        fun `getAlbumPhotoList Error passes through repository`() = runBlockingTest {
 
-            val userId = 1
+            val albumId = 1
 
             var exception: Exception = Exception("Any")
             coEvery {
-                networkApi.getAlbumPhotosAsync(userId).await()
+                networkApi.getAlbumPhotosAsync(albumId).await()
             } throws exception
 
-            val repositoryValue = photoRepository.getAlbumPhotoList(userId)
+            coEvery {
+                photoCacheDataSource.getAllPhotos(albumId)
+            } throws exception
 
-            Assertions.assertThat(repositoryValue.exception).isInstanceOf(exception::class.java)
-            Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception?.message)
+            val repositoryValue = photoRepository.getAlbumPhotoList(albumId).first()
+
+            Assertions.assertThat((repositoryValue as Resource.Error).exception)
+                .isInstanceOf(exception::class.java)
+            Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
             Assertions.assertThat(exception.localizedMessage)
-                .isEqualTo(repositoryValue.exception?.localizedMessage)
+                .isEqualTo(repositoryValue.exception.localizedMessage)
         }
-
-        @Test
-        fun `getAlbumPhotos TimeoutCancellationException passes through repository`() =
-            runBlockingTest {
-
-                val userId = 1
-
-                coEvery {
-                    networkApi.getAlbumPhotosAsync(userId)
-                } answers {
-                    val deferredPhotoListEntities = CompletableDeferred<List<PhotoEntity>?>()
-
-                    deferredPhotoListEntities
-                }
-
-                val repositoryValue = photoRepository.getAlbumPhotoList(userId)
-
-                Assertions.assertThat(repositoryValue.exception).isNotNull
-                Assertions.assertThat(repositoryValue.exception)
-                    .isInstanceOf(TimeoutCancellationException::class.java)
-            }
     }
 }

@@ -11,7 +11,7 @@ import javax.inject.Inject
 /**
  * Maps User to UserCacheEntity or UserCacheEntity to User.
  */
-class CacheMapper
+class UserCacheMapper
 @Inject
 constructor() : EntityMapper<UserEntity, UserCacheEntity> {
 

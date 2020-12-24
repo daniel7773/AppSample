@@ -1,61 +1,79 @@
 package com.example.appsample.business.domain.repository.implementation
 
+import android.util.Log
+import com.example.appsample.business.data.cache.abstraction.PostCacheDataSource
 import com.example.appsample.business.data.models.PostEntity
-import com.example.appsample.business.data.network.abstraction.GET_POSTS_TIMEOUT
-import com.example.appsample.business.data.network.abstraction.GET_POST_TIMEOUT
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.PostEntityToPostMapper
 import com.example.appsample.business.domain.model.Post
+import com.example.appsample.business.domain.repository.NetworkBoundResource
 import com.example.appsample.business.domain.repository.Resource
-import com.example.appsample.business.domain.repository.Resource.Error
 import com.example.appsample.business.domain.repository.Resource.Success
+import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+@FlowPreview
 class PostsRepositoryImpl @Inject constructor(
+    private val mainDispatcher: CoroutineDispatcher,
+    private val postCacheDataSource: PostCacheDataSource,
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
+    private val commentsRepository: CommentsRepository
 ) : PostsRepository {
 
     override suspend fun getPostsList(userId: Int): Resource<List<Post>?> {
-        var postEntityList: List<PostEntity>? = null
-
-        try {
-            postEntityList = withTimeout(GET_POSTS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getPostsListFromUserAsync(userId)
-                    .await()
+        val resourceList = object : NetworkBoundResource<List<PostEntity>, List<Post>>(
+            mainDispatcher,
+            { postCacheDataSource.getAllPosts(userId) },
+            { jsonPlaceholderApiSource.getPostsListFromUserAsync(userId).await() },
+        ) {
+            override suspend fun updateCache(entity: List<PostEntity>) {
+                Log.d("Asdasddwc", "updateCache called for postList with size: ${entity.size}")
+                postCacheDataSource.insertPostList(entity)
+                // TODO: call WorkManager
             }
-        } catch (e: Exception) {
-            return Error(null, "Catch error while calling getPostList", e)
+
+            // TODO: Set any logical solution here
+            override suspend fun shouldFetch(entity: List<Post>?) = true
+            override suspend fun map(entity: List<PostEntity>) =
+                PostEntityToPostMapper.mapList(entity)
+        }.resultSuspend()
+
+        if (resourceList is Success) {
+            resourceList.data?.forEach { post ->
+                post.id?.run {
+                    val commentsPostResponse = commentsRepository.getCommentsNum(this)
+
+                    if (commentsPostResponse is Success) {
+                        post.commentsSize = commentsPostResponse.data ?: 0
+                    } else {
+                        post.commentsSize = 0
+                    }
+                }
+            }
         }
-
-        if (postEntityList == null) {
-            return Error(null, "Data from repository is null", NullPointerException())
-        }
-
-        val postList = PostEntityToPostMapper.mapList(postEntityList)
-
-        return Success(postList, "Success")
+        return resourceList
     }
 
-    override suspend fun getPost(postId: Int): Resource<Post?> {
-        var postEntity: PostEntity? = null
-
-        try {
-            postEntity = withTimeout(GET_POST_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getPostByIdAsync(postId)
-                    .await()
+    override suspend fun getPost(postId: Int): Flow<Resource<Post?>> {
+        return object : NetworkBoundResource<PostEntity, Post>(
+            mainDispatcher,
+            { postCacheDataSource.searchPostById(postId) },
+            { jsonPlaceholderApiSource.getPostByIdAsync(postId).await() },
+        ) {
+            override suspend fun updateCache(entity: PostEntity) {
+                Log.d("Asdasddwc", "updateCache called for post with id: ${entity.id}")
+                postCacheDataSource.insertPost(entity)
+                // TODO: call WorkManager
             }
-        } catch (e: Exception) {
-            return Error(null, "Catch error while calling getPost", e)
-        }
 
-        if (postEntity == null) {
-            return Error(null, "Data from repository is null", NullPointerException())
-        }
+            // TODO: Set any logical solution here
+            override suspend fun shouldFetch(entity: Post?) = true
 
-        val post = PostEntityToPostMapper.map(postEntity)
-
-        return Success(post, "Success")
+            override suspend fun map(entity: PostEntity) = PostEntityToPostMapper.map(entity)
+        }.result
     }
 }

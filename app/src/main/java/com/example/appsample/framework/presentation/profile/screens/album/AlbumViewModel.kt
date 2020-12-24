@@ -15,6 +15,7 @@ import com.example.appsample.framework.presentation.profile.mappers.PhotoToPhoto
 import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
@@ -66,16 +67,24 @@ class AlbumViewModel constructor( // I suppose it is better to use database inst
 
         viewModelScope.launch(mainDispatcher) {
             supervisorScope {
-                _items.value = when (val response = getPhotoListUseCase.getPhotoList(albumId)) {
-                    is Resource.Success -> {
-                        Log.d(TAG, "photos size ${response.data?.size}")
-                        // force unwrap because null values must be handled earlier
-                        val photoList = PhotoToPhotoModelMapper.mapPhotoList(response.data!!)
-                        Success(photoList, response.message ?: "searchPhotos Success in ViewModel")
-                    }
-                    is Resource.Error -> {
-                        Log.d(TAG, "searchPhotos error ${response.exception.localizedMessage}")
-                        Error(response.message.toString(), response.exception)
+                getPhotoListUseCase.getPhotoList(albumId).collect { response ->
+                    _items.value = when (response) {
+                        is Resource.Success -> {
+                            Log.d(TAG, "photos size ${response.data?.size}")
+                            // force unwrap because null values must be handled earlier
+                            val photoList = PhotoToPhotoModelMapper.mapPhotoList(response.data!!)
+                            Success(
+                                photoList,
+                                response.message ?: "searchPhotos Success in ViewModel"
+                            )
+                        }
+                        is Resource.Error -> {
+                            Log.e(TAG, "searchPhotos error ${response.exception.localizedMessage}")
+                            Error(response.message.toString(), response.exception)
+                        }
+                        else -> {
+                            Loading("Loading came")
+                        }
                     }
                 }
             }

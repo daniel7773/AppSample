@@ -48,7 +48,7 @@ interface JsonPlaceholderApiSource {
     ): Deferred<PhotoEntity?>
 
     @GET("comments")
-    fun getCommentsByPostIdAsync(
+    fun getCommentListByPostIdAsync(
         @Query("postId") postId: Int
     ): Deferred<List<CommentEntity>?>
 }

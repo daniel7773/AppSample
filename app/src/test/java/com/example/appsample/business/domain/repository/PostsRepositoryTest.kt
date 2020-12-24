@@ -1,33 +1,65 @@
 package com.example.appsample.business.domain.repository
 
-import com.example.appsample.business.data.models.PostEntity
+import com.example.appsample.business.data.cache.abstraction.PostCacheDataSource
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.PostEntityToPostMapper
+import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
 import com.example.appsample.business.domain.repository.implementation.PostsRepositoryImpl
+import com.example.appsample.rules.InstantExecutorExtension
+import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.Extensions
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
+@ExtendWith(InstantExecutorExtension::class)
 class PostsRepositoryTest {
 
     // system in test
     private val postsRepository: PostsRepository
 
     // resources needed
+    @get:Extensions
+    val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
+
     val networkApi: JsonPlaceholderApiSource = mockk()
+    val postCacheDataSource: PostCacheDataSource = mockk()
+    private val commentsRepository: CommentsRepository = mockk()
 
     init {
-        postsRepository = PostsRepositoryImpl(networkApi)
+
+        coEvery {
+            postCacheDataSource.insertPostList(any())
+        } returns LongArray(1)
+
+        coEvery {
+            postCacheDataSource.insertPost(any())
+        } returns 1L
+
+        coEvery {
+            postCacheDataSource.getAllPosts(any())
+        } returns emptyList()
+
+        coEvery {
+            postCacheDataSource.searchPostById(any())
+        } returns null
+
+
+        postsRepository = PostsRepositoryImpl(
+            mainDispatcher = mainCoroutineRule.testDispatcher,
+            postCacheDataSource = postCacheDataSource,
+            jsonPlaceholderApiSource = networkApi,
+            commentsRepository = commentsRepository
+        )
     }
 
     @Test
@@ -38,11 +70,15 @@ class PostsRepositoryTest {
             networkApi.getPostsListFromUserAsync(userId).await()
         } returns DataFactory.produceListOfPostsEntity(3)
 
+        coEvery {
+            commentsRepository.getCommentsNum(any())
+        } returns Resource.Success(10, "mocked data")
+
         val networkValue = networkApi.getPostsListFromUserAsync(userId).await()
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat(PostEntityToPostMapper.mapList(networkValue!!))
-            .isEqualTo(repositoryValue.data)
+        Assertions.assertThat(PostEntityToPostMapper.mapList(networkValue!!).size)
+            .isEqualTo((repositoryValue as Resource.Success).data!!.size)
     }
 
     @Test
@@ -57,29 +93,10 @@ class PostsRepositoryTest {
 
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat(repositoryValue.exception).isInstanceOf(exception::class.java)
-        Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception?.message)
+        Assertions.assertThat((repositoryValue as Resource.Error).exception)
+            .isInstanceOf(exception::class.java)
+        Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
         Assertions.assertThat(exception.localizedMessage)
-            .isEqualTo(repositoryValue.exception?.localizedMessage)
-    }
-
-    @Test
-    fun `getPosts TimeoutCancellationException passes through repository`() = runBlockingTest {
-
-        val userId = 1
-
-        coEvery {
-            networkApi.getPostsListFromUserAsync(userId)
-        } answers {
-            val deferredPostListEntities = CompletableDeferred<List<PostEntity>?>()
-
-            deferredPostListEntities
-        }
-
-        val repositoryValue = postsRepository.getPostsList(userId)
-
-        Assertions.assertThat(repositoryValue.exception).isNotNull
-        Assertions.assertThat(repositoryValue.exception)
-            .isInstanceOf(TimeoutCancellationException::class.java)
+            .isEqualTo(repositoryValue.exception.localizedMessage)
     }
 }

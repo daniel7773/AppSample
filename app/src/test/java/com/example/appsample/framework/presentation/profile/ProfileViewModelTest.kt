@@ -8,7 +8,6 @@ import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetCommentListUseCase
-import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.model.State
@@ -20,6 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -36,7 +36,6 @@ class ProfileViewModelTest {
     val getUserUseCase: GetUserUseCase = mockk()
     val getPostListUseCase: GetPostListUseCase = mockk()
     val getAlbumListUseCase: GetAlbumListUseCase = mockk()
-    val getPhotoUseCase: GetPhotoUseCase = mockk()
     val getCommentListUseCase: GetCommentListUseCase = mockk()
     val savedStateHandle: SavedStateHandle = mockk()
 
@@ -56,10 +55,8 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher,
             sessionManager,
             getPostListUseCase,
-            getCommentListUseCase,
             getUserUseCase,
             getAlbumListUseCase,
-            getPhotoUseCase,
             savedStateHandle
         )
     }
@@ -74,7 +71,7 @@ class ProfileViewModelTest {
 
                 coEvery {
                     getUserUseCase.getUser(any())
-                } returns DataFactory.provideResourceSuccess(DataFactory.produceUser())
+                } returns flowOf(DataFactory.provideResourceSuccess(DataFactory.produceUser()))
 
                 // When
                 profileViewModel.startSearch()
@@ -93,7 +90,7 @@ class ProfileViewModelTest {
                 // Given
                 coEvery {
                     getUserUseCase.getUser(any())
-                } returns resourceError
+                } returns flowOf(resourceError)
 
                 // When
 
@@ -119,10 +116,6 @@ class ProfileViewModelTest {
                     getAlbumListUseCase.getAlbumList(any())
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfAlbums(4))
 
-                coEvery {
-                    getPhotoUseCase.getPhoto(any(), any())
-                } returns DataFactory.provideResourceSuccess(DataFactory.producePhoto())
-
                 // When
                 profileViewModel.startSearch()
 
@@ -137,7 +130,8 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
                 // Given
-                val resourceError = DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
+                val resourceError =
+                    DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
                 coEvery {
                     getAlbumListUseCase.getAlbumList(any())
                 } returns resourceError
@@ -165,7 +159,7 @@ class ProfileViewModelTest {
                 } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4))
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
-                } returns Resource.Success(emptyList<Comment>(), "")
+                } returns flowOf(Resource.Success(emptyList<Comment>(), ""))
                 // When
                 profileViewModel.startSearch()
 
@@ -180,13 +174,14 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
                 // Given
-                val resourceError = DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
+                val resourceError =
+                    DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
                 coEvery {
                     getPostListUseCase.getPostList(any())
                 } returns resourceError
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
-                } returns Resource.Success(emptyList<Comment>(), "")
+                } returns flowOf(Resource.Success(emptyList<Comment>(), ""))
                 // When
                 profileViewModel.startSearch()
 

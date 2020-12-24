@@ -9,8 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
-import com.example.appsample.business.interactors.profile.GetCommentListUseCase
-import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.mappers.UserToUserModelMapper
@@ -21,31 +19,29 @@ import com.example.appsample.framework.presentation.common.model.State.Success
 import com.example.appsample.framework.presentation.common.model.State.Unknown
 import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.mappers.AlbumToAlbumModelMapper
-import com.example.appsample.framework.presentation.profile.mappers.PhotoToPhotoModelMapper
 import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
-import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
 import com.example.appsample.framework.presentation.profile.model.ProfileElement
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.ProfileTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
 private const val USER_ID_KEY = "userId"
 
+@InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class ProfileViewModel constructor( // I suppose it is better to use database instead of SavedStateHandle for complex data
     private val mainDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostListUseCase: GetPostListUseCase,
-    private val getCommentListUseCase: GetCommentListUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val getAlbumListUseCase: GetAlbumListUseCase,
-    private val getPhotoUseCase: GetPhotoUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -66,14 +62,16 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     val userId: LiveData<Int> = _userId
 
     init {
+        Log.d("ProfileViewModel", "init called")
         savedStateHandle.set(
             USER_ID_KEY,
             sessionManager.user.id!!
-        ) // TODO: add back when find out how make tests not to crash here
+        )
         startSearch()
     }
 
     fun startSearch() {
+        Log.d("ProfileViewModel", "startSearch called")
         viewModelScope.launch(mainDispatcher) {
             supervisorScope {
                 launch(CoroutineExceptionHandler { _, throwable ->
@@ -101,71 +99,52 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
-        user = when (val response = getUserUseCase.getUser(userId.value!!)) {
-            is Resource.Success -> {
-                Log.d(TAG, "user ${response.data}")
-                // force unwrap because null values must be handled earlier
-                val user = UserToUserModelMapper.map(response.data!!)
-                Success(user, response.message ?: "getUser Success in ViewModel")
+        getUserUseCase.getUser(userId.value!!).collect { response ->
+            user = when (response) {
+                is Resource.Success -> {
+                    Log.d(TAG, "user ${response.data}")
+                    // force unwrap because null values must be handled earlier
+                    val userLocal = UserToUserModelMapper.map(response.data!!)
+                    Success(userLocal, response.message ?: "getUser Success in ViewModel")
+                }
+                is Resource.Error -> {
+                    Log.e(TAG, "getUser error ${response.exception.localizedMessage}")
+                    Error(response.message.toString(), response.exception)
+                }
+                else -> {
+                    Loading("init Loading")
+                }
             }
-            is Resource.Error -> {
-                Log.d(TAG, "getUser error ${response.exception.localizedMessage}")
-                Error(response.message.toString(), response.exception)
-            }
+            refreshData()
         }
-        refreshData()
     }
 
     private suspend fun searchPostList() {
+        Log.d("ProfileViewModel", "searchPostList called")
         postList = Loading("init Loading")
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
+
         when (val response = getPostListUseCase.getPostList(userId.value!!)) {
+
             is Resource.Success -> {
                 Log.d(TAG, "postList came, size: ${response.data!!.size}")
                 // force unwrap because null values must be handled earlier
-                val postList = PostToPostModelMapper.mapList(response.data!!)
-                startLoadingCommentsOfPost(postList)
+                val postModelList = PostToPostModelMapper.mapList(response.data)
+
+                this.postList = Success(postModelList, "Successfully got data in VM")
             }
             is Resource.Error -> {
-                Log.d(TAG, "getPostList error ${response.exception.localizedMessage}")
+                Log.e(TAG, "getPostList error ${response.exception.localizedMessage}")
                 postList = Error(response.message.toString(), response.exception)
             }
-        }
-    }
-
-    private suspend fun startLoadingCommentsOfPost(postModelList: List<PostModel>) {
-
-        postModelList.map { it.commentsSize = getCommentsSize(it) } // adding comments size to posts
-
-        joinAll()
-        postList = Success(postModelList, "With comments size")
-        refreshData()
-    }
-
-    private suspend fun getCommentsSize(postModel: PostModel): Int? {
-        if (postModel.id == null) {
-            return null
-        }
-        // passing hardcoded photoId because we using hack in PhotoRepositoryImpl
-        val postCommentListSize =
-            when (val response = getCommentListUseCase.getCommentList(postModel.id!!)) {
-                is Resource.Success -> {
-                    Log.d(
-                        TAG,
-                        "comments size of post with id ${postModel.id!!} is  ${response.data?.size}"
-                    )
-
-                    return response.data?.size
-                }
-                is Resource.Error -> {
-                    Log.d(TAG, "getAlbumFirstPhoto error ${response.exception.localizedMessage}")
-                    return null
-                }
+            else -> {
+                postList = Loading("init Loading")
             }
+        }
 
-        return postCommentListSize
+        refreshData()
     }
 
     private suspend fun searchAlbumList() {
@@ -173,52 +152,26 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
+
         when (val response = getAlbumListUseCase.getAlbumList(userId.value!!)) {
+
             is Resource.Success -> {
-                Log.d(TAG, "albumList ${response.data}")
+                Log.d(TAG, "albumList size ${response.data?.size}")
                 // force unwrap because null values must be handled earlier
                 val albums = AlbumToAlbumModelMapper.map(response.data!!)
 
-                startLoadingFirstPhotosOfAlbums(albums)
+                albumList = Success(albums, "Successfully got data in VM")
             }
             is Resource.Error -> {
-                Log.d(TAG, "getAlbumList error ${response.exception.localizedMessage}")
+                Log.e(TAG, "getAlbumList error ${response.exception.localizedMessage}")
                 albumList = Error(response.message.toString(), response.exception)
             }
+            else -> {
+                albumList = Loading("init Loading")
+            }
         }
-    }
 
-    private suspend fun startLoadingFirstPhotosOfAlbums(localAlbumList: List<AlbumModel>) {
-        localAlbumList.map {
-            it.firstPhoto = getAlbumFirstPhoto(it)
-        } // adding first photos to album
-
-        joinAll()
-        albumList = Success(localAlbumList, "With first photos")
         refreshData()
-    }
-
-    private suspend fun getAlbumFirstPhoto(albumModel: AlbumModel): PhotoModel? {
-        if (albumModel.id == null) {
-            return null
-        }
-        // passing hardcoded photoId because we using hack in PhotoRepositoryImpl
-        val photoModel = when (val response = getPhotoUseCase.getPhoto(albumModel.id!!, 1)) {
-            is Resource.Success -> {
-                Log.d(
-                    TAG,
-                    "first photo of album with id ${albumModel.id!!} is  ${response.data?.id}"
-                )
-
-                return PhotoToPhotoModelMapper.mapPhoto(response.data)
-            }
-            is Resource.Error -> {
-                Log.d(TAG, "getAlbumFirstPhoto error ${response.exception.localizedMessage}")
-                return null
-            }
-        }
-
-        return photoModel
     }
 
     private fun refreshData() = viewModelScope.launch(mainDispatcher) {

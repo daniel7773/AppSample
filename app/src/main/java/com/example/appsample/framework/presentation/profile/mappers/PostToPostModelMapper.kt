@@ -12,7 +12,7 @@ object PostToPostModelMapper {
     private fun createPost(post: Post) = PostModel(
         userId = post.userId,
         id = post.id,
-        commentsSize = null,
+        commentsSize = post.commentsSize,
         title = post.title,
         body = post.body
     )

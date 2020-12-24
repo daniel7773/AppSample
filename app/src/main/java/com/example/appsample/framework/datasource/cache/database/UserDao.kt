@@ -2,13 +2,14 @@ package com.example.appsample.framework.datasource.cache.database
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.appsample.framework.datasource.cache.model.UserCacheEntity
 
 @Dao
 interface UserDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: UserCacheEntity): Long
 
     @Query("SELECT * FROM user WHERE id = :id")

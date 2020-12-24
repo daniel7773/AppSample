@@ -1,6 +1,15 @@
 package com.example.appsample.framework.presentation.profile.di
 
+import androidx.room.Room
+import com.example.appsample.business.data.cache.abstraction.AlbumCacheDataSource
+import com.example.appsample.business.data.cache.abstraction.CommentCacheDataSource
+import com.example.appsample.business.data.cache.abstraction.PhotoCacheDataSource
+import com.example.appsample.business.data.cache.abstraction.PostCacheDataSource
 import com.example.appsample.business.data.cache.abstraction.UserCacheDataSource
+import com.example.appsample.business.data.cache.implementation.AlbumCacheDataSourceImpl
+import com.example.appsample.business.data.cache.implementation.CommentCacheDataSourceImpl
+import com.example.appsample.business.data.cache.implementation.PhotoCacheDataSourceImpl
+import com.example.appsample.business.data.cache.implementation.PostCacheDataSourceImpl
 import com.example.appsample.business.data.cache.implementation.UserCacheDataSourceImpl
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
@@ -17,21 +26,48 @@ import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
-import com.example.appsample.business.interactors.profile.GetPhotoUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.business.interactors.profile.GetPostUseCase
+import com.example.appsample.framework.base.presentation.BaseApplication
+import com.example.appsample.framework.datasource.cache.abstraction.AlbumDaoService
+import com.example.appsample.framework.datasource.cache.abstraction.CommentDaoService
+import com.example.appsample.framework.datasource.cache.abstraction.PhotoDaoService
+import com.example.appsample.framework.datasource.cache.abstraction.PostDaoService
 import com.example.appsample.framework.datasource.cache.abstraction.UserDaoService
+import com.example.appsample.framework.datasource.cache.database.AlbumDao
+import com.example.appsample.framework.datasource.cache.database.AlbumDatabase
+import com.example.appsample.framework.datasource.cache.database.CommentDao
+import com.example.appsample.framework.datasource.cache.database.CommentDatabase
+import com.example.appsample.framework.datasource.cache.database.PhotoDao
+import com.example.appsample.framework.datasource.cache.database.PhotoDatabase
+import com.example.appsample.framework.datasource.cache.database.PostDao
+import com.example.appsample.framework.datasource.cache.database.PostDatabase
 import com.example.appsample.framework.datasource.cache.database.UserDao
 import com.example.appsample.framework.datasource.cache.database.UserDatabase
+import com.example.appsample.framework.datasource.cache.implementation.AlbumDaoServiceImpl
+import com.example.appsample.framework.datasource.cache.implementation.CommentDaoServiceImpl
+import com.example.appsample.framework.datasource.cache.implementation.PhotoDaoServiceImpl
+import com.example.appsample.framework.datasource.cache.implementation.PostDaoServiceImpl
 import com.example.appsample.framework.datasource.cache.implementation.UserDaoServiceImpl
-import com.example.appsample.framework.datasource.cache.mappers.CacheMapper
+import com.example.appsample.framework.datasource.cache.mappers.AlbumCacheMapper
+import com.example.appsample.framework.datasource.cache.mappers.CommentCacheMapper
+import com.example.appsample.framework.datasource.cache.mappers.PhotoCacheMapper
+import com.example.appsample.framework.datasource.cache.mappers.PostCacheMapper
+import com.example.appsample.framework.datasource.cache.mappers.UserCacheMapper
 import com.example.appsample.framework.presentation.auth.di.BASE_URL
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+@FlowPreview
+@ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 @Module
 object ProfileModule {
 
@@ -60,14 +96,14 @@ object ProfileModule {
     @JvmStatic
     @ProfileFragmentScope
     @Provides
-    fun provideUserCacheMapper(): CacheMapper {
-        return CacheMapper()
+    fun provideUserCacheMapper(): UserCacheMapper {
+        return UserCacheMapper()
     }
 
     @ProfileFragmentScope
     @Provides
-    fun provideUserDaoService(userDao: UserDao, cacheMapper: CacheMapper): UserDaoService {
-        return UserDaoServiceImpl(userDao, cacheMapper)
+    fun provideUserDaoService(userDao: UserDao, userCacheMapper: UserCacheMapper): UserDaoService {
+        return UserDaoServiceImpl(userDao, userCacheMapper)
     }
 
     @ProfileFragmentScope
@@ -76,13 +112,54 @@ object ProfileModule {
         return UserCacheDataSourceImpl(userDaoService)
     }
 
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun providePostDb(app: BaseApplication): PostDatabase {
+        return Room
+            .databaseBuilder(app, PostDatabase::class.java, PostDatabase.DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun providePostDAO(postDatabase: PostDatabase): PostDao {
+        return postDatabase.postDao()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun providePostCacheMapper(): PostCacheMapper {
+        return PostCacheMapper()
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun providePostDaoService(postDao: PostDao, postCacheMapper: PostCacheMapper): PostDaoService {
+        return PostDaoServiceImpl(postDao, postCacheMapper)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun providePostCacheDataSourceImpl(postDaoService: PostDaoService): PostCacheDataSource {
+        return PostCacheDataSourceImpl(postDaoService)
+    }
+
     @ProfileFragmentScope
     @Provides
     fun provideJsonPlaceholderRepository(
+        coroutineDispatcher: CoroutineDispatcher,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         userCacheDataSource: UserCacheDataSource
     ): UserRepository {
-        return UserRepositoryImpl(userCacheDataSource, jsonPlaceholderApiSource)
+        return UserRepositoryImpl(
+            coroutineDispatcher,
+            userCacheDataSource,
+            jsonPlaceholderApiSource
+        )
     }
 
     @ProfileFragmentScope
@@ -93,8 +170,18 @@ object ProfileModule {
 
     @ProfileFragmentScope
     @Provides
-    fun providePostsRepository(jsonPlaceholderApiSource: JsonPlaceholderApiSource): PostsRepository {
-        return PostsRepositoryImpl(jsonPlaceholderApiSource)
+    fun providePostsRepository(
+        coroutineDispatcher: CoroutineDispatcher,
+        postCacheDataSource: PostCacheDataSource,
+        jsonPlaceholderApiSource: JsonPlaceholderApiSource,
+        commentsRepository: CommentsRepository
+    ): PostsRepository {
+        return PostsRepositoryImpl(
+            coroutineDispatcher,
+            postCacheDataSource,
+            jsonPlaceholderApiSource,
+            commentsRepository
+        )
     }
 
     @ProfileFragmentScope
@@ -109,10 +196,60 @@ object ProfileModule {
         return GetPostUseCase(postsRepository)
     }
 
+    @JvmStatic
     @ProfileFragmentScope
     @Provides
-    fun provideAlbumsRepository(jsonPlaceholderApiSource: JsonPlaceholderApiSource): AlbumsRepository {
-        return AlbumsRepositoryImpl(jsonPlaceholderApiSource)
+    fun provideAlbumDb(app: BaseApplication): AlbumDatabase {
+        return Room
+            .databaseBuilder(app, AlbumDatabase::class.java, AlbumDatabase.DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun provideAlbumDAO(albumDatabase: AlbumDatabase): AlbumDao {
+        return albumDatabase.albumDao()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun provideAlbumCacheMapper(): AlbumCacheMapper {
+        return AlbumCacheMapper()
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideAlbumDaoService(
+        albumDao: AlbumDao,
+        albumCacheMapper: AlbumCacheMapper
+    ): AlbumDaoService {
+        return AlbumDaoServiceImpl(albumDao, albumCacheMapper)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideAlbumCacheDataSourceImpl(albumDaoService: AlbumDaoService): AlbumCacheDataSource {
+        return AlbumCacheDataSourceImpl(albumDaoService)
+    }
+
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideAlbumsRepository(
+        coroutineDispatcher: CoroutineDispatcher,
+        albumCacheDataSource: AlbumCacheDataSource,
+        jsonPlaceholderApiSource: JsonPlaceholderApiSource,
+        photoRepository: PhotoRepository
+    ): AlbumsRepository {
+        return AlbumsRepositoryImpl(
+            coroutineDispatcher,
+            albumCacheDataSource,
+            jsonPlaceholderApiSource,
+            photoRepository
+        )
     }
 
     @ProfileFragmentScope
@@ -121,16 +258,57 @@ object ProfileModule {
         return GetAlbumListUseCase(albumsRepository)
     }
 
+    @JvmStatic
     @ProfileFragmentScope
     @Provides
-    fun providePhotoRepository(jsonPlaceholderApiSource: JsonPlaceholderApiSource): PhotoRepository {
-        return PhotoRepositoryImpl(jsonPlaceholderApiSource)
+    fun providePhotoDb(app: BaseApplication): PhotoDatabase {
+        return Room
+            .databaseBuilder(app, PhotoDatabase::class.java, PhotoDatabase.DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun providePhotoDAO(photoDatabase: PhotoDatabase): PhotoDao {
+        return photoDatabase.photoDao()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun providePhotoCacheMapper(): PhotoCacheMapper {
+        return PhotoCacheMapper()
     }
 
     @ProfileFragmentScope
     @Provides
-    fun provideGetPhotoUseCase(photoRepository: PhotoRepository): GetPhotoUseCase {
-        return GetPhotoUseCase(photoRepository)
+    fun providePhotoDaoService(
+        photoDao: PhotoDao,
+        photoCacheMapper: PhotoCacheMapper
+    ): PhotoDaoService {
+        return PhotoDaoServiceImpl(photoDao, photoCacheMapper)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun providePhotoCacheDataSourceImpl(photoDaoService: PhotoDaoService): PhotoCacheDataSource {
+        return PhotoCacheDataSourceImpl(photoDaoService)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun providePhotoRepository(
+        coroutineDispatcher: CoroutineDispatcher,
+        photoCacheDataSource: PhotoCacheDataSource,
+        jsonPlaceholderApiSource: JsonPlaceholderApiSource
+    ): PhotoRepository {
+        return PhotoRepositoryImpl(
+            coroutineDispatcher,
+            photoCacheDataSource,
+            jsonPlaceholderApiSource
+        )
     }
 
     @ProfileFragmentScope
@@ -139,10 +317,57 @@ object ProfileModule {
         return GetPhotoListUseCase(photoRepository)
     }
 
+    @JvmStatic
     @ProfileFragmentScope
     @Provides
-    fun provideCommentsRepository(jsonPlaceholderApiSource: JsonPlaceholderApiSource): CommentsRepository {
-        return CommentsRepositoryImpl(jsonPlaceholderApiSource)
+    fun provideCommentDb(app: BaseApplication): CommentDatabase {
+        return Room
+            .databaseBuilder(app, CommentDatabase::class.java, CommentDatabase.DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun provideCommentDAO(commentDatabase: CommentDatabase): CommentDao {
+        return commentDatabase.commentDao()
+    }
+
+    @JvmStatic
+    @ProfileFragmentScope
+    @Provides
+    fun provideCommentCacheMapper(): CommentCacheMapper {
+        return CommentCacheMapper()
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideCommentDaoService(
+        commentDao: CommentDao,
+        commentCacheMapper: CommentCacheMapper
+    ): CommentDaoService {
+        return CommentDaoServiceImpl(commentDao, commentCacheMapper)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideCommentCacheDataSourceImpl(commentDaoService: CommentDaoService): CommentCacheDataSource {
+        return CommentCacheDataSourceImpl(commentDaoService)
+    }
+
+    @ProfileFragmentScope
+    @Provides
+    fun provideCommentsRepository(
+        coroutineDispatcher: CoroutineDispatcher,
+        commentsCacheDataSource: CommentCacheDataSource,
+        jsonPlaceholderApiSource: JsonPlaceholderApiSource
+    ): CommentsRepository {
+        return CommentsRepositoryImpl(
+            coroutineDispatcher,
+            commentsCacheDataSource,
+            jsonPlaceholderApiSource
+        )
     }
 
     @ProfileFragmentScope

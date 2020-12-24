@@ -10,10 +10,11 @@ import com.example.appsample.framework.datasource.cache.abstraction.UserDaoServi
 import com.example.appsample.framework.datasource.cache.database.UserDao
 import com.example.appsample.framework.datasource.cache.database.UserDatabase
 import com.example.appsample.framework.datasource.cache.implementation.UserDaoServiceImpl
-import com.example.appsample.framework.datasource.cache.mappers.CacheMapper
+import com.example.appsample.framework.datasource.cache.mappers.UserCacheMapper
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -47,14 +48,14 @@ object AuthModule {
     @JvmStatic
     @AuthFragmentScope
     @Provides
-    fun provideUserCacheMapper(): CacheMapper {
-        return CacheMapper()
+    fun provideUserCacheMapper(): UserCacheMapper {
+        return UserCacheMapper()
     }
 
     @AuthFragmentScope
     @Provides
-    fun provideUserDaoService(userDao: UserDao, cacheMapper: CacheMapper): UserDaoService {
-        return UserDaoServiceImpl(userDao, cacheMapper)
+    fun provideUserDaoService(userDao: UserDao, userCacheMapper: UserCacheMapper): UserDaoService {
+        return UserDaoServiceImpl(userDao, userCacheMapper)
     }
 
     @AuthFragmentScope
@@ -66,10 +67,15 @@ object AuthModule {
     @AuthFragmentScope
     @Provides
     fun provideJsonPlaceholderRepository(
+        coroutineDispatcher: CoroutineDispatcher,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         userCacheDataSource: UserCacheDataSource
     ): UserRepository {
-        return UserRepositoryImpl(userCacheDataSource, jsonPlaceholderApiSource)
+        return UserRepositoryImpl(
+            mainDispatcher = coroutineDispatcher,
+            userCacheDataSource,
+            jsonPlaceholderApiSource
+        )
     }
 
     @AuthFragmentScope

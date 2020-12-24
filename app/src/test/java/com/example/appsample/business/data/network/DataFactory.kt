@@ -19,6 +19,7 @@ import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.model.AddressModel
 import com.example.appsample.framework.presentation.profile.model.CompanyModel
 import com.example.appsample.framework.presentation.profile.model.GeoModel
+import kotlinx.coroutines.flow.flowOf
 
 object DataFactory {
 
@@ -79,8 +80,12 @@ object DataFactory {
 
     // Domain layer
 
+    fun <T> provideResourceSuccessFlow(data: T) = flowOf(Resource.Success<T>(data, "SUCCESS"))
+    fun <T> provideResourceErrorFlow(data: T) = flowOf(Resource.Error("ERROR", Exception("ERROR")))
+
+
     fun <T> provideResourceSuccess(data: T) = Resource.Success<T>(data, "SUCCESS")
-    fun <T> provideResourceError(data: T) = Resource.Error<T?>(null, "ERROR", Exception("ERROR"))
+    fun <T> provideResourceError(data: T) = Resource.Error("ERROR", Exception("ERROR"))
 
     fun produceUser() = User(
         id = 2,
@@ -158,9 +163,9 @@ object DataFactory {
         )
     )
 
-    fun produceListOfPhotoEntity(albumNum: Int): List<PhotoEntity> {
+    fun produceListOfPhotoEntity(photoNum: Int): List<PhotoEntity> {
         val albumList: ArrayList<PhotoEntity> = ArrayList()
-        repeat(albumNum) {
+        repeat(photoNum) {
             albumList.add(producePhotoEntity(it))
         }
         return albumList

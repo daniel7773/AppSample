@@ -1,39 +1,60 @@
 package com.example.appsample.business.domain.repository.implementation
 
+import android.util.Log
+import com.example.appsample.business.data.cache.abstraction.CommentCacheDataSource
 import com.example.appsample.business.data.models.CommentEntity
-import com.example.appsample.business.data.network.abstraction.GET_ALBUMS_TIMEOUT
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.mappers.CommentEntityToCommentMapper
 import com.example.appsample.business.domain.model.Comment
+import com.example.appsample.business.domain.repository.NetworkBoundResource
 import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class CommentsRepositoryImpl @Inject constructor(
+    private val mainDispatcher: CoroutineDispatcher,
+    private val commentCacheDataSource: CommentCacheDataSource,
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource
 ) : CommentsRepository {
 
-    override suspend fun getCommentList(postId: Int): Resource<List<Comment>?> {
+    override suspend fun getCommentList(postId: Int): Flow<Resource<List<Comment>?>> {
 
-        var commentEntityList: List<CommentEntity>? = null
-
-        try {
-            commentEntityList = withTimeout(GET_ALBUMS_TIMEOUT) {
-                return@withTimeout jsonPlaceholderApiSource.getCommentsByPostIdAsync(postId)
-                    .await()
+        return object : NetworkBoundResource<List<CommentEntity>, List<Comment>>(
+            mainDispatcher,
+            { commentCacheDataSource.getAllComments(postId) },
+            { jsonPlaceholderApiSource.getCommentListByPostIdAsync(postId).await() },
+        ) {
+            override suspend fun updateCache(entity: List<CommentEntity>) {
+                Log.d("Asdasddwc", "updateCache called for commentList with size: ${entity.size}")
+                commentCacheDataSource.insertCommentList(entity)
+                // TODO: call WorkManager
             }
-        } catch (e: Exception) {
-            return Resource.Error(null, "Catch error while calling getComments", e)
-        }
 
-        if (commentEntityList == null) {
-            return Resource.Error(null, "Data from repository is null", NullPointerException())
-        }
+            // TODO: Set any logical solution here
+            override suspend fun shouldFetch(entity: List<Comment>?) = true
+            override suspend fun map(entity: List<CommentEntity>) =
+                CommentEntityToCommentMapper.map(entity)
+        }.result
+    }
 
-        val commentList =
-            CommentEntityToCommentMapper.map(commentEntityList).filter { it.id != null }
+    override suspend fun getCommentsNum(postId: Int): Resource<Int?> {
 
-        return Resource.Success(commentList, "Success")
+        return object : NetworkBoundResource<List<CommentEntity>, Int>(
+            mainDispatcher,
+            { commentCacheDataSource.getAllComments(postId) },
+            { jsonPlaceholderApiSource.getCommentListByPostIdAsync(postId).await() },
+        ) {
+            override suspend fun updateCache(entity: List<CommentEntity>) {
+                Log.d("Asdasddwc", "updateCache called for commentList with size: ${entity.size}")
+                commentCacheDataSource.insertCommentList(entity)
+                // TODO: call WorkManager
+            }
+
+            // TODO: Set any logical solution here
+            override suspend fun shouldFetch(entity: Int?): Boolean = true
+            override suspend fun map(entity: List<CommentEntity>) = entity.size
+        }.resultSuspend()
     }
 }

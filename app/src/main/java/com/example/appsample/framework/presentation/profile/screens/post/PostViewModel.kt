@@ -18,6 +18,7 @@ import com.example.appsample.framework.presentation.profile.model.post.PostEleme
 import com.example.appsample.framework.presentation.profile.screens.post.adapters.PostTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 private const val POST_ID_KEY = "userId"
@@ -65,43 +66,50 @@ class PostViewModel constructor( // I suppose it is better to use database inste
 
     fun searchCommentList(postId: Int) {
         viewModelScope.launch(mainDispatcher) {
-            commentList = when (val response = getCommentListUseCase.getCommentList(postId)) {
-                is Resource.Success -> {
-                    Log.d(TAG, "comment list size ${response.data?.size}")
-                    // force unwrap because null values must be handled earlier
-                    val commentModelList = CommentToCommentModelMapper.map(response.data!!)
-                    State.Success(
-                        commentModelList,
-                        response.message ?: "searchCommentList Success in ViewModel"
-                    )
+            getCommentListUseCase.getCommentList(postId).collect { response ->
+                when (response) {
+                    is Resource.Success -> {
+                        Log.d(TAG, "comment list size ${response.data?.size}")
+                        // force unwrap because null values must be handled earlier
+                        val commentModelList = CommentToCommentModelMapper.map(response.data!!)
+                        commentList = State.Success(
+                            commentModelList,
+                            response.message ?: "searchCommentList Success in ViewModel"
+                        )
+                    }
+                    is Resource.Error -> {
+                        Log.e(TAG, "searchCommentList error ${response.exception.localizedMessage}")
+                        commentList = State.Error(response.message.toString(), response.exception)
+                    }
+                    else -> {
+                        commentList = State.Loading("Loading")
+                    }
                 }
-                is Resource.Error -> {
-                    Log.d(TAG, "searchCommentList error ${response.exception.localizedMessage}")
-                    State.Error(response.message.toString(), response.exception)
-                }
+                refreshData()
             }
-            refreshData()
         }
     }
 
     fun searchPost(postId: Int) {
         viewModelScope.launch(mainDispatcher) {
-            post = when (val response = getPostUseCase.getPost(postId)) {
-                is Resource.Success -> {
-                    Log.d(TAG, "got post SUCCESS")
-                    // force unwrap because null values must be handled earlier
-                    val postModel = PostToPostModelMapper.map(response.data!!)
-                    State.Success(
-                        postModel,
-                        response.message ?: "searchPost Success in ViewModel"
-                    )
+            getPostUseCase.getPost(postId).collect { response ->
+                post = when (response) {
+                    is Resource.Success -> {
+                        Log.d(TAG, "getPost SUCCESS")
+                        // force unwrap because null values must be handled earlier
+                        val postModel = PostToPostModelMapper.map(response.data!!)
+                        State.Success(postModel, response.message ?: "getPost Success in ViewModel")
+                    }
+                    is Resource.Error -> {
+                        Log.e(TAG, "searchPost error ${response.exception.localizedMessage}")
+                        State.Error(response.message.toString(), response.exception)
+                    }
+                    else -> {
+                        State.Loading("Loading")
+                    }
                 }
-                is Resource.Error -> {
-                    Log.d(TAG, "searchPost error ${response.exception.localizedMessage}")
-                    State.Error(response.message.toString(), response.exception)
-                }
+                refreshData()
             }
-            refreshData()
         }
     }
 

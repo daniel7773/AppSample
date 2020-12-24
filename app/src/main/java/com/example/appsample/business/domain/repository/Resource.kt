@@ -1,18 +1,10 @@
 package com.example.appsample.business.domain.repository
 
-sealed class Resource<T>(
-    open val data: T?,
-    open val message: String?,
-    open val exception: Exception?
-) {
-    data class Success<T>(
-        override val data: T,
-        override val message: String?
-    ) : Resource<T>(data, message, null)
+sealed class Resource<out T> {
 
-    data class Error<T>(
-        override val data: T? = null,
-        override val message: String?,
-        override val exception: Exception
-    ) : Resource<T>(data, message, exception)
+    data class Success<out T>(val data: T, val message: String?) : Resource<T>()
+
+    data class Error(val message: String?, val exception: Exception) : Resource<Nothing>()
+
+    data class Loading<out T>(val data: T, val message: String?) : Resource<T>()
 }
