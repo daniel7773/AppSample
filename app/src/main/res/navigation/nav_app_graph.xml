@@ -30,8 +30,7 @@
 
         <argument
             android:name="albumTitle"
-            app:argType="string"
-            android:defaultValue="@string/album" />
+            app:argType="string" />
 
     </fragment>
 
