@@ -23,14 +23,27 @@
         android:id="@+id/albumFragment"
         android:name="com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment">
 
-        <!-- TODO:  add args instead of hardcoded bundles-->
+        <argument
+            android:name="albumId"
+            app:argType="integer"
+            android:defaultValue="1" />
+
+        <argument
+            android:name="albumTitle"
+            app:argType="string"
+            android:defaultValue="@string/album" />
 
     </fragment>
 
     <fragment
         android:id="@+id/postFragment"
         android:name="com.example.appsample.framework.presentation.profile.screens.post.PostFragment">
-        <!-- TODO:  add args instead of hardcoded bundles-->
+
+        <argument
+            android:name="postId"
+            app:argType="integer"
+            android:defaultValue="1" />
+
     </fragment>
 
 </navigation>

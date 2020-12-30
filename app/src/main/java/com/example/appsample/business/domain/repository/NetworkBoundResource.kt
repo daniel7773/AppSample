@@ -1,6 +1,5 @@
 package com.example.appsample.business.domain.repository
 
-import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
@@ -11,8 +10,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import retrofit2.HttpException
 
-const val GET_CACHE_TIMEOUT = 20000L
-const val GET_NETWORK_TIMEOUT = 45000L
+const val GET_CACHE_TIMEOUT = 10000L
+const val GET_NETWORK_TIMEOUT = 25000L
 
 abstract class NetworkBoundResource<EntityObj, ResultObj>
 constructor(
@@ -23,21 +22,18 @@ constructor(
 
     /**
      * @param EntityObj - object that cache and network dataSources are using
+     * @param ResultObj - object that is in use in domain layer
      * val for resulting all logic to Flow
      */
     val result: Flow<Resource<ResultObj?>> = flow {
         // ****** STEP 1: VIEW CACHE ******
-        Log.d("Asdasddwc", "flow result collecting...")
         val cache = returnCache()
         emit(cache)
         if (cache is Resource.Success) {
-            Log.d("Asdasddwc", "cache is Resource.Success")
             if (!shouldFetch(cache.data)) {
-                Log.d("Asdasddwc", "returning from flow")
                 return@flow
             }
         }
-        Log.d("Asdasddwc", "calling api")
         val apiResult = safeApiCall(apiCall, dispatcher)
 
         emit(apiResult)
@@ -45,21 +41,18 @@ constructor(
 
     /**
      * @param EntityObj - object that cache and network dataSources are using
+     * @param ResultObj - object that is in use in domain layer
      * suspending fun for getting data
      */
     suspend fun resultSuspend(): Resource<ResultObj?> {
         // ****** STEP 1: VIEW CACHE ******
-        Log.d("Asdasddwc", "flow result collecting...")
         val cache = returnCache()
 
         if (cache is Resource.Success) {
-            Log.d("Asdasddwc", "cache is Resource.Success")
             if (!shouldFetch(cache.data)) {
-                Log.d("Asdasddwc", "returning from resultSuspend")
                 return cache
             }
         }
-        Log.d("Asdasddwc", "calling api")
         val apiResult = safeApiCall(apiCall, dispatcher)
 
         return apiResult
@@ -67,13 +60,13 @@ constructor(
 
     /**
      * @param EntityObj - object that cache and network dataSources are using
+     * @param ResultObj - object that is in use in domain layer
      * function for getting abstract data from server and calling cache update
      */
     suspend fun safeApiCall(
         apiCall: suspend () -> EntityObj?,
         dispatcher: CoroutineDispatcher
     ): Resource<ResultObj?> {
-        Log.d("Asdasddwc", "safeApiCall called")
         return withContext(dispatcher) {
             try {
                 withTimeout(GET_NETWORK_TIMEOUT) {
@@ -83,7 +76,6 @@ constructor(
                         Resource.Error("NULL came from api", NullPointerException())
                     } else {
                         val success = map(apiResult)
-                        Log.d("Asdasddwc", "apiResult is Resource.Success")
                         updateCache(apiResult)
                         joinAll()
                         Resource.Success(success, "Success")
@@ -111,11 +103,11 @@ constructor(
 
     /**
      * @param EntityObj - object that cache and network dataSources are using
+     * @param ResultObj - object that is in use in domain layer
      * function for getting abstract data from database
      */
     private suspend fun returnCache(): Resource<ResultObj?> {
         val cacheResult: EntityObj?
-        Log.d("Asdasddwc", "returnCache called")
         try {
             cacheResult = withTimeout(GET_CACHE_TIMEOUT) {
                 return@withTimeout cacheCall.invoke()
@@ -140,6 +132,7 @@ constructor(
 
     /**
      * @param EntityObj - object that cache and network dataSources are using
+     * @param ResultObj - object that is in use in domain layer
      * function for calling cache update
      */
     abstract suspend fun updateCache(entity: EntityObj)
@@ -148,6 +141,7 @@ constructor(
 
     /**
      * @param EntityObj - object that cache and network dataSources are using
+     * @param ResultObj - object that is in use in domain layer
      * function for deciding should we update cache or not
      */
     abstract suspend fun shouldFetch(entity: ResultObj?): Boolean

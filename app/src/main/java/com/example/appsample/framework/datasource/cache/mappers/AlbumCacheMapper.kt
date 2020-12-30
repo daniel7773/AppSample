@@ -3,6 +3,7 @@ package com.example.appsample.framework.datasource.cache.mappers
 import com.example.appsample.business.data.models.AlbumEntity
 import com.example.appsample.business.data.util.EntityMapper
 import com.example.appsample.framework.datasource.cache.model.AlbumCacheEntity
+import com.example.appsample.framework.utils.DataHelper
 import javax.inject.Inject
 
 /**
@@ -33,8 +34,8 @@ constructor() : EntityMapper<AlbumEntity, AlbumCacheEntity> {
             id = entity.id,
             user_id = entity.userId ?: 0,
             title = entity.title ?: "NULL",
-            updated_at = "NOW",
-            created_at = "NOW" // TODO: FIX
+            DataHelper.getData(),
+            DataHelper.getData()
         )
     }
 

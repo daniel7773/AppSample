@@ -3,6 +3,7 @@ package com.example.appsample.framework.datasource.cache.mappers
 import com.example.appsample.business.data.models.CommentEntity
 import com.example.appsample.business.data.util.EntityMapper
 import com.example.appsample.framework.datasource.cache.model.CommentCacheEntity
+import com.example.appsample.framework.utils.DataHelper
 import javax.inject.Inject
 
 /**
@@ -35,8 +36,8 @@ constructor() : EntityMapper<CommentEntity, CommentCacheEntity> {
             name = entity.name ?: "NULL",
             email = entity.email ?: "NULL",
             body = entity.body ?: "NULL",
-            updated_at = "NOW",
-            created_at = "NOW" // TODO: FIX
+            DataHelper.getData(),
+            DataHelper.getData()
         )
     }
 

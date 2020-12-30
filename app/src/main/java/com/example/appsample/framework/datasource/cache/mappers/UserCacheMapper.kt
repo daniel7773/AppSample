@@ -6,6 +6,7 @@ import com.example.appsample.business.data.models.GeoEntity
 import com.example.appsample.business.data.models.UserEntity
 import com.example.appsample.business.data.util.EntityMapper
 import com.example.appsample.framework.datasource.cache.model.UserCacheEntity
+import com.example.appsample.framework.utils.DataHelper
 import javax.inject.Inject
 
 /**
@@ -47,8 +48,8 @@ constructor() : EntityMapper<UserEntity, UserCacheEntity> {
             company_name = entity.company?.name ?: "NULL",
             catch_phrase = entity.company?.catchPhrase ?: "NULL",
             bs = entity.company?.bs ?: "NULL",
-            updated_at = "NOW",
-            created_at = "NOW" // TODO: FIX
+            updated_at = DataHelper.getData(),
+            created_at = DataHelper.getData()
         )
     }
 

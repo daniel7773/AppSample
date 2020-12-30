@@ -3,6 +3,7 @@ package com.example.appsample.framework.datasource.cache.mappers
 import com.example.appsample.business.data.models.PostEntity
 import com.example.appsample.business.data.util.EntityMapper
 import com.example.appsample.framework.datasource.cache.model.PostCacheEntity
+import com.example.appsample.framework.utils.DataHelper
 import javax.inject.Inject
 
 /**
@@ -34,8 +35,8 @@ constructor() : EntityMapper<PostEntity, PostCacheEntity> {
             user_id = entity.userId ?: 0,
             title = entity.title ?: "NULL",
             body = entity.body ?: "NULL",
-            updated_at = "NOW",
-            created_at = "NOW" // TODO: FIX
+            DataHelper.getData(),
+            DataHelper.getData()
         )
     }
 

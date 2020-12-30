@@ -40,8 +40,12 @@ class AlbumsRepositoryImpl @Inject constructor(
 
         if (resourceList is Resource.Success) {
             resourceList.data?.forEach { album ->
-                album.id?.run {  // explanation why we sending hardcoded 1 in photoRepository
+                album.id?.run {
                     val commentsPostResponse = photoRepository.getPhotoById(this, 1)
+                    /**
+                     * @see PostsRepositoryImpl
+                     * explanation why we sending hardcoded 1
+                     */
 
                     if (commentsPostResponse is Resource.Success) {
                         album.firstPhoto = commentsPostResponse.data

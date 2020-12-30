@@ -38,6 +38,9 @@ class UserRepositoryTest {
     private val networkApi: JsonPlaceholderApiSource = mockk()
     private val userCacheDataSource: UserCacheDataSource = mockk()
 
+
+    val userId = 1L
+
     init {
         userRepository = UserRepositoryImpl(
             mainDispatcher = mainCoroutineRule.testDispatcher,
@@ -45,10 +48,9 @@ class UserRepositoryTest {
             jsonPlaceholderApiSource = networkApi
         )
 
-
         coEvery {
             userCacheDataSource.insertUser(any())
-        } returns 1L // TODO: rework and add to tests logic
+        } returns userId
     }
 
     @Test
@@ -74,19 +76,18 @@ class UserRepositoryTest {
     @Test
     fun `getUser Error passes through repository`() = runBlockingTest {
 
-        val userId = 1
 
         val exception: Exception = Exception("Any")
 
         coEvery {
-            networkApi.getUserAsync(userId).await()
+            networkApi.getUserAsync(userId.toInt()).await()
         } throws exception
 
         coEvery {
             userCacheDataSource.searchUserById(any())
         } throws exception
 
-        val repositoryValue = userRepository.getUser(userId).first()
+        val repositoryValue = userRepository.getUser(userId.toInt()).first()
 
         Assertions.assertThat((repositoryValue as Resource.Error).exception).isInstanceOf(exception::class.java)
         Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)

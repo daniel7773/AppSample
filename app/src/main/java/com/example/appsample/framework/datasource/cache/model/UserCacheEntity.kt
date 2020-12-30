@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "user")
 data class UserCacheEntity(
 
-    @PrimaryKey(autoGenerate = false) // TODO: fix syncing
+    @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "id")
     var id: Int,
 

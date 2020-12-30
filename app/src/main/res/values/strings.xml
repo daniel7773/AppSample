@@ -17,6 +17,7 @@
 
     <!-- -->
     <string name="albums">Альбомы</string>
+    <string name="album">Альбом</string>
     <string name="photos_number">%d фотографий</string>
 
 
@@ -48,6 +49,9 @@
     <string name="passwords_not_match">Пароли не совпадают</string>
     <string name="some_error_during_registration">Возникла какая-то ошибка при регистрации</string>
 
+    <!-- Profile Fragment details -->
+    <string name="album_id_null">Ошибка, id Альбома почему-то NULL</string>
+    <string name="post_id_null">Ошибка, id Поста почему-то NULL</string>
 
 
 

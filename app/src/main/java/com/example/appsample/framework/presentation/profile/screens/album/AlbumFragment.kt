@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentAlbumBinding
@@ -18,9 +19,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
-const val ALBUM_ID: String = "ALBUM_ID"
-const val ALBUM_TITLE: String = "ALBUM_TITLE"
-
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -28,6 +26,8 @@ class AlbumFragment @Inject
 constructor(
     private val albumViewModelFactory: AlbumViewModelFactory
 ) : BaseFragment(R.layout.fragment_album) {
+
+    private val args: AlbumFragmentArgs by navArgs()
 
     private var _binding: FragmentAlbumBinding? = null
     private val binding: FragmentAlbumBinding get() = _binding!!
@@ -53,8 +53,8 @@ constructor(
         savedInstanceState: Bundle?
     ): View {
 
-        val albumId = arguments?.getInt(ALBUM_ID) ?: 1
-        val albumTitle = arguments?.getString(ALBUM_TITLE) ?: "AlbumTitle"
+        val albumId = args.albumId
+        val albumTitle = args.albumTitle
 
         _binding = FragmentAlbumBinding.inflate(inflater, container, false).also {
             it.viewModel = viewModel
@@ -67,13 +67,11 @@ constructor(
             addItemDecoration(GridMarginDecoration(2))
         }
 
-        // will be called only once, we consider postId should not be null in ViewModel after setting once
+        // will be called only once, since we consider postId should not be null in ViewModel after setting once
         if (viewModel.isAlbumIdNull()) {
             viewModel.setAlbumId(albumId)
             viewModel.searchPhotos()
         }
         return binding.root
     }
-
-
 }

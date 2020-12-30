@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentPostBinding
 import com.example.appsample.framework.base.presentation.BaseFragment
@@ -15,8 +16,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
-const val POST_ID: String = "POST_ID"
-
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -24,6 +23,8 @@ class PostFragment @Inject
 constructor(
     private val postViewModelFactory: PostViewModelFactory
 ) : BaseFragment(R.layout.fragment_post) {
+
+    private val args: PostFragmentArgs by navArgs()
 
     private var _binding: FragmentPostBinding? = null
     private val binding: FragmentPostBinding get() = _binding!!
@@ -38,7 +39,7 @@ constructor(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val postId = arguments?.getInt(POST_ID)
+        val postId = args.postId
 
         _binding = FragmentPostBinding.inflate(inflater, container, false).also {
             it.viewModel = viewModel
@@ -46,8 +47,8 @@ constructor(
         }
         _binding!!.recyclerView.adapter = PostAdapter()
 
-        // will be called only once, we consider postId should not be null in ViewModel after setting once
-        if (viewModel.isPostIdNull() && postId != null) {
+        // will be called only once, since we consider postId should not be null in ViewModel after setting once
+        if (viewModel.isPostIdNull()) {
             viewModel.setPostId(postId)
             viewModel.startSearch()
         }

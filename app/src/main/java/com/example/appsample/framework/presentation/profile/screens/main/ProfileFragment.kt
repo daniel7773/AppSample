@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.os.bundleOf
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentProfileBinding
@@ -17,9 +17,8 @@ import com.example.appsample.framework.presentation.profile.di.factories.viewmod
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.ProfileViewModelFactory
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
-import com.example.appsample.framework.presentation.profile.screens.album.ALBUM_ID
-import com.example.appsample.framework.presentation.profile.screens.album.ALBUM_TITLE
-import com.example.appsample.framework.presentation.profile.screens.post.POST_ID
+import com.example.appsample.framework.presentation.profile.screens.album.AlbumFragmentArgs
+import com.example.appsample.framework.presentation.profile.screens.post.PostFragmentArgs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -44,19 +43,29 @@ constructor(
 
     private val goToAlbumFragment: ((ImageView, AlbumModel, Int) -> Unit) =
         { _, albumModel, _ ->
-            val bundle = bundleOf(ALBUM_ID to albumModel.id, ALBUM_TITLE to albumModel.title)
+            val albumId = albumModel.id
+            val albumTitle = albumModel.title ?: getString(R.string.album)
 
-            mainNavController.navController()
-                .navigate(R.id.action_profileFragment_to_albumFragment, bundle)
+            if (albumId != null) {
+                val args = AlbumFragmentArgs(albumId, albumTitle).toBundle()
+                mainNavController.navController()
+                    .navigate(R.id.action_profileFragment_to_albumFragment, args)
+            } else {
+                Toast.makeText(requireContext(), R.string.album_id_null, Toast.LENGTH_SHORT).show()
+            }
         }
 
     private val goToPostFragment: ((PostModel) -> Unit) =
         { postModel ->
-            Log.d(TAG, "goToPostFragment called")
-            val bundle = bundleOf(POST_ID to postModel.id)
+            val postId = postModel.id
 
-            mainNavController.navController()
-                .navigate(R.id.action_profileFragment_to_postFragment, bundle)
+            if (postId != null) {
+                val args = PostFragmentArgs(postId).toBundle()
+                mainNavController.navController()
+                    .navigate(R.id.action_profileFragment_to_postFragment, args)
+            } else {
+                Toast.makeText(requireContext(), R.string.post_id_null, Toast.LENGTH_SHORT).show()
+            }
         }
 
     override fun onAttach(context: Context) {

@@ -16,7 +16,7 @@ import javax.inject.Inject
 class PhotoRepositoryImpl @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
     private val photoCacheDataSource: PhotoCacheDataSource,
-    private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
+    private val jsonPlaceholderApiSource: JsonPlaceholderApiSource
 ) : PhotoRepository {
 
     override suspend fun getAlbumPhotoList(albumId: Int): Flow<Resource<List<Photo>?>> {
