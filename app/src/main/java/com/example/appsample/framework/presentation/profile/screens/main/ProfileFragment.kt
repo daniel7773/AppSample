@@ -41,32 +41,30 @@ constructor(
 
     private lateinit var mainNavController: MainNavController
 
-    private val goToAlbumFragment: ((ImageView, AlbumModel, Int) -> Unit) =
-        { _, albumModel, _ ->
-            val albumId = albumModel.id
-            val albumTitle = albumModel.title ?: getString(R.string.album)
+    private val goToAlbumFragment: ((ImageView, AlbumModel, Int) -> Unit) = { _, albumModel, _ ->
+        val albumId = albumModel.id
+        val albumTitle = albumModel.title ?: getString(R.string.album)
 
-            if (albumId != null) {
-                val args = AlbumFragmentArgs(albumId, albumTitle).toBundle()
-                mainNavController.navController()
-                    .navigate(R.id.action_profileFragment_to_albumFragment, args)
-            } else {
-                Toast.makeText(requireContext(), R.string.album_id_null, Toast.LENGTH_SHORT).show()
-            }
+        if (albumId != null) {
+            val args = AlbumFragmentArgs(albumId, albumTitle).toBundle()
+            mainNavController.navController()
+                .navigate(R.id.action_profileFragment_to_albumFragment, args)
+        } else {
+            Toast.makeText(requireContext(), R.string.album_id_null, Toast.LENGTH_SHORT).show()
         }
+    }
 
-    private val goToPostFragment: ((PostModel) -> Unit) =
-        { postModel ->
-            val postId = postModel.id
+    private val goToPostFragment: ((PostModel) -> Unit) = { postModel ->
+        val postId = postModel.id
 
-            if (postId != null) {
-                val args = PostFragmentArgs(postId).toBundle()
-                mainNavController.navController()
-                    .navigate(R.id.action_profileFragment_to_postFragment, args)
-            } else {
-                Toast.makeText(requireContext(), R.string.post_id_null, Toast.LENGTH_SHORT).show()
-            }
+        if (postId != null) {
+            val args = PostFragmentArgs(postId).toBundle()
+            mainNavController.navController()
+                .navigate(R.id.action_profileFragment_to_postFragment, args)
+        } else {
+            Toast.makeText(requireContext(), R.string.post_id_null, Toast.LENGTH_SHORT).show()
         }
+    }
 
     override fun onAttach(context: Context) {
         try {
