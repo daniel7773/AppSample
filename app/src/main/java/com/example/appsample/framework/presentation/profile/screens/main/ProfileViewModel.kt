@@ -31,6 +31,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import javax.inject.Named
 
 private const val USER_ID_KEY = "userId"
 
@@ -38,6 +39,7 @@ private const val USER_ID_KEY = "userId"
 @ExperimentalCoroutinesApi
 class ProfileViewModel constructor( // I suppose it is better to use database instead of SavedStateHandle for complex data
     private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostListUseCase: GetPostListUseCase,
     private val getUserUseCase: GetUserUseCase,
@@ -76,7 +78,9 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
             supervisorScope {
                 launch(CoroutineExceptionHandler { _, throwable ->
                     user = getError(throwable)
-                }) { searchUser() }
+                }) {
+                    searchUser()
+                }
 
                 launch(CoroutineExceptionHandler { _, throwable ->
                     postList = getError(throwable)
@@ -95,6 +99,7 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     )
 
     private suspend fun searchUser() {
+        Log.d("DISPATCHER_DEBUG", "searchUser called : ${Thread.currentThread()}")
         user = Loading("init Loading")
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
@@ -121,26 +126,29 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
 
     private suspend fun searchPostList() {
         Log.d("ProfileViewModel", "searchPostList called")
+        Log.d("DISPATCHER_DEBUG", "searchPostList called : ${Thread.currentThread()}")
         postList = Loading("init Loading")
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
 
-        when (val response = getPostListUseCase.getPostList(userId.value!!)) {
+        getPostListUseCase.getPostList(userId.value!!).collect { response ->
 
-            is Resource.Success -> {
-                Log.d(TAG, "postList came, size: ${response.data!!.size}")
-                // force unwrap because null values must be handled earlier
-                val postModelList = PostToPostModelMapper.mapList(response.data)
+            when (response) {
+                is Resource.Success -> {
+                    Log.d(TAG, "postList came, size: ${response.data!!.size}")
+                    // force unwrap because null values must be handled earlier
+                    val postModelList = PostToPostModelMapper.mapList(response.data)
 
-                this.postList = Success(postModelList, "Successfully got data in VM")
-            }
-            is Resource.Error -> {
-                Log.e(TAG, "getPostList error ${response.exception.localizedMessage}")
-                postList = Error(response.message.toString(), response.exception)
-            }
-            else -> {
-                postList = Loading("init Loading")
+                    this.postList = Success(postModelList, "Successfully got data in VM")
+                }
+                is Resource.Error -> {
+                    Log.e(TAG, "getPostList error ${response.exception.localizedMessage}")
+                    postList = Error(response.message.toString(), response.exception)
+                }
+                else -> {
+                    postList = Loading("init Loading")
+                }
             }
         }
 
@@ -152,27 +160,28 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
         if (userId.value == null) {
             throw java.lang.Exception("User id cant be NULL")
         }
+        Log.d("DISPATCHER_DEBUG", "searchAlbumList called : ${Thread.currentThread()}")
+        getAlbumListUseCase.getAlbumList(userId.value!!).collect { response ->
+            when (response) {
+                is Resource.Success -> {
+                    Log.d(TAG, "albumList size ${response.data?.size}")
+                    // force unwrap because null values must be handled earlier
+                    val albums = AlbumToAlbumModelMapper.map(response.data!!)
 
-        when (val response = getAlbumListUseCase.getAlbumList(userId.value!!)) {
-
-            is Resource.Success -> {
-                Log.d(TAG, "albumList size ${response.data?.size}")
-                // force unwrap because null values must be handled earlier
-                val albums = AlbumToAlbumModelMapper.map(response.data!!)
-
-                albumList = Success(albums, "Successfully got data in VM")
+                    albumList = Success(albums, "Successfully got data in VM")
+                }
+                is Resource.Error -> {
+                    Log.e(TAG, "getAlbumList error ${response.exception.localizedMessage}")
+                    albumList = Error(response.message.toString(), response.exception)
+                }
+                else -> {
+                    albumList = Loading("init Loading")
+                }
             }
-            is Resource.Error -> {
-                Log.e(TAG, "getAlbumList error ${response.exception.localizedMessage}")
-                albumList = Error(response.message.toString(), response.exception)
-            }
-            else -> {
-                albumList = Loading("init Loading")
-            }
+            refreshData()
         }
-
-        refreshData()
     }
+
 
     private fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _adapterItems.value = ProfileTransformator.transform(user, albumList, postList)

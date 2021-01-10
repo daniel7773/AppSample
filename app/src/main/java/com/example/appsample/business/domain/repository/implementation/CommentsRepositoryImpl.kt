@@ -12,28 +12,31 @@ import com.example.appsample.business.domain.repository.abstraction.CommentsRepo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Named
 
 class CommentsRepositoryImpl @Inject constructor(
-    private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val commentCacheDataSource: CommentCacheDataSource,
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource
 ) : CommentsRepository {
 
+    private val TAG = "CommentsRepositoryImpl"
+
     override suspend fun getCommentList(postId: Int): Flow<Resource<List<Comment>?>> {
 
         return object : NetworkBoundResource<List<CommentEntity>, List<Comment>>(
-            mainDispatcher,
             { commentCacheDataSource.getAllComments(postId) },
             { jsonPlaceholderApiSource.getCommentListByPostIdAsync(postId).await() },
         ) {
             override suspend fun updateCache(entity: List<CommentEntity>) {
-                Log.d("Asdasddwc", "updateCache called for commentList with size: ${entity.size}")
+                Log.d(TAG, "updateCache called for commentList with size: ${entity.size}")
                 commentCacheDataSource.insertCommentList(entity)
                 // TODO: call WorkManager
             }
 
-            // TODO: Set any logical solution here
-            override suspend fun shouldFetch(entity: List<Comment>?) = true
+            // TODO: Set any logical solution here, now it is fake condition here since it's sample,
+            //  we know each post got 5 comments on server
+            override suspend fun shouldFetch(entity: List<Comment>?) = entity?.size != 5
             override suspend fun map(entity: List<CommentEntity>) =
                 CommentEntityToCommentMapper.map(entity)
         }.result
@@ -42,18 +45,18 @@ class CommentsRepositoryImpl @Inject constructor(
     override suspend fun getCommentsNum(postId: Int): Resource<Int?> {
 
         return object : NetworkBoundResource<List<CommentEntity>, Int>(
-            mainDispatcher,
             { commentCacheDataSource.getAllComments(postId) },
             { jsonPlaceholderApiSource.getCommentListByPostIdAsync(postId).await() },
         ) {
             override suspend fun updateCache(entity: List<CommentEntity>) {
-                Log.d("Asdasddwc", "updateCache called for commentList with size: ${entity.size}")
+                Log.d(TAG, "updateCache called for commentList with size: ${entity.size}")
                 commentCacheDataSource.insertCommentList(entity)
                 // TODO: call WorkManager
             }
 
-            // TODO: Set any logical solution here
-            override suspend fun shouldFetch(entity: Int?): Boolean = true
+            // TODO: Set any logical solution here, now it is fake condition here since it's sample,
+            //  we know each post got 5 comments on server
+            override suspend fun shouldFetch(entity: Int?): Boolean = entity != 5
             override suspend fun map(entity: List<CommentEntity>) = entity.size
         }.resultSuspend()
     }

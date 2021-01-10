@@ -11,49 +11,64 @@ import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.withContext
+import java.util.concurrent.*
 import javax.inject.Inject
+import javax.inject.Named
 
 class AlbumsRepositoryImpl @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val albumCacheDataSource: AlbumCacheDataSource,
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource,
     private val photoRepository: PhotoRepository
 ) : AlbumsRepository {
 
-    override suspend fun getAlbumList(userId: Int): Resource<List<Album>?> {
-        val resourceList = object : NetworkBoundResource<List<AlbumEntity>, List<Album>>(
-            mainDispatcher,
+    private val TAG = "AlbumsRepositoryImpl"
+
+    override suspend fun getAlbumList(userId: Int): Flow<Resource<List<Album>?>> {
+        return object : NetworkBoundResource<List<AlbumEntity>, List<Album>>(
             { albumCacheDataSource.getAllAlbums(userId) },
             { jsonPlaceholderApiSource.getAlbumsFromUserAsync(userId).await() },
         ) {
             override suspend fun updateCache(entity: List<AlbumEntity>) {
-                Log.d("Asdasddwc", "updateCache called for albumList with size: ${entity.size}")
+                Log.d(TAG, "updateCache called for albumList with size: ${entity.size}")
                 albumCacheDataSource.insertAlbumList(entity)
                 // TODO: call WorkManager
             }
 
-            // TODO: Set any logical solution here
-            override suspend fun shouldFetch(entity: List<Album>?) = true
+            // TODO: Set any logical solution here, now it is fake condition here since it's sample,
+            //  we know each user got 10 albums on server
+            override suspend fun shouldFetch(entity: List<Album>?) = entity?.size != 10
             override suspend fun map(entity: List<AlbumEntity>) =
                 AlbumEntityToAlbumMapper.mapList(entity)
-        }.resultSuspend()
+        }.result.transform { albumListResource ->
+            if (albumListResource is Resource.Success) {
 
-        if (resourceList is Resource.Success) {
-            resourceList.data?.forEach { album ->
-                album.id?.run {
-                    val commentsPostResponse = photoRepository.getPhotoById(this, 1)
-                    /**
-                     * @see PostsRepositoryImpl
-                     * explanation why we sending hardcoded 1
-                     */
+                albumListResource.data!!.forEach { album ->
+                    Log.d("KAKBYTAKBY", "loading next photo")
+                    album.id?.run {
+                        val photoFlow = withContext(ioDispatcher) {
+                            photoRepository.getPhotoById(this@run, 1)
+                        }
+                        /**
+                         * @see PhotoRepositoryImpl getPhotoById()
+                         * explanation why we sending hardcoded 1
+                         */
 
-                    if (commentsPostResponse is Resource.Success) {
-                        album.firstPhoto = commentsPostResponse.data
+                        photoFlow.collect { photoResource ->
+                            if (photoResource is Resource.Success) {
+                                album.firstPhoto = photoResource.data
+                            }
+                        }
                     }
                 }
             }
+            emit(albumListResource)
         }
-        return resourceList
     }
 
 }

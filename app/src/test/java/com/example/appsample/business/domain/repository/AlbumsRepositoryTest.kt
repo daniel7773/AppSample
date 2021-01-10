@@ -19,6 +19,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -44,6 +46,7 @@ class AlbumsRepositoryTest {
     init {
         albumsRepository = AlbumsRepositoryImpl(
             mainDispatcher = mainCoroutineRule.testDispatcher,
+            ioDispatcher = mainCoroutineRule.testDispatcher,
             albumCacheDataSource = albumCacheDataSource,
             jsonPlaceholderApiSource = networkApi,
             photoRepository = photoRepository
@@ -74,13 +77,13 @@ class AlbumsRepositoryTest {
 
         coEvery {
             photoRepository.getPhotoById(any(), any())
-        } returns Resource.Success(Photo(), "mocked data")
+        } returns flowOf(Resource.Success(Photo(), "mocked data"))
 
         val networkValue = networkApi.getAlbumsFromUserAsync(userId).await()
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
         Assertions.assertThat(AlbumEntityToAlbumMapper.mapList(networkValue!!).size)
-            .isEqualTo((repositoryValue as Resource.Success).data!!.size)
+            .isEqualTo((repositoryValue.first() as Resource.Success).data!!.size)
     }
 
     @Test
@@ -95,9 +98,9 @@ class AlbumsRepositoryTest {
 
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
-        Assertions.assertThat((repositoryValue as Resource.Error).exception).isInstanceOf(exception::class.java)
-        Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
+        Assertions.assertThat((repositoryValue.first() as Resource.Error).exception).isInstanceOf(exception::class.java)
+        Assertions.assertThat(exception.message).isEqualTo((repositoryValue.first() as Resource.Error).exception.message)
         Assertions.assertThat(exception.localizedMessage)
-            .isEqualTo(repositoryValue.exception.localizedMessage)
+            .isEqualTo((repositoryValue.first() as Resource.Error).exception.localizedMessage)
     }
 }

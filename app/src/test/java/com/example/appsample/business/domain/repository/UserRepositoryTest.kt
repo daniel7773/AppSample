@@ -43,7 +43,7 @@ class UserRepositoryTest {
 
     init {
         userRepository = UserRepositoryImpl(
-            mainDispatcher = mainCoroutineRule.testDispatcher,
+            ioDispatcher = mainCoroutineRule.testDispatcher,
             userCacheDataSource = userCacheDataSource,
             jsonPlaceholderApiSource = networkApi
         )

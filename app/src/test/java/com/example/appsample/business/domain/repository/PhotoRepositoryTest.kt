@@ -43,7 +43,7 @@ class PhotoRepositoryTest {
 
     init {
         photoRepository = PhotoRepositoryImpl(
-            mainDispatcher = mainCoroutineRule.testDispatcher,
+            ioDispatcher = mainCoroutineRule.testDispatcher,
             photoCacheDataSource = photoCacheDataSource,
             jsonPlaceholderApiSource = networkApi
         )
@@ -79,7 +79,7 @@ class PhotoRepositoryTest {
             val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
 
             Assertions.assertThat(PhotoEntityToPhotoMapper.mapPhoto(networkValue!!))
-                .isEqualTo((repositoryValue as Resource.Success).data)
+                .isEqualTo((repositoryValue.first() as Resource.Success).data)
         }
 
         @Test
@@ -99,10 +99,10 @@ class PhotoRepositoryTest {
 
             val repositoryValue = photoRepository.getPhotoById(albumId, photoId)
 
-            Assertions.assertThat((repositoryValue as Resource.Error).exception).isInstanceOf(exception::class.java)
-            Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
+            Assertions.assertThat((repositoryValue.first() as Resource.Error).exception).isInstanceOf(exception::class.java)
+            Assertions.assertThat(exception.message).isEqualTo((repositoryValue.first() as Resource.Error).exception.message)
             Assertions.assertThat(exception.localizedMessage)
-                .isEqualTo(repositoryValue.exception.localizedMessage)
+                .isEqualTo((repositoryValue.first() as Resource.Error).exception.localizedMessage)
         }
     }
 

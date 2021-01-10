@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.appsample"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -92,7 +92,7 @@ dependencies {
      *   https://developer.android.com/codelabs/kotlin-coroutines#2
      */
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
 
     /**
      *   For retrofit with coroutines

@@ -52,7 +52,8 @@ class ProfileViewModelTest {
         every { savedStateHandle.set<Any>(any(), any()) } returns Unit
 
         profileViewModel = ProfileViewModel(
-            mainCoroutineRule.testDispatcher,
+            mainDispatcher = mainCoroutineRule.testDispatcher,
+            ioDispatcher = mainCoroutineRule.testDispatcher,
             sessionManager,
             getPostListUseCase,
             getUserUseCase,
@@ -114,7 +115,7 @@ class ProfileViewModelTest {
 
                 coEvery {
                     getAlbumListUseCase.getAlbumList(any())
-                } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfAlbums(4))
+                } returns flowOf(DataFactory.provideResourceSuccess(DataFactory.produceListOfAlbums(4)))
 
                 // When
                 profileViewModel.startSearch()
@@ -134,7 +135,7 @@ class ProfileViewModelTest {
                     DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
                 coEvery {
                     getAlbumListUseCase.getAlbumList(any())
-                } returns resourceError
+                } returns flowOf(resourceError)
 
                 // When
                 profileViewModel.startSearch()
@@ -156,7 +157,7 @@ class ProfileViewModelTest {
                 val exception = Exception("My exception")
                 coEvery {
                     getPostListUseCase.getPostList(any())
-                } returns DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4))
+                } returns flowOf(DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4)))
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
                 } returns flowOf(Resource.Success(emptyList<Comment>(), ""))
@@ -178,7 +179,7 @@ class ProfileViewModelTest {
                     DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
                 coEvery {
                     getPostListUseCase.getPostList(any())
-                } returns resourceError
+                } returns flowOf(resourceError)
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
                 } returns flowOf(Resource.Success(emptyList<Comment>(), ""))

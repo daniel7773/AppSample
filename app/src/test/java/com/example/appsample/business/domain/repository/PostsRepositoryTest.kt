@@ -13,6 +13,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -55,7 +56,7 @@ class PostsRepositoryTest {
 
 
         postsRepository = PostsRepositoryImpl(
-            mainDispatcher = mainCoroutineRule.testDispatcher,
+            ioDispatcher = mainCoroutineRule.testDispatcher,
             postCacheDataSource = postCacheDataSource,
             jsonPlaceholderApiSource = networkApi,
             commentsRepository = commentsRepository
@@ -71,6 +72,10 @@ class PostsRepositoryTest {
         } returns DataFactory.produceListOfPostsEntity(3)
 
         coEvery {
+            postCacheDataSource.getAllPosts(userId)
+        } returns DataFactory.produceListOfPostsEntity(3)
+
+        coEvery {
             commentsRepository.getCommentsNum(any())
         } returns Resource.Success(10, "mocked data")
 
@@ -78,7 +83,7 @@ class PostsRepositoryTest {
         val repositoryValue = postsRepository.getPostsList(userId)
 
         Assertions.assertThat(PostEntityToPostMapper.mapList(networkValue!!).size)
-            .isEqualTo((repositoryValue as Resource.Success).data!!.size)
+            .isEqualTo((repositoryValue.first() as Resource.Success).data!!.size)
     }
 
     @Test
@@ -91,12 +96,14 @@ class PostsRepositoryTest {
             networkApi.getPostsListFromUserAsync(userId).await()
         } throws exception
 
+        coEvery { postCacheDataSource.getAllPosts(userId) } throws exception
+
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat((repositoryValue as Resource.Error).exception)
+        Assertions.assertThat((repositoryValue.first() as Resource.Error).exception)
             .isInstanceOf(exception::class.java)
-        Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
+        Assertions.assertThat(exception.message).isEqualTo((repositoryValue.first() as Resource.Error).exception.message)
         Assertions.assertThat(exception.localizedMessage)
-            .isEqualTo(repositoryValue.exception.localizedMessage)
+            .isEqualTo((repositoryValue.first() as Resource.Error).exception.localizedMessage)
     }
 }

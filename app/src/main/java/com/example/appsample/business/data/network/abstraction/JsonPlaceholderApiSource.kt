@@ -10,11 +10,6 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-const val GET_USER_TIMEOUT = 15000L
-const val GET_ALBUMS_TIMEOUT = 25000L
-const val GET_POSTS_TIMEOUT = 25000L
-const val GET_POST_TIMEOUT = 15000L
-
 interface JsonPlaceholderApiSource {
 
     @GET("users/{id}")

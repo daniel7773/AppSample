@@ -17,6 +17,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 
 const val BASE_URL = "https://jsonplaceholder.typicode.com"
 
@@ -66,13 +67,13 @@ object AuthModule {
 
     @AuthFragmentScope
     @Provides
-    fun provideJsonPlaceholderRepository(
-        coroutineDispatcher: CoroutineDispatcher,
+    fun provideUserRepository(
+        @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         userCacheDataSource: UserCacheDataSource
     ): UserRepository {
         return UserRepositoryImpl(
-            mainDispatcher = coroutineDispatcher,
+            ioDispatcher,
             userCacheDataSource,
             jsonPlaceholderApiSource
         )

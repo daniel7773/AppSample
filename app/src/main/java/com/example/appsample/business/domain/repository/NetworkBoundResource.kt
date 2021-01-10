@@ -1,21 +1,18 @@
 package com.example.appsample.business.domain.repository
 
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import retrofit2.HttpException
 
-const val GET_CACHE_TIMEOUT = 10000L
-const val GET_NETWORK_TIMEOUT = 25000L
+const val GET_CACHE_TIMEOUT = 35000L
+const val GET_NETWORK_TIMEOUT = 35000L
 
 abstract class NetworkBoundResource<EntityObj, ResultObj>
 constructor(
-    private val dispatcher: CoroutineDispatcher,
     private val cacheCall: suspend () -> EntityObj?,
     private val apiCall: suspend () -> EntityObj?
 ) {
@@ -34,7 +31,7 @@ constructor(
                 return@flow
             }
         }
-        val apiResult = safeApiCall(apiCall, dispatcher)
+        val apiResult = safeApiCall(apiCall)
 
         emit(apiResult)
     }
@@ -53,7 +50,7 @@ constructor(
                 return cache
             }
         }
-        val apiResult = safeApiCall(apiCall, dispatcher)
+        val apiResult = safeApiCall(apiCall)
 
         return apiResult
     }
@@ -64,38 +61,35 @@ constructor(
      * function for getting abstract data from server and calling cache update
      */
     suspend fun safeApiCall(
-        apiCall: suspend () -> EntityObj?,
-        dispatcher: CoroutineDispatcher
+        apiCall: suspend () -> EntityObj?
     ): Resource<ResultObj?> {
-        return withContext(dispatcher) {
-            try {
-                withTimeout(GET_NETWORK_TIMEOUT) {
-                    val apiResult: EntityObj? = apiCall.invoke()
+        try {
+            return withTimeout(GET_NETWORK_TIMEOUT) {
+                val apiResult: EntityObj? = apiCall.invoke()
 
-                    return@withTimeout if (apiResult == null) {
-                        Resource.Error("NULL came from api", NullPointerException())
-                    } else {
-                        val success = map(apiResult)
-                        updateCache(apiResult)
-                        joinAll()
-                        Resource.Success(success, "Success")
-                    }
+                if (apiResult == null) {
+                    Resource.Error("NULL came from api", NullPointerException())
+                } else {
+                    val success = map(apiResult)
+                    updateCache(apiResult)
+                    joinAll()
+                    Resource.Success(success, "Success")
                 }
-            } catch (e: Exception) {
-                if (e !is CancellationException) {
-                    e.printStackTrace()
+            }
+        } catch (e: Exception) {
+            if (e !is CancellationException) {
+                e.printStackTrace()
+            }
+            return when (e) {
+                is TimeoutCancellationException -> {
+                    Resource.Error("NETWORK_ERROR_TIMEOUT", e)
                 }
-                when (e) {
-                    is TimeoutCancellationException -> {
-                        Resource.Error("NETWORK_ERROR_TIMEOUT", e)
-                    }
-                    is HttpException -> {
-                        val code = e.code()
-                        Resource.Error("Error code: ${code}", e)
-                    }
-                    else -> {
-                        Resource.Error("Unknown Error", e)
-                    }
+                is HttpException -> {
+                    val code = e.code()
+                    Resource.Error("Error code: ${code}", e)
+                }
+                else -> {
+                    Resource.Error("Unknown Error", e)
                 }
             }
         }
@@ -107,7 +101,8 @@ constructor(
      * function for getting abstract data from database
      */
     private suspend fun returnCache(): Resource<ResultObj?> {
-        val cacheResult: EntityObj?
+        var cacheResult: EntityObj? = null
+
         try {
             cacheResult = withTimeout(GET_CACHE_TIMEOUT) {
                 return@withTimeout cacheCall.invoke()

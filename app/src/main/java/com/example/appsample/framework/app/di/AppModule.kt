@@ -31,6 +31,11 @@ object AppModule {
     @Provides
     fun provideMainDispatcher() = Dispatchers.Main as CoroutineDispatcher
 
+    @Singleton
+    @Provides
+    @Named("DispatcherIO")
+    fun provideIODispatcher() = Dispatchers.IO
+
     @JvmStatic
     @Singleton
     @Provides

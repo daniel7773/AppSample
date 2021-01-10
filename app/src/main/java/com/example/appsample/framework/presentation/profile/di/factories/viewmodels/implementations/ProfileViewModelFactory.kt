@@ -11,12 +11,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
+import javax.inject.Named
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class ProfileViewModelFactory @ExperimentalCoroutinesApi
 @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val getPostListUseCase: GetPostListUseCase,
     private val getUserUseCase: GetUserUseCase,
@@ -25,6 +27,7 @@ class ProfileViewModelFactory @ExperimentalCoroutinesApi
     override fun create(handle: SavedStateHandle): ProfileViewModel {
         return ProfileViewModel(
             mainDispatcher,
+            ioDispatcher,
             sessionManager,
             getPostListUseCase,
             getUserUseCase,

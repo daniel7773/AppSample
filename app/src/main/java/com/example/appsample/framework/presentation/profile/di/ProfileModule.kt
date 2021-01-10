@@ -64,6 +64,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -151,12 +152,12 @@ object ProfileModule {
     @ProfileFragmentScope
     @Provides
     fun provideJsonPlaceholderRepository(
-        coroutineDispatcher: CoroutineDispatcher,
+        @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         userCacheDataSource: UserCacheDataSource
     ): UserRepository {
         return UserRepositoryImpl(
-            coroutineDispatcher,
+            ioDispatcher,
             userCacheDataSource,
             jsonPlaceholderApiSource
         )
@@ -171,13 +172,13 @@ object ProfileModule {
     @ProfileFragmentScope
     @Provides
     fun providePostsRepository(
-        coroutineDispatcher: CoroutineDispatcher,
+        @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         postCacheDataSource: PostCacheDataSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         commentsRepository: CommentsRepository
     ): PostsRepository {
         return PostsRepositoryImpl(
-            coroutineDispatcher,
+            ioDispatcher,
             postCacheDataSource,
             jsonPlaceholderApiSource,
             commentsRepository
@@ -239,13 +240,15 @@ object ProfileModule {
     @ProfileFragmentScope
     @Provides
     fun provideAlbumsRepository(
-        coroutineDispatcher: CoroutineDispatcher,
+        @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
+        mainDispatcher: CoroutineDispatcher,
         albumCacheDataSource: AlbumCacheDataSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         photoRepository: PhotoRepository
     ): AlbumsRepository {
         return AlbumsRepositoryImpl(
-            coroutineDispatcher,
+            mainDispatcher,
+            ioDispatcher,
             albumCacheDataSource,
             jsonPlaceholderApiSource,
             photoRepository
@@ -300,12 +303,12 @@ object ProfileModule {
     @ProfileFragmentScope
     @Provides
     fun providePhotoRepository(
-        coroutineDispatcher: CoroutineDispatcher,
+        @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         photoCacheDataSource: PhotoCacheDataSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource
     ): PhotoRepository {
         return PhotoRepositoryImpl(
-            coroutineDispatcher,
+            ioDispatcher,
             photoCacheDataSource,
             jsonPlaceholderApiSource
         )
@@ -359,12 +362,12 @@ object ProfileModule {
     @ProfileFragmentScope
     @Provides
     fun provideCommentsRepository(
-        coroutineDispatcher: CoroutineDispatcher,
+        @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         commentsCacheDataSource: CommentCacheDataSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource
     ): CommentsRepository {
         return CommentsRepositoryImpl(
-            coroutineDispatcher,
+            ioDispatcher,
             commentsCacheDataSource,
             jsonPlaceholderApiSource
         )
