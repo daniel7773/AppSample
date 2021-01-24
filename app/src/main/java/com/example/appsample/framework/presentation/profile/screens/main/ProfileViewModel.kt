@@ -11,6 +11,7 @@ import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.AdapterElement
 import com.example.appsample.framework.presentation.common.mappers.UserToUserModelMapper
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.State.Error
@@ -22,7 +23,6 @@ import com.example.appsample.framework.presentation.profile.mappers.AlbumToAlbum
 import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
-import com.example.appsample.framework.presentation.profile.model.ProfileElement
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.ProfileTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -51,10 +51,10 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     var postList: State<List<PostModel>?> = Unknown()
     var albumList: State<List<AlbumModel>?> = Unknown()
 
-    private val _adapterItems: MutableLiveData<Sequence<ProfileElement>> by lazy {
+    private val _adapterItems: MutableLiveData<Sequence<AdapterElement>> by lazy {
         MutableLiveData(emptySequence())
     }
-    val items: LiveData<Sequence<ProfileElement>> by lazy { _adapterItems }
+    val items: LiveData<Sequence<AdapterElement>> by lazy { _adapterItems }
 
     private val _isLoading by lazy { MutableLiveData(true) }
     val isLoading: LiveData<Boolean> by lazy { _isLoading }

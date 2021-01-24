@@ -1,15 +1,16 @@
 package com.example.appsample.framework.presentation.profile.screens.post.adapters
 
 import android.util.Log
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.AdapterElement
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.Divider
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.EmptySpace
 import com.example.appsample.framework.presentation.common.model.State
+import com.example.appsample.framework.presentation.profile.adapterelements.PostBodyElement
+import com.example.appsample.framework.presentation.profile.adapterelements.PostCommentElement
+import com.example.appsample.framework.presentation.profile.adapterelements.PostSourceElement
 import com.example.appsample.framework.presentation.profile.model.CommentModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
-import com.example.appsample.framework.presentation.profile.model.post.Divider
-import com.example.appsample.framework.presentation.profile.model.post.EmptySpace
-import com.example.appsample.framework.presentation.profile.model.post.PostBodyElement
-import com.example.appsample.framework.presentation.profile.model.post.PostCommentElement
-import com.example.appsample.framework.presentation.profile.model.post.PostElement
-import com.example.appsample.framework.presentation.profile.model.post.PostSourceElement
+
 
 object PostTransformator {
 
@@ -19,16 +20,16 @@ object PostTransformator {
     fun transform(
         post: State<PostModel?>,
         comments: State<List<CommentModel>?>
-    ) = emptySequence<PostElement>()
+    ) = emptySequence<AdapterElement>()
         .plus(Divider("divider_after_toolbar"))
         .plus(getPost(post))
         .plus(getCommentList(comments))
 
     fun getPost(postModel: State<PostModel?>) = when (postModel) {
         is State.Success -> {
-            if (postModel.data == null) emptySequence<PostElement>()
+            if (postModel.data == null) emptySequence<AdapterElement>()
             Log.d(TAG, "added success to userAdapterItem")
-            emptySequence<PostElement>()
+            emptySequence<AdapterElement>()
                 .plus(PostSourceElement(postModel.data!!))
                 .plus(Divider("divider_after_post_source"))
                 .plus(PostBodyElement(postModel.data!!))
@@ -36,22 +37,22 @@ object PostTransformator {
                 .plus(Divider("divider_after_post_body"))
         }
         else -> {
-            emptySequence<PostElement>()
+            emptySequence()
         }
     }
 
-    fun getCommentList(commentListState: State<List<CommentModel>?>): Sequence<PostElement> =
+    fun getCommentList(commentListState: State<List<CommentModel>?>): Sequence<AdapterElement> =
         when (commentListState) {
             is State.Success -> {
-                if (commentListState.data == null) emptySequence<PostElement>()
-                emptySequence<PostElement>()
+                if (commentListState.data == null) emptySequence<AdapterElement>()
+                emptySequence<AdapterElement>()
                     .plus(
                         commentListState.data!!.flatMap { commentModel ->
-                            emptySequence<PostElement>().plus(PostCommentElement(commentModel))
+                            emptySequence<AdapterElement>().plus(PostCommentElement(commentModel))
                         })
             }
             else -> {
-                emptySequence<PostElement>()
+                emptySequence()
             }
         }
 }

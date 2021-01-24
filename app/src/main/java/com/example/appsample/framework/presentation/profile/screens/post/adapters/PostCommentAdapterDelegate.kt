@@ -1,49 +1,31 @@
 package com.example.appsample.framework.presentation.profile.screens.post.adapters
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import android.util.Log
 import com.example.appsample.databinding.BlockPostCommentBinding
-import com.example.appsample.framework.presentation.profile.model.post.PostCommentElement
-import com.example.appsample.framework.presentation.profile.model.post.PostElement
-import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.ViewBindingDelegateAdapter
+import com.example.appsample.framework.presentation.profile.adapterelements.PostCommentElement
 
 
-@FlowPreview
-class PostCommentAdapterDelegate @ExperimentalCoroutinesApi constructor() :
-    AbsListItemAdapterDelegate<PostCommentElement, PostElement, PostCommentAdapterDelegate.ViewHolder>() {
-
-    @ExperimentalCoroutinesApi
-    override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
-        val blockPostCommentBinding =
-            BlockPostCommentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(blockPostCommentBinding)
-    }
-
-    override fun isForViewType(
-        item: PostElement,
-        items: MutableList<PostElement>,
-        position: Int
-    ): Boolean {
-        return item is PostCommentElement
-    }
-
-    override fun onBindViewHolder(
-        item: PostCommentElement,
-        holder: ViewHolder,
-        payloads: MutableList<Any>
+class PostCommentAdapterDelegate :
+    ViewBindingDelegateAdapter<PostCommentElement, BlockPostCommentBinding>(
+        BlockPostCommentBinding::inflate
     ) {
-        holder.bind(item)
+
+    override fun BlockPostCommentBinding.onBind(item: PostCommentElement) {
+        comment = item.comment
     }
 
-    class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: BlockPostCommentBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    override fun isForViewType(item: Any): Boolean = item is PostCommentElement
 
-        fun bind(item: PostCommentElement) {
-            binding.comment = item.comment
-        }
+    override fun PostCommentElement.getItemId(): Any = id
+
+    override fun BlockPostCommentBinding.onRecycled() {}
+
+    override fun BlockPostCommentBinding.onAttachedToWindow() {
+        Log.d(PostCommentAdapterDelegate::class.java.simpleName, "onAttachedToWindow")
+    }
+
+    override fun BlockPostCommentBinding.onDetachedFromWindow() {
+        Log.d(PostCommentAdapterDelegate::class.java.simpleName, "onDetachedFromWindow")
     }
 }
