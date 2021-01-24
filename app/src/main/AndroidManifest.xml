@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppSample">
         <activity android:name=".framework.app.ui.MainActivity"
-            android:windowSoftInputMode="stateHidden|adjustPan">  <!-- added this for button on registration stage 1 does not go up with keyboard -->
+            android:windowSoftInputMode="stateHidden|adjustPan">
+            <!-- added windowSoftInputMode for button on registration stage 1 does not go up with keyboard -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

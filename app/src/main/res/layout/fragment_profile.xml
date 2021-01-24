@@ -6,13 +6,16 @@
 
         <variable
             name="viewModel"
-            type="com.example.appsample.framework.presentation.profile.ProfileViewModel" />
+            type="com.example.appsample.framework.presentation.profile.screens.main.ProfileViewModel" />
 
     </data>
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:swipeRefreshLayoutProgressSpinnerBackgroundColor="@color/colorAccent"
+        app:refreshing="@{viewModel.isLoading}">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/profile_rv"
@@ -21,6 +24,6 @@
             app:items="@{viewModel.items}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </layout>

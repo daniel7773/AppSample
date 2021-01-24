@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs.kotlin'
 }
 
 android {
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.appsample"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -24,6 +25,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -33,6 +39,13 @@ android {
     }
     buildFeatures {
         dataBinding true
+    }
+    /**
+     *  for not getting error while testing livedata in ViewModel
+     *  Caused by: java.lang.RuntimeException: Method getMainLooper in android.os.Looper not mocked. See http://g.co/androidstudio/not-mocked for details.
+     */
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 
@@ -44,7 +57,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 
-
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-beta01'
     /**
      *   Dagger2
      *   https://github.com/google/dagger
@@ -78,8 +91,8 @@ dependencies {
      *   Coroutines
      *   https://developer.android.com/codelabs/kotlin-coroutines#2
      */
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
 
     /**
      *   For retrofit with coroutines
@@ -102,38 +115,47 @@ dependencies {
 
 
     /**
+     * Loading pictures
+     * https://github.com/square/picasso
+     */
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    /**
+     * Swiperefreshlayout
+     * https://developer.android.com/jetpack/androidx/releases/swiperefreshlayout?hl=ru
+     */
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
+
+    /**
+     * Room
+     * https://developer.android.com/reference/androidx/room/package-summary?hl=ru
+     */
+    implementation 'androidx.room:room-runtime:2.3.0-alpha04'
+    implementation 'androidx.room:room-ktx:2.3.0-alpha04'
+    kapt "androidx.room:room-compiler:2.3.0-alpha04"
+
+    /**
      * Unit test dependencies
      */
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.6.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
-    testImplementation 'io.mockk:mockk:1.10.2'
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation("junit:junit:4.13")
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.0"
+    /**
+     * Testing coroutines
+     * https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-test/index.html
+     */
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2'
 
-    // -------- INSTRUMENTATION TESTS (use JUnit4)
-    androidTestImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    /**
+     *  Mocking data https://mockk.io/
+     */
+    testImplementation "io.mockk:mockk:1.10.2"
 
-    // AndroidX test
-    def androidx_test_version = "1.1.0"
-    androidTestImplementation "androidx.test:core:$androidx_test_version"
-    androidTestImplementation "androidx.test:runner:$androidx_test_version"
+    /**
+     * Asserting tests https://github.com/assertj/assertj-core
+     */
+    testImplementation "org.assertj:assertj-core:3.18.1"
 
-    // Architecture components testing
-    def androidx_arch_test_version = "2.1.0"
-    androidTestImplementation "androidx.arch.core:core-testing:$androidx_arch_test_version"
-
-
-    androidTestImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.3.61'
-    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-idling-resource:3.3.0'
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test:rules:1.3.0'
-    androidTestImplementation 'androidx.test:core-ktx:1.3.0'
-    androidTestImplementation 'io.mockk:mockk-android:1.9.2'
-    androidTestImplementation 'androidx.fragment:fragment-testing:1.2.5'
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.2'
-    androidTestImplementation 'androidx.navigation:navigation-testing:2.3.2'
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
 }

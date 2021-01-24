@@ -14,6 +14,7 @@ sealed class State<T>(
         override val message: String
     ) : State<T>(null, message)
 
+    // message keeps info about the error happened above, Exceptions is about current class
     data class Error<T>(
         override val message: String,
         override val exception: Exception

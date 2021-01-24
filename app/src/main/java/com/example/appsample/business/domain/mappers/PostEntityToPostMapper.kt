@@ -5,7 +5,9 @@ import com.example.appsample.business.domain.model.Post
 
 object PostEntityToPostMapper {
 
-    fun map(postEntity: List<PostEntity>) = postEntity.map { createPost(it) }
+    fun mapList(postEntity: List<PostEntity>) = postEntity.map { createPost(it) }
+
+    fun map(postEntity: PostEntity) = createPost(postEntity)
 
     private fun createPost(postEntity: PostEntity) = Post(
         userId = postEntity.userId,

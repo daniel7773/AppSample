@@ -12,11 +12,11 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 class BaseApplication : Application() {
 
-    private val TAG: String = "AppDebug"
+    private val TAG: String = "BaseApplication"
 
-    private val appComponent = DaggerAppComponent.builder()
-        .application(this)
-        .build()
+    private val appComponent = DaggerAppComponent
+        .factory()
+        .create(this)
 
     override fun onCreate() {
         super.onCreate()

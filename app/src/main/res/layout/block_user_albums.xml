@@ -4,9 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="java.util.List"/>
-        <variable name="albumList"
-            type="List&lt;com.example.appsample.framework.presentation.profile.models.AlbumModel>"/>
+
+        <import type="java.util.List" />
+
+        <variable
+            name="albumList"
+            type="List&lt;com.example.appsample.framework.presentation.profile.model.AlbumModel>" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,19 +17,34 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:clickable="true"
+        android:elevation="2dp"
         android:focusable="true"
-        android:elevation="2dp">
+        android:paddingTop="6dp"
+        android:paddingBottom="8dp">
 
         <TextView
             android:id="@+id/textViewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:text="Альбомы"
-            android:textSize="24sp"
+            android:gravity="center"
+            android:text="@string/albums"
+            android:textColor="@color/black"
+            android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/albums_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewTitle"
+            app:layout_constraintStart_toEndOf="@+id/textViewTitle"
+            app:layout_constraintTop_toTopOf="@+id/textViewTitle"
+            tools:text="3" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/albums_recycler_view"
@@ -36,12 +54,12 @@
             android:orientation="horizontal"
             android:paddingLeft="11dp"
             android:paddingRight="11dp"
-            android:paddingBottom="20dp"
+            android:paddingBottom="4dp"
+            app:albumItems="@{albumList}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewTitle"
-            app:items="@{albumList}"
             tools:listitem="@layout/block_user_album">
 
         </androidx.recyclerview.widget.RecyclerView>

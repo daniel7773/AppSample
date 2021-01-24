@@ -14,7 +14,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @Subcomponent(
     modules = [
         ProfileModule::class,
-        ProfileViewModelsModule::class,
         ProfileFragmentBuildersModule::class
     ]
 )
@@ -29,17 +28,3 @@ interface ProfileComponent {
     fun inject(profileNavHostFragment: ProfileNavHostFragment)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
