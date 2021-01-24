@@ -28,17 +28,3 @@ interface ProfileComponent {
     fun inject(profileNavHostFragment: ProfileNavHostFragment)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
