@@ -9,12 +9,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPostUseCase
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.AdapterElement
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.profile.mappers.CommentToCommentModelMapper
 import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
 import com.example.appsample.framework.presentation.profile.model.CommentModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
-import com.example.appsample.framework.presentation.profile.model.post.PostElement
 import com.example.appsample.framework.presentation.profile.screens.post.adapters.PostTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,8 +31,9 @@ class PostViewModel constructor( // I suppose it is better to use database inste
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _items: MutableLiveData<Sequence<PostElement>?> = MutableLiveData(emptySequence())
-    val items: LiveData<Sequence<PostElement>?> by lazy { _items }
+    private val _items: MutableLiveData<Sequence<AdapterElement>?> =
+        MutableLiveData(emptySequence())
+    val items: LiveData<Sequence<AdapterElement>?> by lazy { _items }
 
     private val _postId: MutableLiveData<Int> = savedStateHandle.getLiveData(POST_ID_KEY)
     val postId: LiveData<Int> = _postId

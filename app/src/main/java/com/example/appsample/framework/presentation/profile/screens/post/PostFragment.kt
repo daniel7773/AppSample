@@ -9,8 +9,14 @@ import androidx.navigation.fragment.navArgs
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentPostBinding
 import com.example.appsample.framework.base.presentation.BaseFragment
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.CompositeDelegateAdapter
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.DividerAdapterDelegate
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.EmptySpaceAdapterDelegate
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.PostViewModelFactory
+import com.example.appsample.framework.presentation.profile.screens.post.adapters.PostBodyAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.post.adapters.PostCommentAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.post.adapters.PostSourceAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -33,6 +39,13 @@ constructor(
         GenericSavedStateViewModelFactory(postViewModelFactory, this)
     }
 
+    private val adapter = CompositeDelegateAdapter(
+        PostBodyAdapterDelegate(),
+        PostCommentAdapterDelegate(),
+        PostSourceAdapterDelegate(),
+        DividerAdapterDelegate(),
+        EmptySpaceAdapterDelegate()
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +58,7 @@ constructor(
             it.viewModel = viewModel
             it.lifecycleOwner = viewLifecycleOwner
         }
-        _binding!!.recyclerView.adapter = PostAdapter()
+        _binding!!.recyclerView.adapter = adapter
 
         // will be called only once, since we consider postId should not be null in ViewModel after setting once
         if (viewModel.isPostIdNull()) {
