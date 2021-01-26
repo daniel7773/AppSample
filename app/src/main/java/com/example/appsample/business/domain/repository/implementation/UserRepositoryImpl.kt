@@ -7,7 +7,6 @@ import com.example.appsample.business.data.network.abstraction.JsonPlaceholderAp
 import com.example.appsample.business.domain.mappers.UserEntityToUserMapper
 import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.domain.repository.NetworkBoundResource
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +21,7 @@ class UserRepositoryImpl @Inject constructor(
 
     private val TAG = "UserRepositoryImpl"
 
-    override suspend fun getUser(id: Int): Flow<Resource<User?>> {
+    override suspend fun getUser(id: Int): Flow<User?> {
 
         return object : NetworkBoundResource<UserEntity, User>(
             { userCacheDataSource.searchUserById(id.toString()) },

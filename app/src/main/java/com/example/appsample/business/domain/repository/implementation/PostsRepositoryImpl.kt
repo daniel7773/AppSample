@@ -7,8 +7,6 @@ import com.example.appsample.business.data.network.abstraction.JsonPlaceholderAp
 import com.example.appsample.business.domain.mappers.PostEntityToPostMapper
 import com.example.appsample.business.domain.model.Post
 import com.example.appsample.business.domain.repository.NetworkBoundResource
-import com.example.appsample.business.domain.repository.Resource
-import com.example.appsample.business.domain.repository.Resource.Success
 import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,7 +27,7 @@ class PostsRepositoryImpl @Inject constructor(
 
     private val TAG = "PostsRepositoryImpl"
 
-    override suspend fun getPostsList(userId: Int): Flow<Resource<List<Post>?>> {
+    override suspend fun getPostsList(userId: Int): Flow<List<Post>?> {
         return object : NetworkBoundResource<List<PostEntity>, List<Post>>(
             { postCacheDataSource.getAllPosts(userId) },
             { jsonPlaceholderApiSource.getPostsListFromUserAsync(userId).await() },
@@ -45,27 +43,21 @@ class PostsRepositoryImpl @Inject constructor(
             override suspend fun shouldFetch(entity: List<Post>?) = entity?.size != 10
             override suspend fun map(entity: List<PostEntity>) =
                 PostEntityToPostMapper.mapList(entity)
-        }.result.transform { postListResource ->
-            if (postListResource is Success) {
-                postListResource.data?.forEach { post ->
-                    post.id?.run {
-                        val commentsPostResponse = withContext(ioDispatcher) {
-                            commentsRepository.getCommentsNum(this@run)
-                        }
-                        if (commentsPostResponse is Success) {
-                            post.commentsSize = commentsPostResponse.data ?: 0
-                        } else {
-                            post.commentsSize = 0
-                        }
-
+        }.result.transform { postList ->
+            postList?.forEach { post ->
+                post.id?.run {
+                    val commentsNum = withContext(ioDispatcher) {
+                        commentsRepository.getCommentsNum(this@run)
                     }
+                    post.commentsSize = commentsNum ?: 0
+
                 }
             }
-            emit(postListResource)
+            emit(postList)
         }
     }
 
-    override suspend fun getPost(postId: Int): Flow<Resource<Post?>> {
+    override suspend fun getPost(postId: Int): Flow<Post?> {
         return object : NetworkBoundResource<PostEntity, Post>(
             { postCacheDataSource.searchPostById(postId) },
             { jsonPlaceholderApiSource.getPostByIdAsync(postId).await() },

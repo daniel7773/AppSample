@@ -7,7 +7,6 @@ import com.example.appsample.business.data.network.abstraction.JsonPlaceholderAp
 import com.example.appsample.business.domain.mappers.AlbumEntityToAlbumMapper
 import com.example.appsample.business.domain.model.Album
 import com.example.appsample.business.domain.repository.NetworkBoundResource
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,7 +28,7 @@ class AlbumsRepositoryImpl @Inject constructor(
 
     private val TAG = "AlbumsRepositoryImpl"
 
-    override suspend fun getAlbumList(userId: Int): Flow<Resource<List<Album>?>> {
+    override suspend fun getAlbumList(userId: Int): Flow<List<Album>?> {
         return object : NetworkBoundResource<List<AlbumEntity>, List<Album>>(
             { albumCacheDataSource.getAllAlbums(userId) },
             { jsonPlaceholderApiSource.getAlbumsFromUserAsync(userId).await() },
@@ -45,29 +44,25 @@ class AlbumsRepositoryImpl @Inject constructor(
             override suspend fun shouldFetch(entity: List<Album>?) = entity?.size != 10
             override suspend fun map(entity: List<AlbumEntity>) =
                 AlbumEntityToAlbumMapper.mapList(entity)
-        }.result.transform { albumListResource ->
-            if (albumListResource is Resource.Success) {
+        }.result.transform { albumList ->
 
-                albumListResource.data!!.forEach { album ->
-                    Log.d("KAKBYTAKBY", "loading next photo")
-                    album.id?.run {
-                        val photoFlow = withContext(ioDispatcher) {
-                            photoRepository.getPhotoById(this@run, 1)
-                        }
-                        /**
-                         * @see PhotoRepositoryImpl getPhotoById()
-                         * explanation why we sending hardcoded 1
-                         */
+            albumList?.forEach { album ->
+                album.id?.run {
+                    val photoFlow = withContext(ioDispatcher) {
+                        photoRepository.getPhotoById(this@run, 1)
+                    }
+                    /**
+                     * @see PhotoRepositoryImpl.getPhotoById()
+                     * explanation why we sending hardcoded 1
+                     */
 
-                        photoFlow.collect { photoResource ->
-                            if (photoResource is Resource.Success) {
-                                album.firstPhoto = photoResource.data
-                            }
-                        }
+                    photoFlow.collect { photo ->
+                        album.firstPhoto = photo
                     }
                 }
             }
-            emit(albumListResource)
+
+            emit(albumList)
         }
     }
 

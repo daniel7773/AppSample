@@ -10,6 +10,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -28,7 +29,7 @@ class AuthViewModelTest {
     val getUserUseCase: GetUserUseCase = mockk()
     val sessionManager: SessionManager = SessionManager(mainCoroutineRule.testDispatcher)
     val authViewModel: AuthViewModel =
-        AuthViewModel(mainCoroutineRule.testDispatcher, getUserUseCase, sessionManager)
+        AuthViewModel(mainCoroutineRule.testDispatcher, mainCoroutineRule.testDispatcher, getUserUseCase, sessionManager)
 
     @Test
     fun `Loading Success data came`() = runBlockingTest {
@@ -36,7 +37,7 @@ class AuthViewModelTest {
         // Given
         coEvery {
             getUserUseCase.getUser(any())
-        } returns DataFactory.provideResourceSuccessFlow(DataFactory.produceUser())
+        } returns flowOf(DataFactory.produceUser())
         authViewModel.userId.value = "2"
 
         // When
@@ -54,7 +55,7 @@ class AuthViewModelTest {
         // Given
         coEvery {
             getUserUseCase.getUser(any())
-        } returns DataFactory.provideResourceErrorFlow(DataFactory.produceUser())
+        } throws Exception()
         authViewModel.userId.value = "2"
 
         // When

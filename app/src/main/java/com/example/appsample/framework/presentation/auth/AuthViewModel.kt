@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.common.mappers.UserToUserModelMapper
@@ -20,10 +19,12 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 class AuthViewModel @Inject constructor(
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val mainDispatcher: CoroutineDispatcher,
     private val getUserUseCase: GetUserUseCase,
     val sessionManager: SessionManager
@@ -45,19 +46,20 @@ class AuthViewModel @Inject constructor(
     val userId: MutableLiveData<String> = MutableLiveData()
 
     private val loadingExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _authState.value = State.Error(
-            throwable.message.toString(), Exception(throwable.localizedMessage)
+        Log.d(TAG, "error message: ${throwable.localizedMessage}")
+        throwable.printStackTrace()
+        refreshUserState(
+            State.Error(
+                throwable.message.toString(), Exception(throwable.localizedMessage)
+            )
         )
 
-        viewModelScope.launch(mainDispatcher) {
-            sessionManager.setAuthState(
-                AuthResource.Error(
-                    "ERROR IN RESPONSE OF AUTHENTICATION",
-                    java.lang.Exception(throwable.localizedMessage)
-                )
+        viewModelScope.launch {
+            setErrorState(
+                "ERROR IN RESPONSE OF AUTHENTICATION",
+                Exception(throwable.localizedMessage)
             )
         }
-        Log.e(TAG, "Error in viewModel getUser coroutine chain: ", throwable)
     }
 
     fun startLoading() {
@@ -69,46 +71,31 @@ class AuthViewModel @Inject constructor(
             Log.d(TAG, "error message ${nfe.localizedMessage}")
         }
 
+        Log.d(TAG, "about to start search")
         // TODO: handle how to get that user is not authenticated
-        viewModelScope.launch(mainDispatcher + loadingExceptionHandler) {
-            _authState.value = State.Loading("init loading")
-            getUserUseCase.getUser(id).collect { response ->
-                when (response) {
-                    is Resource.Success -> {
-                        Log.d(TAG, "user ${response.data}")
-                        // force unwrap because null values must be handled earlier
-                        val user = UserToUserModelMapper.map(response.data!!)
-                        _authState.value = State.Success(user, "get data successfully")
-                        setSuccessState(user)
-                    }
-                    is Resource.Error -> {
-                        Log.e(TAG, "getUser error ${response.exception.localizedMessage}")
-                        _authState.value = State.Error("get data successfully", response.exception)
-                        setErrorState(response)
-                    }
-                    else -> {
-                        _authState.value = State.Loading("Loading")
-                        sessionManager.setAuthState(AuthResource.Loading("Loading"))
-                    }
+        viewModelScope.launch(ioDispatcher + loadingExceptionHandler) {
+            refreshUserState(State.Loading("init loading"))
+            getUserUseCase.getUser(id).collect { user ->
+                Log.d(TAG, "getUser(id).collect: ${user}")
+                if (user == null) {
+                    refreshUserState(State.Error("Error while getting user", Exception()))
+                    setErrorState("Error while getting user", Exception())
+                    return@collect
                 }
+                val userModel = UserToUserModelMapper.map(user)
+                refreshUserState(State.Success(userModel, "SUCCESS"))
+                setSuccessState(userModel)
             }
-
         }
     }
 
-    private suspend fun setSuccessState(userModel: UserModel) =
-        sessionManager.setAuthState(
-            AuthResource.Authenticated(
-                userModel,
-                "success"
-            )
-        )
+    private fun refreshUserState(state: State<UserModel>) = viewModelScope.launch(mainDispatcher) {
+        _authState.value = state
+    }
 
-    private suspend fun setErrorState(response: Resource.Error) =
-        sessionManager.setAuthState(
-            AuthResource.Error(
-                response.message,
-                response.exception
-            )
-        )
+    private suspend fun setSuccessState(userModel: UserModel) =
+        sessionManager.setAuthState(AuthResource.Authenticated(userModel, "SUCCESS"))
+
+    private suspend fun setErrorState(message: String, exception: Exception) =
+        sessionManager.setAuthState(AuthResource.Error(message, exception))
 }

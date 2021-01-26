@@ -1,5 +1,6 @@
 package com.example.appsample.business.domain.repository
 
+import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
@@ -17,19 +18,23 @@ constructor(
     private val apiCall: suspend () -> EntityObj?
 ) {
 
+    private val TAG = NetworkBoundResource::class.java.simpleName
+
     /**
      * @param EntityObj - object that cache and network dataSources are using
      * @param ResultObj - object that is in use in domain layer
      * val for resulting all logic to Flow
      */
-    val result: Flow<Resource<ResultObj?>> = flow {
+    val result: Flow<ResultObj?> = flow {
         // ****** STEP 1: VIEW CACHE ******
         val cache = returnCache()
-        emit(cache)
-        if (cache is Resource.Success) {
-            if (!shouldFetch(cache.data)) {
-                return@flow
-            }
+
+        if(cache != null) {
+            emit(cache)
+        }
+
+        if (!shouldFetch(cache)) {
+            return@flow
         }
         val apiResult = safeApiCall(apiCall)
 
@@ -41,18 +46,14 @@ constructor(
      * @param ResultObj - object that is in use in domain layer
      * suspending fun for getting data
      */
-    suspend fun resultSuspend(): Resource<ResultObj?> {
+    suspend fun resultSuspend(): ResultObj? {
         // ****** STEP 1: VIEW CACHE ******
         val cache = returnCache()
 
-        if (cache is Resource.Success) {
-            if (!shouldFetch(cache.data)) {
-                return cache
-            }
+        if (!shouldFetch(cache)) {
+            return cache
         }
-        val apiResult = safeApiCall(apiCall)
-
-        return apiResult
+        return safeApiCall(apiCall)
     }
 
     /**
@@ -62,36 +63,40 @@ constructor(
      */
     suspend fun safeApiCall(
         apiCall: suspend () -> EntityObj?
-    ): Resource<ResultObj?> {
+    ): ResultObj? {
         try {
             return withTimeout(GET_NETWORK_TIMEOUT) {
                 val apiResult: EntityObj? = apiCall.invoke()
 
                 if (apiResult == null) {
-                    Resource.Error("NULL came from api", NullPointerException())
+                    Log.d(TAG, "safeApiCall result is null")
+                    null
                 } else {
                     val success = map(apiResult)
                     updateCache(apiResult)
-                    joinAll()
-                    Resource.Success(success, "Success")
+                    Log.d(TAG, "safeApiCall SUCCEED")
+                    success
                 }
             }
         } catch (e: Exception) {
             if (e !is CancellationException) {
                 e.printStackTrace()
             }
-            return when (e) {
+            when (e) {
                 is TimeoutCancellationException -> {
-                    Resource.Error("NETWORK_ERROR_TIMEOUT", e)
+                    Log.e(TAG, "TimeoutCancellationException in safeApiCall")
                 }
                 is HttpException -> {
                     val code = e.code()
-                    Resource.Error("Error code: ${code}", e)
+                    Log.e(TAG, "HttpException, code: $code")
                 }
                 else -> {
-                    Resource.Error("Unknown Error", e)
+                    Log.e(TAG, "Unknown Exception")
+                    e.printStackTrace()
                 }
+
             }
+            return null
         }
     }
 
@@ -100,7 +105,7 @@ constructor(
      * @param ResultObj - object that is in use in domain layer
      * function for getting abstract data from database
      */
-    private suspend fun returnCache(): Resource<ResultObj?> {
+    private suspend fun returnCache(): ResultObj? {
         var cacheResult: EntityObj? = null
 
         try {
@@ -113,16 +118,16 @@ constructor(
             }
 
             if (e is TimeoutCancellationException) {
-                return Resource.Error("Some problems with cache, it is loading too long", e)
+                Log.e(TAG, "TimeoutCancellationException in returnCache")
+                return null
             }
-            return Resource.Error("Error from cache", e)
+            Log.e(TAG, "Exception in returnCache")
+            return null
         }
 
-        if (cacheResult == null) {
-            return Resource.Error("Looks like cache is empty", NullPointerException())
-        }
+        if (cacheResult == null) return null
 
-        return Resource.Success(map(cacheResult), "Success")
+        return map(cacheResult)
     }
 
     /**

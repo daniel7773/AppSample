@@ -70,7 +70,7 @@ class UserRepositoryTest {
         val repositoryValue = userRepository.getUser(userId).first()
 
         Assertions.assertThat(UserEntityToUserMapper.map(networkValue!!))
-            .isEqualTo((repositoryValue as Resource.Success).data)
+            .isEqualTo(repositoryValue)
     }
 
     @Test
@@ -89,10 +89,7 @@ class UserRepositoryTest {
 
         val repositoryValue = userRepository.getUser(userId.toInt()).first()
 
-        Assertions.assertThat((repositoryValue as Resource.Error).exception).isInstanceOf(exception::class.java)
-        Assertions.assertThat(exception.message).isEqualTo(repositoryValue.exception.message)
-        Assertions.assertThat(exception.localizedMessage)
-            .isEqualTo(repositoryValue.exception.localizedMessage)
+        Assertions.assertThat(repositoryValue).isEqualTo(null)
     }
 
 }

@@ -7,7 +7,6 @@ import com.example.appsample.business.data.network.abstraction.JsonPlaceholderAp
 import com.example.appsample.business.domain.mappers.PhotoEntityToPhotoMapper
 import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.repository.NetworkBoundResource
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +22,7 @@ class PhotoRepositoryImpl @Inject constructor(
 
     private val TAG = "PhotoRepositoryImpl"
 
-    override suspend fun getAlbumPhotoList(albumId: Int): Flow<Resource<List<Photo>?>> {
+    override suspend fun getAlbumPhotoList(albumId: Int): Flow<List<Photo>?> {
 
         return object : NetworkBoundResource<List<PhotoEntity>, List<Photo>>(
             { photoCacheDataSource.getAllPhotos(albumId) },
@@ -43,7 +42,7 @@ class PhotoRepositoryImpl @Inject constructor(
         }.result
     }
 
-    override suspend fun getPhotoById(albumId: Int, photoId: Int): Flow<Resource<Photo?>> {
+    override suspend fun getPhotoById(albumId: Int, photoId: Int): Flow<Photo?> {
         /** Since it's sample app and we are working not with a real data
          *  and we have no option change server logic or to get photo by photoId without some hacking
          *  I believe it's ok to make albumId and photoId to photoId transformation

@@ -1,12 +1,10 @@
 package com.example.appsample.framework.presentation.profile.screens.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
@@ -28,6 +26,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -47,6 +46,8 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    private val states = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Idle)
+
     var user: State<UserModel?> = Unknown()
     var postList: State<List<PostModel>?> = Unknown()
     var albumList: State<List<AlbumModel>?> = Unknown()
@@ -64,7 +65,6 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     val userId: LiveData<Int> = _userId
 
     init {
-        Log.d("ProfileViewModel", "init called")
         savedStateHandle.set(
             USER_ID_KEY,
             sessionManager.user.id!!
@@ -73,22 +73,21 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     }
 
     fun startSearch() {
-        Log.d("ProfileViewModel", "startSearch called")
-        viewModelScope.launch(mainDispatcher) {
-            supervisorScope {
-                launch(CoroutineExceptionHandler { _, throwable ->
-                    user = getError(throwable)
-                }) {
-                    searchUser()
-                }
+        viewModelScope.launch(ioDispatcher) { launchSearch() }
+    }
 
-                launch(CoroutineExceptionHandler { _, throwable ->
-                    postList = getError(throwable)
-                }) { searchPostList() }
+    suspend fun launchSearch() {
+        supervisorScope {
+            launch(CoroutineExceptionHandler { _, throwable -> user = getError(throwable) }) {
+                searchUser()
+            }
 
-                launch(CoroutineExceptionHandler { _, throwable ->
-                    albumList = getError(throwable)
-                }) { searchAlbumList() }
+            launch(CoroutineExceptionHandler { _, throwable -> postList = getError(throwable) }) {
+                searchPostList()
+            }
+
+            launch(CoroutineExceptionHandler { _, throwable -> albumList = getError(throwable) }) {
+                searchAlbumList()
             }
         }
     }
@@ -99,85 +98,31 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     )
 
     private suspend fun searchUser() {
-        Log.d("DISPATCHER_DEBUG", "searchUser called : ${Thread.currentThread()}")
         user = Loading("init Loading")
-        if (userId.value == null) {
-            throw java.lang.Exception("User id cant be NULL")
-        }
-        getUserUseCase.getUser(userId.value!!).collect { response ->
-            user = when (response) {
-                is Resource.Success -> {
-                    Log.d(TAG, "user ${response.data}")
-                    // force unwrap because null values must be handled earlier
-                    val userLocal = UserToUserModelMapper.map(response.data!!)
-                    Success(userLocal, response.message ?: "getUser Success in ViewModel")
-                }
-                is Resource.Error -> {
-                    Log.e(TAG, "getUser error ${response.exception.localizedMessage}")
-                    Error(response.message.toString(), response.exception)
-                }
-                else -> {
-                    Loading("init Loading")
-                }
-            }
+
+        getUserUseCase.getUser(userId.value!!).collect { user ->
+            if (user == null) return@collect
+            this.user = Success(UserToUserModelMapper.map(user), "SUCCESS")
             refreshData()
         }
     }
 
     private suspend fun searchPostList() {
-        Log.d("ProfileViewModel", "searchPostList called")
-        Log.d("DISPATCHER_DEBUG", "searchPostList called : ${Thread.currentThread()}")
         postList = Loading("init Loading")
-        if (userId.value == null) {
-            throw java.lang.Exception("User id cant be NULL")
+
+        getPostListUseCase.getPostList(userId.value!!).collect { postList ->
+            if (postList == null) return@collect
+            this.postList = Success(PostToPostModelMapper.mapList(postList), "SUCCESS")
+            refreshData()
         }
-
-        getPostListUseCase.getPostList(userId.value!!).collect { response ->
-
-            when (response) {
-                is Resource.Success -> {
-                    Log.d(TAG, "postList came, size: ${response.data!!.size}")
-                    // force unwrap because null values must be handled earlier
-                    val postModelList = PostToPostModelMapper.mapList(response.data)
-
-                    this.postList = Success(postModelList, "Successfully got data in VM")
-                }
-                is Resource.Error -> {
-                    Log.e(TAG, "getPostList error ${response.exception.localizedMessage}")
-                    postList = Error(response.message.toString(), response.exception)
-                }
-                else -> {
-                    postList = Loading("init Loading")
-                }
-            }
-        }
-
-        refreshData()
     }
 
     private suspend fun searchAlbumList() {
         albumList = Loading("init Loading")
-        if (userId.value == null) {
-            throw java.lang.Exception("User id cant be NULL")
-        }
-        Log.d("DISPATCHER_DEBUG", "searchAlbumList called : ${Thread.currentThread()}")
-        getAlbumListUseCase.getAlbumList(userId.value!!).collect { response ->
-            when (response) {
-                is Resource.Success -> {
-                    Log.d(TAG, "albumList size ${response.data?.size}")
-                    // force unwrap because null values must be handled earlier
-                    val albums = AlbumToAlbumModelMapper.map(response.data!!)
 
-                    albumList = Success(albums, "Successfully got data in VM")
-                }
-                is Resource.Error -> {
-                    Log.e(TAG, "getAlbumList error ${response.exception.localizedMessage}")
-                    albumList = Error(response.message.toString(), response.exception)
-                }
-                else -> {
-                    albumList = Loading("init Loading")
-                }
-            }
+        getAlbumListUseCase.getAlbumList(userId.value!!).collect { albumList ->
+            if (albumList == null) return@collect
+            this.albumList = Success(AlbumToAlbumModelMapper.map(albumList), "SUCCESS")
             refreshData()
         }
     }
