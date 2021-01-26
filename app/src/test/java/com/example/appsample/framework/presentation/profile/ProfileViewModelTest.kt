@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.domain.model.Comment
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetCommentListUseCase
@@ -72,7 +71,7 @@ class ProfileViewModelTest {
 
                 coEvery {
                     getUserUseCase.getUser(any())
-                } returns flowOf(DataFactory.provideResourceSuccess(DataFactory.produceUser()))
+                } returns flowOf(DataFactory.produceUser())
 
                 // When
                 profileViewModel.startSearch()
@@ -87,11 +86,11 @@ class ProfileViewModelTest {
         fun `Loading Error exception received correctly`() =
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
-                val resourceError = DataFactory.provideResourceError(DataFactory.produceUser())
+                val user = DataFactory.produceUser()
                 // Given
                 coEvery {
                     getUserUseCase.getUser(any())
-                } returns flowOf(resourceError)
+                } throws Exception()
 
                 // When
 
@@ -99,8 +98,6 @@ class ProfileViewModelTest {
 
                 // Then
                 assertThat(profileViewModel.user.exception).isNotNull
-                assertThat(profileViewModel.user.message).isEqualTo(resourceError.message)
-                assertThat(profileViewModel.user.exception).isInstanceOf(resourceError.exception::class.java)
 
             }
     }
@@ -115,7 +112,7 @@ class ProfileViewModelTest {
 
                 coEvery {
                     getAlbumListUseCase.getAlbumList(any())
-                } returns flowOf(DataFactory.provideResourceSuccess(DataFactory.produceListOfAlbums(4)))
+                } returns flowOf(DataFactory.produceListOfAlbums(4))
 
                 // When
                 profileViewModel.startSearch()
@@ -132,18 +129,16 @@ class ProfileViewModelTest {
 
                 // Given
                 val resourceError =
-                    DataFactory.provideResourceError(DataFactory.produceListOfAlbums(4))
+                    DataFactory.produceListOfAlbums(4)
                 coEvery {
                     getAlbumListUseCase.getAlbumList(any())
-                } returns flowOf(resourceError)
+                } throws Exception()
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.albumList.exception).isNotNull
-                assertThat(profileViewModel.albumList.message).isEqualTo(resourceError.message)
-                assertThat(profileViewModel.albumList.exception).isInstanceOf(resourceError.exception::class.java)
             }
     }
 
@@ -157,10 +152,10 @@ class ProfileViewModelTest {
                 val exception = Exception("My exception")
                 coEvery {
                     getPostListUseCase.getPostList(any())
-                } returns flowOf(DataFactory.provideResourceSuccess(DataFactory.produceListOfPosts(4)))
+                } returns flowOf(DataFactory.produceListOfPosts(4))
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
-                } returns flowOf(Resource.Success(emptyList<Comment>(), ""))
+                } returns flowOf(listOf(Comment()))
                 // When
                 profileViewModel.startSearch()
 
@@ -175,21 +170,17 @@ class ProfileViewModelTest {
             mainCoroutineRule.testDispatcher.runBlockingTest {
 
                 // Given
-                val resourceError =
-                    DataFactory.provideResourceError(DataFactory.produceListOfPosts(4))
                 coEvery {
                     getPostListUseCase.getPostList(any())
-                } returns flowOf(resourceError)
+                } throws Exception()
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
-                } returns flowOf(Resource.Success(emptyList<Comment>(), ""))
+                } returns flowOf(listOf<Comment>())
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.postList.exception).isNotNull
-                assertThat(profileViewModel.postList.message).isEqualTo(resourceError.message)
-                assertThat(profileViewModel.postList.exception).isInstanceOf(resourceError.exception::class.java)
 
             }
     }

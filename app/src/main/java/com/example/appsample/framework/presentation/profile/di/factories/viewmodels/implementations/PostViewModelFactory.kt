@@ -8,17 +8,20 @@ import com.example.appsample.framework.presentation.profile.screens.post.PostVie
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
+import javax.inject.Named
 
 @ExperimentalCoroutinesApi
 class PostViewModelFactory @ExperimentalCoroutinesApi
 @Inject constructor(
     private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val getCommentListUseCase: GetCommentListUseCase,
     private val getPostUseCase: GetPostUseCase
 ) : ViewModelAssistedFactory<PostViewModel> {
     override fun create(handle: SavedStateHandle): PostViewModel {
         return PostViewModel(
             mainDispatcher,
+            ioDispatcher,
             getCommentListUseCase,
             getPostUseCase,
             handle

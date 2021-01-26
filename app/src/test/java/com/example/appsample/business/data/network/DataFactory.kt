@@ -14,7 +14,6 @@ import com.example.appsample.business.domain.model.Geo
 import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.model.Post
 import com.example.appsample.business.domain.model.User
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.framework.presentation.common.model.UserModel
 import com.example.appsample.framework.presentation.profile.model.AddressModel
 import com.example.appsample.framework.presentation.profile.model.CompanyModel
@@ -79,13 +78,6 @@ object DataFactory {
 
 
     // Domain layer
-
-    fun <T> provideResourceSuccessFlow(data: T) = flowOf(Resource.Success<T>(data, "SUCCESS"))
-    fun <T> provideResourceErrorFlow(data: T) = flowOf(Resource.Error("ERROR", Exception("ERROR")))
-
-
-    fun <T> provideResourceSuccess(data: T) = Resource.Success<T>(data, "SUCCESS")
-    fun <T> provideResourceError(data: T) = Resource.Error("ERROR", Exception("ERROR"))
 
     fun produceUser() = User(
         id = 2,

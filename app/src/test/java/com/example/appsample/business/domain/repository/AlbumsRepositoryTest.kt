@@ -10,7 +10,6 @@ import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import com.example.appsample.business.domain.repository.implementation.AlbumsRepositoryImpl
-import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
@@ -77,13 +76,13 @@ class AlbumsRepositoryTest {
 
         coEvery {
             photoRepository.getPhotoById(any(), any())
-        } returns flowOf(Resource.Success(Photo(), "mocked data"))
+        } returns flowOf(Photo())
 
         val networkValue = networkApi.getAlbumsFromUserAsync(userId).await()
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
         Assertions.assertThat(AlbumEntityToAlbumMapper.mapList(networkValue!!).size)
-            .isEqualTo((repositoryValue.first() as Resource.Success).data!!.size)
+            .isEqualTo(repositoryValue.first()?.size)
     }
 
     @Test
@@ -98,9 +97,6 @@ class AlbumsRepositoryTest {
 
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
-        Assertions.assertThat((repositoryValue.first() as Resource.Error).exception).isInstanceOf(exception::class.java)
-        Assertions.assertThat(exception.message).isEqualTo((repositoryValue.first() as Resource.Error).exception.message)
-        Assertions.assertThat(exception.localizedMessage)
-            .isEqualTo((repositoryValue.first() as Resource.Error).exception.localizedMessage)
+        Assertions.assertThat(repositoryValue.first()).isEqualTo(null)
     }
 }

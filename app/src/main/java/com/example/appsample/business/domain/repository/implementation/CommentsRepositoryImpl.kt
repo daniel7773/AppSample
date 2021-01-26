@@ -7,7 +7,6 @@ import com.example.appsample.business.data.network.abstraction.JsonPlaceholderAp
 import com.example.appsample.business.domain.mappers.CommentEntityToCommentMapper
 import com.example.appsample.business.domain.model.Comment
 import com.example.appsample.business.domain.repository.NetworkBoundResource
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +21,7 @@ class CommentsRepositoryImpl @Inject constructor(
 
     private val TAG = "CommentsRepositoryImpl"
 
-    override suspend fun getCommentList(postId: Int): Flow<Resource<List<Comment>?>> {
+    override suspend fun getCommentList(postId: Int): Flow<List<Comment>?> {
 
         return object : NetworkBoundResource<List<CommentEntity>, List<Comment>>(
             { commentCacheDataSource.getAllComments(postId) },
@@ -42,7 +41,7 @@ class CommentsRepositoryImpl @Inject constructor(
         }.result
     }
 
-    override suspend fun getCommentsNum(postId: Int): Resource<Int?> {
+    override suspend fun getCommentsNum(postId: Int): Int? {
 
         return object : NetworkBoundResource<List<CommentEntity>, Int>(
             { commentCacheDataSource.getAllComments(postId) },

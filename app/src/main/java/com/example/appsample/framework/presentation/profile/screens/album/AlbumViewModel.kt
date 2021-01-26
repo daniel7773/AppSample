@@ -1,13 +1,11 @@
 package com.example.appsample.framework.presentation.profile.screens.album
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appsample.business.domain.repository.Resource
 import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.State.*
@@ -18,12 +16,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import javax.inject.Named
 
 private const val ALBUM_ID_KEY = "albumId"
 
 @ExperimentalCoroutinesApi
 class AlbumViewModel constructor( // I suppose it is better to use database instead of SavedStateHandle for complex data
     private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
     private val getPhotoListUseCase: GetPhotoListUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -65,31 +65,26 @@ class AlbumViewModel constructor( // I suppose it is better to use database inst
         if (isAlbumIdNull()) throw Exception("albumId should not be NULL when starting search")
         val albumId = _albumId.value!!
 
-        viewModelScope.launch(mainDispatcher) {
-            supervisorScope {
-                getPhotoListUseCase.getPhotoList(albumId).collect { response ->
-                    _items.value = when (response) {
-                        is Resource.Success -> {
-                            Log.d(TAG, "photos size ${response.data?.size}")
-                            // force unwrap because null values must be handled earlier
-                            val photoList = PhotoToPhotoModelMapper.mapPhotoList(response.data!!)
-                            Success(
-                                photoList,
-                                response.message ?: "searchPhotos Success in ViewModel"
-                            )
-                        }
-                        is Resource.Error -> {
-                            Log.e(TAG, "searchPhotos error ${response.exception.localizedMessage}")
-                            Error(response.message.toString(), response.exception)
-                        }
-                        else -> {
-                            Loading("Loading came")
-                        }
-                    }
+        viewModelScope.launch(ioDispatcher) { launchSearch(albumId) }
+    }
+
+    private suspend fun launchSearch(albumId: Int) {
+        refreshData(Loading("Loading..."))
+        supervisorScope {
+            getPhotoListUseCase.getPhotoList(albumId).collect { photoList ->
+                if (photoList.isNullOrEmpty()) {
+                    _items.value = Error("NULL", Exception())
+                    return@collect
                 }
+                refreshData(Success(PhotoToPhotoModelMapper.mapPhotoList(photoList), "SUCCESS"))
             }
         }
     }
+
+    private fun refreshData(state: State<List<PhotoModel>?>) =
+        viewModelScope.launch(mainDispatcher) {
+            _items.value = state
+        }
 
     companion object {
         private const val TAG = "AlbumViewModel"
