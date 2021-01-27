@@ -13,11 +13,19 @@ import com.example.appsample.R
 import com.example.appsample.databinding.FragmentProfileBinding
 import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.CompositeDelegateAdapter
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.DividerAdapterDelegate
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.EmptySpaceAdapterDelegate
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.ProfileViewModelFactory
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
 import com.example.appsample.framework.presentation.profile.model.PostModel
 import com.example.appsample.framework.presentation.profile.screens.album.AlbumFragmentArgs
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserActionsAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserAlbumsAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserDetailsAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserInfoAdapterDelegate
+import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserPostAdapterDelegate
 import com.example.appsample.framework.presentation.profile.screens.post.PostFragmentArgs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -31,15 +39,15 @@ class ProfileFragment @Inject
 constructor(
     private val profileViewModelFactory: ProfileViewModelFactory
 ) : BaseFragment(R.layout.fragment_profile) {
-    // checking userName
+
+    private lateinit var mainNavController: MainNavController
+
     private var _binding: FragmentProfileBinding? = null
     private val binding: FragmentProfileBinding get() = _binding!!
 
     private val viewModel: ProfileViewModel by viewModels {
         GenericSavedStateViewModelFactory(profileViewModelFactory, this)
     }
-
-    private lateinit var mainNavController: MainNavController
 
     private val goToAlbumFragment: ((ImageView, AlbumModel, Int) -> Unit) = { _, albumModel, _ ->
         val albumId = albumModel.id
@@ -66,6 +74,16 @@ constructor(
         }
     }
 
+    private val adapter = CompositeDelegateAdapter(
+        UserActionsAdapterDelegate(),
+        UserAlbumsAdapterDelegate(goToAlbumFragment),
+        UserDetailsAdapterDelegate(),
+        UserInfoAdapterDelegate(),
+        UserPostAdapterDelegate(goToPostFragment),
+        DividerAdapterDelegate(),
+        EmptySpaceAdapterDelegate()
+    )
+
     override fun onAttach(context: Context) {
         try {
             mainNavController = context as MainNavController
@@ -85,7 +103,7 @@ constructor(
             it.lifecycleOwner = viewLifecycleOwner
         }
 
-        _binding!!.profileRv.adapter = ProfileAdapter(goToAlbumFragment, goToPostFragment)
+        _binding!!.profileRv.adapter = adapter
 
         _binding?.swipeRefreshLayout?.setOnRefreshListener {
             viewModel.startSearch()

@@ -1,64 +1,50 @@
 package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.databinding.BlockUserDetailsBinding
-import com.example.appsample.framework.presentation.profile.model.ProfileElement
-import com.example.appsample.framework.presentation.profile.model.UserDetailsElement
-import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.ViewBindingDelegateAdapter
+import com.example.appsample.framework.presentation.profile.adapterelements.UserDetailsElement
 
 
-@FlowPreview
-class UserDetailsAdapterDelegate @ExperimentalCoroutinesApi constructor() :
-    AbsListItemAdapterDelegate<UserDetailsElement, ProfileElement, UserDetailsAdapterDelegate.ViewHolder>() {
-
-    @ExperimentalCoroutinesApi
-    override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
-        val viewProductCategoryBinding =
-            BlockUserDetailsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(viewProductCategoryBinding)
-    }
-
-    override fun isForViewType(
-        item: ProfileElement,
-        items: MutableList<ProfileElement>,
-        position: Int
-    ): Boolean {
-        return item is UserDetailsElement
-    }
-
-    override fun onBindViewHolder(
-        item: UserDetailsElement,
-        holder: ViewHolder,
-        payloads: MutableList<Any>
+class UserDetailsAdapterDelegate :
+    ViewBindingDelegateAdapter<UserDetailsElement, BlockUserDetailsBinding>(
+        BlockUserDetailsBinding::inflate
     ) {
-        holder.bind(item)
-    }
 
-    class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: BlockUserDetailsBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    override fun BlockUserDetailsBinding.onBind(item: UserDetailsElement) {
 
-        fun bind(item: UserDetailsElement) {
-            binding.user = item.user
-            binding.moreAddressDetails.setOnClickListener { onClickAddressDetails() }
-            binding.hideAddressDetails.setOnClickListener { onClickAddressDetails() }
-        }
-
-        private fun onClickAddressDetails() {
-            if (binding.moreAddressDetails.visibility == View.VISIBLE) {
-                binding.moreAddressDetails.visibility = View.GONE
-                binding.addressDetailsLayout.visibility = View.VISIBLE
-                binding.hideAddressDetails.visibility = View.VISIBLE
+        fun onClickAddressDetails() {
+            if (moreAddressDetails.visibility == View.VISIBLE) {
+                moreAddressDetails.visibility = View.GONE
+                addressDetailsLayout.visibility = View.VISIBLE
+                hideAddressDetails.visibility = View.VISIBLE
             } else {
-                binding.moreAddressDetails.visibility = View.VISIBLE
-                binding.addressDetailsLayout.visibility = View.GONE
-                binding.hideAddressDetails.visibility = View.GONE
+                moreAddressDetails.visibility = View.VISIBLE
+                addressDetailsLayout.visibility = View.GONE
+                hideAddressDetails.visibility = View.GONE
             }
         }
+
+        user = item.user
+        moreAddressDetails.setOnClickListener { onClickAddressDetails() }
+        hideAddressDetails.setOnClickListener { onClickAddressDetails() }
+    }
+
+    override fun isForViewType(item: Any): Boolean = item is UserDetailsElement
+
+    override fun UserDetailsElement.getItemId(): Any = id
+
+    override fun BlockUserDetailsBinding.onRecycled() {
+        moreAddressDetails.setOnClickListener(null)
+        hideAddressDetails.setOnClickListener(null)
+    }
+
+    override fun BlockUserDetailsBinding.onAttachedToWindow() {
+        Log.d(UserDetailsAdapterDelegate::class.java.simpleName, "onAttachedToWindow")
+    }
+
+    override fun BlockUserDetailsBinding.onDetachedFromWindow() {
+        Log.d(UserDetailsAdapterDelegate::class.java.simpleName, "onDetachedFromWindow")
     }
 }

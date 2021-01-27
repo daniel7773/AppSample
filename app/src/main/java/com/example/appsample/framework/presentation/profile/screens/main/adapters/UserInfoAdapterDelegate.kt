@@ -1,49 +1,30 @@
 package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import android.util.Log
 import com.example.appsample.databinding.BlockUserInfoBinding
-import com.example.appsample.framework.presentation.profile.model.ProfileElement
-import com.example.appsample.framework.presentation.profile.model.UserInfoElement
-import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.ViewBindingDelegateAdapter
+import com.example.appsample.framework.presentation.profile.adapterelements.UserInfoElement
 
 
-@FlowPreview
-class UserInfoAdapterDelegate @ExperimentalCoroutinesApi constructor() :
-    AbsListItemAdapterDelegate<UserInfoElement, ProfileElement, UserInfoAdapterDelegate.ViewHolder>() {
+class UserInfoAdapterDelegate : ViewBindingDelegateAdapter<UserInfoElement, BlockUserInfoBinding>(
+    BlockUserInfoBinding::inflate
+) {
 
-    @ExperimentalCoroutinesApi
-    override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
-        val viewProductCategoryBinding =
-            BlockUserInfoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(viewProductCategoryBinding)
+    override fun BlockUserInfoBinding.onBind(item: UserInfoElement) {
+        user = item.user
     }
 
-    override fun isForViewType(
-        item: ProfileElement,
-        items: MutableList<ProfileElement>,
-        position: Int
-    ): Boolean {
-        return item is UserInfoElement
+    override fun isForViewType(item: Any): Boolean = item is UserInfoElement
+
+    override fun UserInfoElement.getItemId(): Any = id
+
+    override fun BlockUserInfoBinding.onRecycled() {}
+
+    override fun BlockUserInfoBinding.onAttachedToWindow() {
+        Log.d(UserInfoAdapterDelegate::class.java.simpleName, "onAttachedToWindow")
     }
 
-    override fun onBindViewHolder(
-        item: UserInfoElement,
-        holder: ViewHolder,
-        payloads: MutableList<Any>
-    ) {
-        holder.bind(item)
-    }
-
-    class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: BlockUserInfoBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(item: UserInfoElement) {
-            binding.user = item.user
-        }
+    override fun BlockUserInfoBinding.onDetachedFromWindow() {
+        Log.d(UserInfoAdapterDelegate::class.java.simpleName, "onDetachedFromWindow")
     }
 }

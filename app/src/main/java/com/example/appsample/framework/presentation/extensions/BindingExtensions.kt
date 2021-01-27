@@ -2,14 +2,12 @@ package com.example.appsample.framework.presentation.extensions
 
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.AdapterElement
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.CompositeDelegateAdapter
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
 import com.example.appsample.framework.presentation.profile.model.PhotoModel
-import com.example.appsample.framework.presentation.profile.model.ProfileElement
-import com.example.appsample.framework.presentation.profile.model.post.PostElement
 import com.example.appsample.framework.presentation.profile.screens.album.AlbumPhotoListAdapter
-import com.example.appsample.framework.presentation.profile.screens.main.ProfileAdapter
 import com.example.appsample.framework.presentation.profile.screens.main.adapters.UserAlbumsChildAdapter
-import com.example.appsample.framework.presentation.profile.screens.post.PostAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -18,11 +16,11 @@ import kotlinx.coroutines.FlowPreview
 @BindingAdapter("app:items")
 fun setRecyclerViewItems(
     recyclerView: RecyclerView,
-    items: Sequence<ProfileElement>?
+    items: Sequence<AdapterElement>?
 ) {
-    val adapter = (recyclerView.adapter as? ProfileAdapter)
+    val adapter = (recyclerView.adapter as? CompositeDelegateAdapter)
         ?: throw Exception("Adapter should not be NULL while calling app:items in BindingExtensions")
-    adapter.updateData(items.orEmpty())
+    adapter.swapData(items?.toList().orEmpty())
 }
 
 
@@ -50,17 +48,4 @@ fun setAlbumFragmentRecyclerView(
     val adapter = (recyclerView.adapter as? AlbumPhotoListAdapter)
         ?: throw Exception("Adapter should not be NULL while calling app:albumPhotos in BindingExtensions")
     adapter.submitList(items.orEmpty())
-}
-
-// for post adapter in PostFragment
-@FlowPreview
-@ExperimentalCoroutinesApi
-@BindingAdapter("app:postItems")
-fun setPostRecyclerViewItems(
-    recyclerView: RecyclerView,
-    items: Sequence<PostElement>?
-) {
-    val adapter = (recyclerView.adapter as? PostAdapter)
-        ?: throw Exception("Adapter should not be NULL while calling app:items in BindingExtensions")
-    adapter.updateData(items.orEmpty())
 }

@@ -1,18 +1,18 @@
 package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
 import android.util.Log
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.AdapterElement
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.Divider
+import com.example.appsample.framework.base.presentation.delegateadapter.separators.EmptySpace
 import com.example.appsample.framework.presentation.common.model.State
 import com.example.appsample.framework.presentation.common.model.UserModel
+import com.example.appsample.framework.presentation.profile.adapterelements.AlbumsBlockElement
+import com.example.appsample.framework.presentation.profile.adapterelements.UserActionsElement
+import com.example.appsample.framework.presentation.profile.adapterelements.UserDetailsElement
+import com.example.appsample.framework.presentation.profile.adapterelements.UserInfoElement
+import com.example.appsample.framework.presentation.profile.adapterelements.UserPostsElement
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
-import com.example.appsample.framework.presentation.profile.model.AlbumsBlockElement
-import com.example.appsample.framework.presentation.profile.model.Divider
-import com.example.appsample.framework.presentation.profile.model.EmptySpace
 import com.example.appsample.framework.presentation.profile.model.PostModel
-import com.example.appsample.framework.presentation.profile.model.ProfileElement
-import com.example.appsample.framework.presentation.profile.model.UserActionsElement
-import com.example.appsample.framework.presentation.profile.model.UserDetailsElement
-import com.example.appsample.framework.presentation.profile.model.UserInfoElement
-import com.example.appsample.framework.presentation.profile.model.UserPostsElement
 
 object ProfileTransformator {
 
@@ -23,16 +23,16 @@ object ProfileTransformator {
         user: State<UserModel?>,
         albums: State<List<AlbumModel>?>,
         posts: State<List<PostModel>?>
-    ) = emptySequence<ProfileElement>()
+    ) = emptySequence<AdapterElement>()
         .plus(getUser(user))
         .plus(getAlbumList(albums))
         .plus(getPostList(posts))
 
     fun getUser(userState: State<UserModel?>) = when (userState) {
         is State.Success -> {
-            if (userState.data == null) emptySequence<ProfileElement>()
+            if (userState.data == null) emptySequence<AdapterElement>()
             Log.d(TAG, "added success to userAdapterItem")
-            sequenceOf<ProfileElement>(UserInfoElement(userState.data!!))
+            sequenceOf<AdapterElement>(UserInfoElement(userState.data!!))
                 .plus(UserActionsElement(userState.data!!))
                 .plus(Divider("divider_after_user_actions"))
                 .plus(UserDetailsElement(userState.data!!))
@@ -45,7 +45,7 @@ object ProfileTransformator {
 
     fun getPostList(postListState: State<List<PostModel>?>) = when (postListState) {
         is State.Success -> {
-            if (postListState.data == null) emptySequence<ProfileElement>()
+            if (postListState.data.isNullOrEmpty()) emptySequence<AdapterElement>()
             Log.d(TAG, "added success to postListItem with size: ${postListState.data!!.size}")
             sequenceOf(EmptySpace("user_posts_empty_space"))
                 .plus(postListState.data!!.flatMap {
@@ -61,8 +61,8 @@ object ProfileTransformator {
     fun getAlbumList(albumListState: State<List<AlbumModel>?>) = when (albumListState) {
         is State.Success -> {
             Log.d(TAG, "added success to albumListItem")
-            if (albumListState.data == null) emptySequence<ProfileElement>()
-            emptySequence<ProfileElement>()
+            if (albumListState.data.isNullOrEmpty()) emptySequence<AdapterElement>()
+            emptySequence<AdapterElement>()
                 .plus(EmptySpace("album_block_empty_space"))
                 .plus(AlbumsBlockElement(albumListState.data!!))
         }

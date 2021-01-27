@@ -1,54 +1,42 @@
 package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.util.Log
 import android.widget.ImageView
-import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.databinding.BlockUserAlbumsBinding
+import com.example.appsample.framework.base.presentation.delegateadapter.delegate.ViewBindingDelegateAdapter
+import com.example.appsample.framework.presentation.profile.adapterelements.AlbumsBlockElement
 import com.example.appsample.framework.presentation.profile.model.AlbumModel
-import com.example.appsample.framework.presentation.profile.model.AlbumsBlockElement
-import com.example.appsample.framework.presentation.profile.model.ProfileElement
-import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 class UserAlbumsAdapterDelegate(
     private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit)
-) : AbsListItemAdapterDelegate<AlbumsBlockElement, ProfileElement, UserAlbumsAdapterDelegate.ViewHolder>() {
+) : ViewBindingDelegateAdapter<AlbumsBlockElement, BlockUserAlbumsBinding>(
+    BlockUserAlbumsBinding::inflate
+) {
 
-    override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
-        val blockUserAlbumsBinding =
-            BlockUserAlbumsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(blockUserAlbumsBinding, onAlbumClick)
-    }
-
-    override fun isForViewType(
-        item: ProfileElement,
-        items: MutableList<ProfileElement>,
-        position: Int
-    ): Boolean {
-        return item is AlbumsBlockElement
-    }
-
-    override fun onBindViewHolder(
-        item: AlbumsBlockElement,
-        holder: ViewHolder,
-        payloads: MutableList<Any>
-    ) {
-        holder.bind(item.postList)
-    }
-
-    class ViewHolder @ExperimentalCoroutinesApi constructor(
-        private val binding: BlockUserAlbumsBinding,
-        private val onAlbumClick: ((ImageView, AlbumModel, Int) -> Unit)
-    ) : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(items: List<AlbumModel>) {
-            binding.albumsRecyclerView.adapter = UserAlbumsChildAdapter(onAlbumClick)
-            binding.albumList = items
-            if (items.isNotEmpty()) {
-                binding.albumsSize.text = items.size.toString()
-            }
+    override fun BlockUserAlbumsBinding.onBind(item: AlbumsBlockElement) {
+        albumList = item.albumList
+        albumsRecyclerView.adapter = UserAlbumsChildAdapter(onAlbumClick)
+        if (item.albumList.isNotEmpty()) {
+            albumsSize.text = item.albumList.size.toString()
         }
+    }
+
+    override fun isForViewType(item: Any): Boolean = item is AlbumsBlockElement
+
+    override fun AlbumsBlockElement.getItemId(): Any = id
+
+    override fun BlockUserAlbumsBinding.onRecycled() {
+        albumsSize.text = ""
+        albumsRecyclerView.adapter = null
+    }
+
+    override fun BlockUserAlbumsBinding.onAttachedToWindow() {
+        Log.d(UserAlbumsAdapterDelegate::class.java.simpleName, "onAttachedToWindow")
+    }
+
+    override fun BlockUserAlbumsBinding.onDetachedFromWindow() {
+        Log.d(UserAlbumsAdapterDelegate::class.java.simpleName, "onDetachedFromWindow")
     }
 }

@@ -77,13 +77,13 @@ class PostsRepositoryTest {
 
         coEvery {
             commentsRepository.getCommentsNum(any())
-        } returns Resource.Success(10, "mocked data")
+        } returns 10
 
         val networkValue = networkApi.getPostsListFromUserAsync(userId).await()
         val repositoryValue = postsRepository.getPostsList(userId)
 
         Assertions.assertThat(PostEntityToPostMapper.mapList(networkValue!!).size)
-            .isEqualTo((repositoryValue.first() as Resource.Success).data!!.size)
+            .isEqualTo(repositoryValue.first()?.size)
     }
 
     @Test
@@ -100,10 +100,6 @@ class PostsRepositoryTest {
 
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat((repositoryValue.first() as Resource.Error).exception)
-            .isInstanceOf(exception::class.java)
-        Assertions.assertThat(exception.message).isEqualTo((repositoryValue.first() as Resource.Error).exception.message)
-        Assertions.assertThat(exception.localizedMessage)
-            .isEqualTo((repositoryValue.first() as Resource.Error).exception.localizedMessage)
+        Assertions.assertThat(repositoryValue.first()).isEqualTo(null)
     }
 }

@@ -92,7 +92,7 @@ dependencies {
      *   https://developer.android.com/codelabs/kotlin-coroutines#2
      */
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2'
 
     /**
      *   For retrofit with coroutines
@@ -105,13 +105,8 @@ dependencies {
      *   Navigation
      *
      */
-    // Navigation
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.2'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.2'
-
-    // Custom adapters for using with View Binding (not synthetic)
-    implementation 'com.hannesdorfmann:adapterdelegates4-kotlin-dsl:4.3.0'
-    implementation 'com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding:4.3.0'
 
 
     /**
