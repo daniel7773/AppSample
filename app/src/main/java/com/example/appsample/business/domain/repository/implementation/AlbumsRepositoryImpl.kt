@@ -10,11 +10,11 @@ import com.example.appsample.business.domain.repository.NetworkBoundResource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.withContext
-import java.util.concurrent.*
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -26,10 +26,10 @@ class AlbumsRepositoryImpl @Inject constructor(
     private val photoRepository: PhotoRepository
 ) : AlbumsRepository {
 
-    private val TAG = "AlbumsRepositoryImpl"
+    private val TAG = AlbumsRepositoryImpl::class.java.simpleName
 
     override suspend fun getAlbumList(userId: Int): Flow<List<Album>?> {
-        return object : NetworkBoundResource<List<AlbumEntity>, List<Album>>(
+        val albumList = object : NetworkBoundResource<List<AlbumEntity>, List<Album>>(
             { albumCacheDataSource.getAllAlbums(userId) },
             { jsonPlaceholderApiSource.getAlbumsFromUserAsync(userId).await() },
         ) {
@@ -44,26 +44,21 @@ class AlbumsRepositoryImpl @Inject constructor(
             override suspend fun shouldFetch(entity: List<Album>?) = entity?.size != 10
             override suspend fun map(entity: List<AlbumEntity>) =
                 AlbumEntityToAlbumMapper.mapList(entity)
-        }.result.transform { albumList ->
+        }.resultSuspend()
 
-            albumList?.forEach { album ->
-                album.id?.run {
-                    val photoFlow = withContext(ioDispatcher) {
-                        photoRepository.getPhotoById(this@run, 1)
-                    }
-                    /**
-                     * @see PhotoRepositoryImpl.getPhotoById()
-                     * explanation why we sending hardcoded 1
-                     */
+        return flowOf(addFirstPhotos(albumList))
+    }
 
-                    photoFlow.collect { photo ->
-                        album.firstPhoto = photo
-                    }
-                }
+    private fun addFirstPhotos(albumList: List<Album>?) = runBlocking(ioDispatcher) {
+        albumList?.map { album ->
+            async {
+                album.firstPhoto = photoRepository.getPhotoByIdSuspend(album.id ?: 0, 1)
             }
-
-            emit(albumList)
+        }?.map {
+            it.await()
         }
+        joinAll()
+        albumList
     }
 
 }

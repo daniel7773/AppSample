@@ -8,4 +8,6 @@ interface PhotoRepository {
     suspend fun getAlbumPhotoList(albumId: Int): Flow<List<Photo>?>
 
     suspend fun getPhotoById(albumId: Int, photoId: Int): Flow<Photo?>
+
+    suspend fun getPhotoByIdSuspend(albumId: Int, photoId: Int): Photo?
 }
