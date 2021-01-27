@@ -67,7 +67,7 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     init {
         savedStateHandle.set(
             USER_ID_KEY,
-            sessionManager.user.id!!
+            sessionManager.user.id ?: 0
         )
         startSearch()
     }

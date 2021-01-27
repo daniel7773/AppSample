@@ -45,7 +45,7 @@ object ProfileTransformator {
 
     fun getPostList(postListState: State<List<PostModel>?>) = when (postListState) {
         is State.Success -> {
-            if (postListState.data == null) emptySequence<AdapterElement>()
+            if (postListState.data.isNullOrEmpty()) emptySequence<AdapterElement>()
             Log.d(TAG, "added success to postListItem with size: ${postListState.data!!.size}")
             sequenceOf(EmptySpace("user_posts_empty_space"))
                 .plus(postListState.data!!.flatMap {
@@ -61,7 +61,7 @@ object ProfileTransformator {
     fun getAlbumList(albumListState: State<List<AlbumModel>?>) = when (albumListState) {
         is State.Success -> {
             Log.d(TAG, "added success to albumListItem")
-            if (albumListState.data == null) emptySequence<AdapterElement>()
+            if (albumListState.data.isNullOrEmpty()) emptySequence<AdapterElement>()
             emptySequence<AdapterElement>()
                 .plus(EmptySpace("album_block_empty_space"))
                 .plus(AlbumsBlockElement(albumListState.data!!))

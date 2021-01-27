@@ -11,9 +11,11 @@ import com.example.appsample.business.domain.repository.abstraction.CommentsRepo
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -25,10 +27,10 @@ class PostsRepositoryImpl @Inject constructor(
     private val commentsRepository: CommentsRepository
 ) : PostsRepository {
 
-    private val TAG = "PostsRepositoryImpl"
+    private val TAG = PostsRepositoryImpl::class.java.simpleName
 
     override suspend fun getPostsList(userId: Int): Flow<List<Post>?> {
-        return object : NetworkBoundResource<List<PostEntity>, List<Post>>(
+        val postList = object : NetworkBoundResource<List<PostEntity>, List<Post>>(
             { postCacheDataSource.getAllPosts(userId) },
             { jsonPlaceholderApiSource.getPostsListFromUserAsync(userId).await() },
         ) {
@@ -43,18 +45,23 @@ class PostsRepositoryImpl @Inject constructor(
             override suspend fun shouldFetch(entity: List<Post>?) = entity?.size != 10
             override suspend fun map(entity: List<PostEntity>) =
                 PostEntityToPostMapper.mapList(entity)
-        }.result.transform { postList ->
-            postList?.forEach { post ->
-                post.id?.run {
-                    val commentsNum = withContext(ioDispatcher) {
-                        commentsRepository.getCommentsNum(this@run)
-                    }
-                    post.commentsSize = commentsNum ?: 0
+        }.resultSuspend()
 
-                }
+
+
+        return flowOf(addComments(postList))
+    }
+
+    private fun addComments(postList: List<Post>?) = runBlocking(ioDispatcher) {
+        postList?.map { post ->
+            async {
+                post.commentsSize = commentsRepository.getCommentsNum(post.id ?: 0)
             }
-            emit(postList)
+        }?.map {
+            it.await()
         }
+        joinAll()
+        postList
     }
 
     override suspend fun getPost(postId: Int): Flow<Post?> {
