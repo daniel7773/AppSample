@@ -187,7 +187,7 @@ class RegisterFragment : BaseFragment(R.layout.fragment_register),
     fun showNextStage() {
         val animationFlipIn = AnimationUtils.loadAnimation(
             requireContext(),
-            R.anim.slide_from_left
+            R.anim.slide_from_right_transparent
         )
         val animationFlipOut = AnimationUtils.loadAnimation(
             requireContext(),
@@ -202,7 +202,7 @@ class RegisterFragment : BaseFragment(R.layout.fragment_register),
         if (viewFlipper.displayedChild == 0) return
         val animationFlipIn = AnimationUtils.loadAnimation(
             requireContext(),
-            R.anim.slide_from_right
+            R.anim.slide_from_left
         )
         val animationFlipOut = AnimationUtils.loadAnimation(
             requireContext(),

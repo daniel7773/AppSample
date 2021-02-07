@@ -1,6 +1,7 @@
 package com.example.appsample.framework.presentation.profile.screens.main.adapters
 
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import com.example.appsample.databinding.BlockUserAlbumsBinding
 import com.example.appsample.framework.base.presentation.delegateadapter.delegate.ViewBindingDelegateAdapter
@@ -16,11 +17,16 @@ class UserAlbumsAdapterDelegate(
 ) {
 
     override fun BlockUserAlbumsBinding.onBind(item: AlbumsBlockElement) {
-        albumList = item.albumList
-        albumsRecyclerView.adapter = UserAlbumsChildAdapter(onAlbumClick)
+        var bindingList: List<AlbumModel?> = item.albumList
         if (item.albumList.isNotEmpty()) {
             albumsSize.text = item.albumList.size.toString()
+            addPhotoTextView.visibility = View.GONE
+        } else {
+            bindingList = listOf<AlbumModel?>(null, null, null)
+            addPhotoTextView.visibility = View.VISIBLE
         }
+        albumList = bindingList
+        albumsRecyclerView.adapter = UserAlbumsChildAdapter(onAlbumClick)
     }
 
     override fun isForViewType(item: Any): Boolean = item is AlbumsBlockElement
@@ -30,6 +36,7 @@ class UserAlbumsAdapterDelegate(
     override fun BlockUserAlbumsBinding.onRecycled() {
         albumsSize.text = ""
         albumsRecyclerView.adapter = null
+        addPhotoTextView.visibility = View.GONE
     }
 
     override fun BlockUserAlbumsBinding.onAttachedToWindow() {

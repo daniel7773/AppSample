@@ -53,7 +53,11 @@ class UserAlbumsChildAdapter(private val onAlbumClick: ((ImageView, AlbumModel, 
             val isItemNull = item == null
             if (isItemNull) {
                 binding.albumTitle.visibility = View.GONE
+                binding.albumSize.visibility = View.GONE
                 return
+            } else {
+                binding.albumTitle.visibility = View.VISIBLE
+                binding.albumSize.visibility = View.VISIBLE
             }
             val photosNumber: String = String.format(
                 binding.postIcon.context.getString(R.string.photos_number),
@@ -73,7 +77,7 @@ class UserAlbumsChildAdapter(private val onAlbumClick: ((ImageView, AlbumModel, 
         private fun loadAlbumPicture(photo: PhotoModel) =
             Picasso.get()
                 .load(photo.thumbnailUrl)
-                .placeholder(R.drawable.ic_square_placeholder)
+                .placeholder(R.drawable.shadow)
                 .error(R.drawable.ic_error)
                 .into(binding.postIcon)
     }

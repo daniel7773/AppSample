@@ -23,6 +23,24 @@
         android:paddingBottom="8dp">
 
         <TextView
+            android:id="@+id/addPhotoTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:text="@string/add_image"
+            android:gravity="center_vertical"
+            android:textStyle="bold"
+            android:drawablePadding="12dp"
+            android:textColor="@color/linkBlue"
+            android:textSize="22sp"
+            android:drawableStart="@drawable/ic_add_image"
+            app:layout_constraintBottom_toBottomOf="@id/albums_recycler_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/albums_recycler_view" />
+
+        <TextView
             android:id="@+id/textViewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -46,8 +46,6 @@ class ProfileViewModel constructor( // I suppose it is better to use database in
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val states = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Idle)
-
     var user: State<UserModel?> = Unknown()
     var postList: State<List<PostModel>?> = Unknown()
     var albumList: State<List<AlbumModel>?> = Unknown()

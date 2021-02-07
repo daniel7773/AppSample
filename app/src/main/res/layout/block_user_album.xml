@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/item_layout"
         android:layout_width="@dimen/album_item_card_width"
-        android:layout_height="@dimen/album_item_card_height">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/post_icon"
@@ -24,7 +24,7 @@
             android:layout_marginVertical="8dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_square_placeholder"
+            android:src="@drawable/shadow"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -20,27 +20,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-/*
-
-    val TAG = "MainActivity"
-
-    @Inject
-    lateinit var authFragmentFactory: AuthFragmentFactory
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        ((this.application) as BaseApplication)
-            .getAppComponent()
-            .mainComponent()
-            .create()
-            .inject(this)
-
-        supportFragmentManager.fragmentFactory = authFragmentFactory
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-    }
-
-
- */
 
 private const val NAV_HOST_ID = "NavHostFragment"
 private const val FRAGMENT_FACTORY_NAME = "FragmentFactoryName"
@@ -64,6 +43,7 @@ class MainActivity : MainNavController, BaseActivity() {
         this.fragmentFactoryName = fragmentFactoryName
         this.graphId = graphId
 
+        var isSetAnim = false
         val newNavHostFragment = when (fragmentFactoryName) {
 
             AuthFragmentFactory.FRAGMENT_FACTORY_NAME -> {
@@ -73,6 +53,7 @@ class MainActivity : MainNavController, BaseActivity() {
             }
 
             ProfileFragmentFactory.FRAGMENT_FACTORY_NAME -> {
+                isSetAnim = true
                 ProfileNavHostFragment.create(
                     graphId
                 )
@@ -85,7 +66,12 @@ class MainActivity : MainNavController, BaseActivity() {
             }
         }
 
-        supportFragmentManager.beginTransaction()
+        val transaction = supportFragmentManager.beginTransaction()
+
+        if (isSetAnim) {
+            transaction.setCustomAnimations(R.anim.slide_from_right, R.anim.dummy_animation_100)
+        }
+        transaction
             .replace(
                 R.id.main_nav_host_container,
                 newNavHostFragment,

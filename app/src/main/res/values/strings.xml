@@ -17,6 +17,7 @@
 
     <!-- -->
     <string name="albums">Альбомы</string>
+    <string name="add_image">Добавить фото</string>
     <string name="album">Альбом</string>
     <string name="photos_number">%d фотографий</string>
 

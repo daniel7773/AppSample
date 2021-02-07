@@ -30,7 +30,8 @@ object ProfileTransformator {
 
     fun getUser(userState: State<UserModel?>) = when (userState) {
         is State.Success -> {
-            if (userState.data == null) emptySequence<AdapterElement>()
+            if (userState.data == null) getNullUserSequence()
+            Log.d(TAG, "userState.data == null: ${userState.data == null}")
             Log.d(TAG, "added success to userAdapterItem")
             sequenceOf<AdapterElement>(UserInfoElement(userState.data!!))
                 .plus(UserActionsElement(userState.data!!))
@@ -38,9 +39,16 @@ object ProfileTransformator {
                 .plus(UserDetailsElement(userState.data!!))
                 .plus(Divider("user_details_divider"))
         }
-        else -> {
-            emptySequence()
-        }
+        else -> getNullUserSequence()
+    }
+
+    private fun getNullUserSequence(): Sequence<AdapterElement> {
+        val userModel = UserModel()
+        return sequenceOf<AdapterElement>(UserInfoElement(userModel))
+            .plus(UserActionsElement(userModel))
+            .plus(Divider("divider_after_user_actions"))
+            .plus(UserDetailsElement(userModel))
+            .plus(Divider("user_details_divider"))
     }
 
     fun getPostList(postListState: State<List<PostModel>?>) = when (postListState) {
@@ -58,16 +66,20 @@ object ProfileTransformator {
         }
     }
 
-    fun getAlbumList(albumListState: State<List<AlbumModel>?>) = when (albumListState) {
+    private fun getAlbumList(listState: State<List<AlbumModel>?>) = when (listState) {
         is State.Success -> {
             Log.d(TAG, "added success to albumListItem")
-            if (albumListState.data.isNullOrEmpty()) emptySequence<AdapterElement>()
+            if (listState.data.isNullOrEmpty()) getNullOrEmptyAlbumListSequence()
             emptySequence<AdapterElement>()
                 .plus(EmptySpace("album_block_empty_space"))
-                .plus(AlbumsBlockElement(albumListState.data!!))
+                .plus(AlbumsBlockElement(listState.data!!))
         }
-        else -> {
-            emptySequence()
-        }
+        else -> getNullOrEmptyAlbumListSequence()
+    }
+
+    private fun getNullOrEmptyAlbumListSequence(): Sequence<AdapterElement> {
+        return emptySequence<AdapterElement>()
+            .plus(EmptySpace("album_block_empty_space"))
+            .plus(AlbumsBlockElement(emptyList()))
     }
 }
