@@ -1,16 +1,17 @@
 package com.example.appsample.framework.datasource.cache.abstraction
 
-import com.example.appsample.business.data.models.PostEntity
+import com.example.appsample.business.domain.model.Post
+
 
 interface PostDaoService {
 
-    suspend fun insertPost(postEntity: PostEntity): Long
+    suspend fun insertPost(postData: Post): Long
 
-    suspend fun insertPostList(posts: List<PostEntity>): LongArray
+    suspend fun insertPostList(posts: List<Post>): LongArray
 
-    suspend fun searchPostById(id: Int): PostEntity?
+    suspend fun searchPostById(id: Int): Post?
 
-    suspend fun searchPosts(query: String, page: Int): List<PostEntity>?
+    suspend fun searchPosts(query: String, page: Int): List<Post>?
 
     suspend fun updatePost(
         id: Int,
@@ -22,9 +23,9 @@ interface PostDaoService {
 
     suspend fun deletePost(id: Int): Int
 
-    suspend fun deletePosts(posts: List<PostEntity>): Int
+    suspend fun deletePosts(posts: List<Post>): Int
 
-    suspend fun getAllPosts(userId: Int): List<PostEntity>
+    suspend fun getAllPosts(userId: Int): List<Post>
 
     suspend fun getNumPosts(userId: Int): Int
 }

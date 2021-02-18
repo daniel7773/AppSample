@@ -1,21 +1,18 @@
 package com.example.appsample.business.domain.repository
 
-import com.example.appsample.business.data.cache.abstraction.UserCacheDataSource
-import com.example.appsample.business.data.models.UserEntity
+import com.example.appsample.business.data.cache.abstraction.UserCacheSource
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
-import com.example.appsample.business.domain.mappers.UserEntityToUserMapper
-import com.example.appsample.business.domain.repository.abstraction.PostsRepository
+import com.example.appsample.business.domain.mappers.UserDataToUserMapper
 import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import com.example.appsample.business.domain.repository.implementation.UserRepositoryImpl
+import com.example.appsample.business.domain.state.DataState
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions
@@ -36,7 +33,7 @@ class UserRepositoryTest {
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
 
     private val networkApi: JsonPlaceholderApiSource = mockk()
-    private val userCacheDataSource: UserCacheDataSource = mockk()
+    private val userCacheSource: UserCacheSource = mockk()
 
 
     val userId = 1L
@@ -44,12 +41,12 @@ class UserRepositoryTest {
     init {
         userRepository = UserRepositoryImpl(
             ioDispatcher = mainCoroutineRule.testDispatcher,
-            userCacheDataSource = userCacheDataSource,
+            userCacheSource = userCacheSource,
             jsonPlaceholderApiSource = networkApi
         )
 
         coEvery {
-            userCacheDataSource.insertUser(any())
+            userCacheSource.insertUser(any())
         } returns userId
     }
 
@@ -59,8 +56,8 @@ class UserRepositoryTest {
         val userId = 1
 
         coEvery {
-            userCacheDataSource.searchUserById(any())
-        } returns DataFactory.produceUserEntity()
+            userCacheSource.searchUserById(any())
+        } returns DataFactory.produceUser()
 
         coEvery {
             networkApi.getUserAsync(userId).await()
@@ -69,8 +66,8 @@ class UserRepositoryTest {
         val networkValue = networkApi.getUserAsync(userId).await()
         val repositoryValue = userRepository.getUser(userId).first()
 
-        Assertions.assertThat(UserEntityToUserMapper.map(networkValue!!))
-            .isEqualTo(repositoryValue)
+        Assertions.assertThat(UserDataToUserMapper.map(networkValue!!))
+            .isEqualTo(repositoryValue.data)
     }
 
     @Test
@@ -84,12 +81,12 @@ class UserRepositoryTest {
         } throws exception
 
         coEvery {
-            userCacheDataSource.searchUserById(any())
+            userCacheSource.searchUserById(any())
         } throws exception
 
         val repositoryValue = userRepository.getUser(userId.toInt()).first()
 
-        Assertions.assertThat(repositoryValue).isEqualTo(null)
+        Assertions.assertThat(repositoryValue).isInstanceOf(DataState.Error::class.java)
     }
 
 }

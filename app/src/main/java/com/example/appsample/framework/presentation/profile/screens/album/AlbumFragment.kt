@@ -1,6 +1,8 @@
 package com.example.appsample.framework.presentation.profile.screens.album
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentAlbumBinding
+import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.AlbumViewModelFactory
@@ -26,8 +29,11 @@ class AlbumFragment @Inject
 constructor(
     private val albumViewModelFactory: AlbumViewModelFactory
 ) : BaseFragment(R.layout.fragment_album) {
+    private val TAG = AlbumFragment::class.java.simpleName
 
     private val args: AlbumFragmentArgs by navArgs()
+
+    private lateinit var mainNavController: MainNavController
 
     private var _binding: FragmentAlbumBinding? = null
     private val binding: FragmentAlbumBinding get() = _binding!!
@@ -45,6 +51,15 @@ constructor(
         GridLayoutManager(requireContext(), 6).apply {
             this.spanCount = 3
         }
+    }
+
+    override fun onAttach(context: Context) {
+        try {
+            mainNavController = context as MainNavController
+        } catch (e: ClassCastException) {
+            Log.e(TAG, "$context must implement MainNavController")
+        }
+        super.onAttach(context)
     }
 
     override fun onCreateView(
@@ -66,6 +81,7 @@ constructor(
             layoutManager = gridLayoutManager
             addItemDecoration(GridMarginDecoration(2))
         }
+        _binding!!.backButton.setOnClickListener { closeFragment() }
 
         // will be called only once, since we consider postId should not be null in ViewModel after setting once
         if (viewModel.isAlbumIdNull()) {
@@ -73,5 +89,9 @@ constructor(
             viewModel.searchPhotos()
         }
         return binding.root
+    }
+
+    private fun closeFragment() {
+        mainNavController.navController().popBackStack()
     }
 }

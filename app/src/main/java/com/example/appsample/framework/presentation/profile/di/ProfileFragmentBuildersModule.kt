@@ -5,8 +5,8 @@ import androidx.fragment.app.FragmentFactory
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileFragmentFactory
 import com.example.appsample.framework.presentation.profile.di.keys.ProfileFragmentKey
 import com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment
-import com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment
 import com.example.appsample.framework.presentation.profile.screens.post.PostFragment
+import com.example.appsample.framework.presentation.profile.screens.profile.ProfileFragment
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap

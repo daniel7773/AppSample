@@ -10,7 +10,7 @@ class PostBodyAdapterDelegate : ViewBindingDelegateAdapter<PostBodyElement, Bloc
 ) {
 
     override fun BlockPostBodyBinding.onBind(item: PostBodyElement) {
-        post = item.postModel
+        post = item.post
     }
 
     override fun isForViewType(item: Any): Boolean = item is PostBodyElement

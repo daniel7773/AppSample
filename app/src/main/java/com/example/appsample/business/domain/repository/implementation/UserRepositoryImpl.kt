@@ -1,44 +1,77 @@
 package com.example.appsample.business.domain.repository.implementation
 
 import android.util.Log
-import com.example.appsample.business.data.cache.abstraction.UserCacheDataSource
-import com.example.appsample.business.data.models.UserEntity
+import com.example.appsample.business.data.cache.abstraction.UserCacheSource
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
-import com.example.appsample.business.domain.mappers.UserEntityToUserMapper
+import com.example.appsample.business.domain.mappers.UserDataToUserMapper
 import com.example.appsample.business.domain.model.User
-import com.example.appsample.business.domain.repository.NetworkBoundResource
 import com.example.appsample.business.domain.repository.abstraction.UserRepository
+import com.example.appsample.business.domain.state.DataState
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Named
 
 class UserRepositoryImpl @Inject constructor(
     @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
-    private val userCacheDataSource: UserCacheDataSource,
+    private val userCacheSource: UserCacheSource,
     private val jsonPlaceholderApiSource: JsonPlaceholderApiSource
 ) : UserRepository {
 
     private val TAG = "UserRepositoryImpl"
 
-    override suspend fun getUser(id: Int): Flow<User?> {
+    override suspend fun getUser(id: Int): Flow<DataState<User?>> = flow {
+        val cache: User? = getCacheData(id)
 
-        return object : NetworkBoundResource<UserEntity, User>(
-            { userCacheDataSource.searchUserById(id.toString()) },
-            { jsonPlaceholderApiSource.getUserAsync(id).await() },
+        if (cache != null) {
+            emit(DataState.Loading<User?>(cache, "Data from cache"))
+        } else {
+            Log.d(TAG, "Value from cache is empty")
+        }
 
-            ) {
-            override suspend fun updateCache(entity: UserEntity) {
-                Log.d(TAG, "updateCache called for user with id: ${entity.id}")
-                userCacheDataSource.insertUser(entity)
-                // TODO: call WorkManager
+        val networkData = getNetworkData(cache, id)
+        if (networkData.data != null) {
+            userCacheSource.insertUser(networkData.data!!)
+        }
+        emit(networkData)
+    }.flowOn(ioDispatcher)
+
+    private suspend fun getCacheData(id: Int): User? {
+        var user: User?
+        try {
+            withTimeout(3000L) {
+                user = userCacheSource.searchUserById(id.toString())
             }
+        } catch (e: Exception) {
+            if (e is TimeoutCancellationException) {
+                Log.e(TAG, "Timeout while getting user from cache")
+            }
+            e.printStackTrace()
+            user = null
+        }
+        return user
+    }
 
-            // TODO: Set any logical solution here, now it is set fake condition here since it's sample
-            //       we know that user data is not updating on server
-            override suspend fun shouldFetch(entity: User?): Boolean = entity == null
-
-            override suspend fun map(entity: UserEntity) = UserEntityToUserMapper.map(entity)
-        }.result
+    private suspend fun getNetworkData(cacheValue: User?, userId: Int): DataState<User?> {
+        try {
+            val user = withTimeout(15000L) {
+                jsonPlaceholderApiSource.getUserAsync(userId).await()
+            }
+            return if (user != null) {
+                DataState.Success(UserDataToUserMapper.map(user))
+            } else {
+                DataState.Error(null, "NULL came from network", NullPointerException())
+            }
+        } catch (e: Exception) {
+            if (e is TimeoutCancellationException) {
+                Log.e(TAG, "Timeout while getting user from network")
+            }
+            e.printStackTrace()
+            return DataState.Error(cacheValue, "Can't get value from network", e)
+        }
     }
 }

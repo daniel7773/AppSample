@@ -7,7 +7,7 @@
 
         <variable
             name="comment"
-            type="com.example.appsample.framework.presentation.profile.model.CommentModel" />
+            type="com.example.appsample.business.domain.model.Comment" />
 
     </data>
 

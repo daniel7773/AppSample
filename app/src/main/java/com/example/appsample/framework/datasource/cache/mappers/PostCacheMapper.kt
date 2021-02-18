@@ -1,27 +1,25 @@
 package com.example.appsample.framework.datasource.cache.mappers
 
-import com.example.appsample.business.data.models.PostEntity
 import com.example.appsample.business.data.util.EntityMapper
+import com.example.appsample.business.domain.model.Post
 import com.example.appsample.framework.datasource.cache.model.PostCacheEntity
 import com.example.appsample.framework.utils.DataHelper
 import javax.inject.Inject
 
 /**
- * Maps PostEntity to PostCacheEntity or PostCacheEntity to PostEntity.
+ * Maps Post to PostCacheEntity or PostCacheEntity to Post.
  */
-class PostCacheMapper
-@Inject
-constructor() : EntityMapper<PostEntity, PostCacheEntity> {
+class PostCacheMapper @Inject constructor() : EntityMapper<Post, PostCacheEntity> {
 
-    fun cacheEntityListToEntityList(entities: List<PostCacheEntity>): List<PostEntity> {
-        val list: ArrayList<PostEntity> = ArrayList()
+    fun cacheEntityListToList(entities: List<PostCacheEntity>): List<Post> {
+        val list: ArrayList<Post> = ArrayList()
         for (entity in entities) {
             list.add(mapFromCacheEntity(entity))
         }
         return list
     }
 
-    fun entityListToCacheEntityList(posts: List<PostEntity>): List<PostCacheEntity> {
+    fun listToCacheEntityList(posts: List<Post>): List<PostCacheEntity> {
         val entities: ArrayList<PostCacheEntity> = ArrayList()
         for (post in posts) {
             entities.add(mapToCacheEntity(post))
@@ -29,19 +27,19 @@ constructor() : EntityMapper<PostEntity, PostCacheEntity> {
         return entities
     }
 
-    override fun mapToCacheEntity(entity: PostEntity): PostCacheEntity {
+    override fun mapToCacheEntity(obj: Post): PostCacheEntity {
         return PostCacheEntity(
-            id = entity.id,
-            user_id = entity.userId ?: 0,
-            title = entity.title ?: "NULL",
-            body = entity.body ?: "NULL",
+            id = obj.id,
+            user_id = obj.userId ?: 0,
+            title = obj.title ?: "NULL",
+            body = obj.body ?: "NULL",
             DataHelper.getData(),
             DataHelper.getData()
         )
     }
 
-    override fun mapFromCacheEntity(cacheEntity: PostCacheEntity): PostEntity {
-        return PostEntity(
+    override fun mapFromCacheEntity(cacheEntity: PostCacheEntity): Post {
+        return Post(
             id = cacheEntity.id,
             userId = cacheEntity.user_id,
             title = cacheEntity.title,

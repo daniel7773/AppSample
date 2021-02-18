@@ -6,11 +6,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.appsample.business.domain.model.Photo
+import com.example.appsample.business.domain.state.DataState
+import com.example.appsample.business.domain.state.DataState.*
 import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
-import com.example.appsample.framework.presentation.common.model.State
-import com.example.appsample.framework.presentation.common.model.State.*
-import com.example.appsample.framework.presentation.profile.mappers.PhotoToPhotoModelMapper
-import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -28,16 +27,16 @@ class AlbumViewModel constructor( // I suppose it is better to use database inst
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _items: MutableLiveData<State<List<PhotoModel>?>> by lazy {
-        MutableLiveData(Unknown())
+    private val _items: MutableLiveData<DataState<List<Photo>?>> by lazy {
+        MutableLiveData(Idle())
     }
 
-    val items: LiveData<List<PhotoModel>> = Transformations.map(_items) {
+    val items: LiveData<List<Photo>> = Transformations.map(_items) {
         when (it) {
             is Loading -> emptyList()
             is Success -> it.data
             is Error -> emptyList()
-            is Unknown -> emptyList()
+            is Idle -> emptyList()
         }
     }
 
@@ -69,19 +68,15 @@ class AlbumViewModel constructor( // I suppose it is better to use database inst
     }
 
     private suspend fun launchSearch(albumId: Int) {
-        refreshData(Loading("Loading..."))
+        refreshData(Loading(null, "Loading..."))
         supervisorScope {
-            getPhotoListUseCase.getPhotoList(albumId).collect { photoList ->
-                if (photoList.isNullOrEmpty()) {
-                    _items.value = Error("NULL", Exception())
-                    return@collect
-                }
-                refreshData(Success(PhotoToPhotoModelMapper.mapPhotoList(photoList), "SUCCESS"))
+            getPhotoListUseCase.getPhotoList(albumId).collect { photoData ->
+                refreshData(photoData)
             }
         }
     }
 
-    private fun refreshData(state: State<List<PhotoModel>?>) =
+    private fun refreshData(state: DataState<List<Photo>?>) =
         viewModelScope.launch(mainDispatcher) {
             _items.value = state
         }

@@ -6,7 +6,7 @@ import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.ViewModelAssistedFactory
-import com.example.appsample.framework.presentation.profile.screens.main.ProfileViewModel
+import com.example.appsample.framework.presentation.profile.screens.profile.ProfileViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi

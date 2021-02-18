@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.appsample.framework.presentation.profile.screens.main.ProfileViewModel" />
+            type="com.example.appsample.framework.presentation.profile.screens.profile.ProfileViewModel" />
 
     </data>
 
@@ -14,8 +14,8 @@
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:swipeRefreshLayoutProgressSpinnerBackgroundColor="@color/colorAccent"
-        app:refreshing="@{viewModel.isLoading}">
+        app:refreshing="@{viewModel.isLoading}"
+        app:swipeRefreshLayoutProgressSpinnerBackgroundColor="@color/colorAccent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/profile_rv"

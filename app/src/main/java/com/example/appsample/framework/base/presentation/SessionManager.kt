@@ -1,8 +1,8 @@
 package com.example.appsample.framework.base.presentation
 
 import android.util.Log
+import com.example.appsample.business.domain.model.User
 import com.example.appsample.framework.presentation.common.model.AuthResource
-import com.example.appsample.framework.presentation.common.model.UserModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,7 +29,7 @@ class SessionManager @Inject constructor(
     private var _stateFlow: MutableSharedFlow<AuthResource> = MutableSharedFlow()
     val stateFlow = _stateFlow.asSharedFlow() // publicly exposed as read-only shared flow
 
-    var user: UserModel = UserModel()
+    var user: User = User()
 
     init {
         launch(coroutineContext) {
@@ -46,7 +46,7 @@ class SessionManager @Inject constructor(
                         Log.d(TAG, "user authentication ---------- Error ---------- ")
                     }
                     is AuthResource.NotAuthenticated -> {
-                        user = UserModel()
+                        user = User()
                         Log.d(TAG, "user authentication ----- NotAuthenticated ----- ")
                         Log.d(TAG, "Moving to Auth Fragment ")
                     }
