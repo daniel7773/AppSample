@@ -1,16 +1,17 @@
 package com.example.appsample.framework.datasource.cache.abstraction
 
-import com.example.appsample.business.data.models.PhotoEntity
+import com.example.appsample.business.domain.model.Photo
+
 
 interface PhotoDaoService {
 
-    suspend fun insertPhoto(photoEntity: PhotoEntity): Long
+    suspend fun insertPhoto(photoData: Photo): Long
 
-    suspend fun insertPhotoList(photoList: List<PhotoEntity>): LongArray
+    suspend fun insertPhotoList(photoList: List<Photo>): LongArray
 
-    suspend fun searchPhotoById(id: Int): PhotoEntity?
+    suspend fun searchPhotoById(id: Int): Photo?
 
-    suspend fun searchPhotos(query: String, page: Int): List<PhotoEntity>?
+    suspend fun searchPhotos(query: String, page: Int): List<Photo>?
 
     suspend fun updatePhoto(
         id: Int,
@@ -23,9 +24,9 @@ interface PhotoDaoService {
 
     suspend fun deletePhoto(id: Int): Int
 
-    suspend fun deletePhotos(photos: List<PhotoEntity>): Int
+    suspend fun deletePhotos(photos: List<Photo>): Int
 
-    suspend fun getAllPhotos(albumId: Int): List<PhotoEntity>
+    suspend fun getAllPhotos(albumId: Int): List<Photo>
 
     suspend fun getNumPhotos(albumId: Int): Int
 }

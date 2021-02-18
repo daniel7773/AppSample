@@ -1,12 +1,13 @@
 package com.example.appsample.business.domain.repository
 
-import com.example.appsample.business.data.cache.abstraction.PostCacheDataSource
+import com.example.appsample.business.data.cache.abstraction.PostCacheSource
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
-import com.example.appsample.business.domain.mappers.PostEntityToPostMapper
+import com.example.appsample.business.domain.mappers.PostDataToPostMapper
 import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
 import com.example.appsample.business.domain.repository.abstraction.PostsRepository
 import com.example.appsample.business.domain.repository.implementation.PostsRepositoryImpl
+import com.example.appsample.business.domain.state.DataState
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
@@ -33,31 +34,31 @@ class PostsRepositoryTest {
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
 
     val networkApi: JsonPlaceholderApiSource = mockk()
-    val postCacheDataSource: PostCacheDataSource = mockk()
+    val postCacheSource: PostCacheSource = mockk()
     private val commentsRepository: CommentsRepository = mockk()
 
     init {
 
         coEvery {
-            postCacheDataSource.insertPostList(any())
+            postCacheSource.insertPostList(any())
         } returns LongArray(1)
 
         coEvery {
-            postCacheDataSource.insertPost(any())
+            postCacheSource.insertPost(any())
         } returns 1L
 
         coEvery {
-            postCacheDataSource.getAllPosts(any())
+            postCacheSource.getAllPosts(any())
         } returns emptyList()
 
         coEvery {
-            postCacheDataSource.searchPostById(any())
+            postCacheSource.searchPostById(any())
         } returns null
 
 
         postsRepository = PostsRepositoryImpl(
             ioDispatcher = mainCoroutineRule.testDispatcher,
-            postCacheDataSource = postCacheDataSource,
+            postCacheSource = postCacheSource,
             jsonPlaceholderApiSource = networkApi,
             commentsRepository = commentsRepository
         )
@@ -72,8 +73,8 @@ class PostsRepositoryTest {
         } returns DataFactory.produceListOfPostsEntity(3)
 
         coEvery {
-            postCacheDataSource.getAllPosts(userId)
-        } returns DataFactory.produceListOfPostsEntity(3)
+            postCacheSource.getAllPosts(userId)
+        } returns DataFactory.produceListOfPosts(3)
 
         coEvery {
             commentsRepository.getCommentsNum(any())
@@ -82,8 +83,8 @@ class PostsRepositoryTest {
         val networkValue = networkApi.getPostsListFromUserAsync(userId).await()
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat(PostEntityToPostMapper.mapList(networkValue!!).size)
-            .isEqualTo(repositoryValue.first()?.size)
+        Assertions.assertThat(PostDataToPostMapper.mapList(networkValue!!).size)
+            .isEqualTo(repositoryValue.first().data?.size)
     }
 
     @Test
@@ -96,10 +97,10 @@ class PostsRepositoryTest {
             networkApi.getPostsListFromUserAsync(userId).await()
         } throws exception
 
-        coEvery { postCacheDataSource.getAllPosts(userId) } throws exception
+        coEvery { postCacheSource.getAllPosts(userId) } throws exception
 
         val repositoryValue = postsRepository.getPostsList(userId)
 
-        Assertions.assertThat(repositoryValue.first()).isEqualTo(null)
+        Assertions.assertThat(repositoryValue.first()).isInstanceOf(DataState.Error::class.java)
     }
 }

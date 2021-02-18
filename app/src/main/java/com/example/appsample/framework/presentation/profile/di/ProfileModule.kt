@@ -1,16 +1,16 @@
 package com.example.appsample.framework.presentation.profile.di
 
 import androidx.room.Room
-import com.example.appsample.business.data.cache.abstraction.AlbumCacheDataSource
-import com.example.appsample.business.data.cache.abstraction.CommentCacheDataSource
-import com.example.appsample.business.data.cache.abstraction.PhotoCacheDataSource
-import com.example.appsample.business.data.cache.abstraction.PostCacheDataSource
-import com.example.appsample.business.data.cache.abstraction.UserCacheDataSource
-import com.example.appsample.business.data.cache.implementation.AlbumCacheDataSourceImpl
-import com.example.appsample.business.data.cache.implementation.CommentCacheDataSourceImpl
-import com.example.appsample.business.data.cache.implementation.PhotoCacheDataSourceImpl
-import com.example.appsample.business.data.cache.implementation.PostCacheDataSourceImpl
-import com.example.appsample.business.data.cache.implementation.UserCacheDataSourceImpl
+import com.example.appsample.business.data.cache.abstraction.AlbumCacheSource
+import com.example.appsample.business.data.cache.abstraction.CommentCacheSource
+import com.example.appsample.business.data.cache.abstraction.PhotoCacheSource
+import com.example.appsample.business.data.cache.abstraction.PostCacheSource
+import com.example.appsample.business.data.cache.abstraction.UserCacheSource
+import com.example.appsample.business.data.cache.implementation.AlbumCacheSourceImpl
+import com.example.appsample.business.data.cache.implementation.CommentCacheSourceImpl
+import com.example.appsample.business.data.cache.implementation.PhotoCacheSourceImpl
+import com.example.appsample.business.data.cache.implementation.PostCacheSourceImpl
+import com.example.appsample.business.data.cache.implementation.UserCacheSourceImpl
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.abstraction.CommentsRepository
@@ -109,8 +109,8 @@ object ProfileModule {
 
     @ProfileFragmentScope
     @Provides
-    fun provideUserCacheDataSourceImpl(userDaoService: UserDaoService): UserCacheDataSource {
-        return UserCacheDataSourceImpl(userDaoService)
+    fun provideUserCacheDataSourceImpl(userDaoService: UserDaoService): UserCacheSource {
+        return UserCacheSourceImpl(userDaoService)
     }
 
     @JvmStatic
@@ -145,8 +145,8 @@ object ProfileModule {
 
     @ProfileFragmentScope
     @Provides
-    fun providePostCacheDataSourceImpl(postDaoService: PostDaoService): PostCacheDataSource {
-        return PostCacheDataSourceImpl(postDaoService)
+    fun providePostCacheDataSourceImpl(postDaoService: PostDaoService): PostCacheSource {
+        return PostCacheSourceImpl(postDaoService)
     }
 
     @ProfileFragmentScope
@@ -154,11 +154,11 @@ object ProfileModule {
     fun provideJsonPlaceholderRepository(
         @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
-        userCacheDataSource: UserCacheDataSource
+        userCacheSource: UserCacheSource
     ): UserRepository {
         return UserRepositoryImpl(
             ioDispatcher,
-            userCacheDataSource,
+            userCacheSource,
             jsonPlaceholderApiSource
         )
     }
@@ -173,13 +173,13 @@ object ProfileModule {
     @Provides
     fun providePostsRepository(
         @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
-        postCacheDataSource: PostCacheDataSource,
+        postCacheSource: PostCacheSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         commentsRepository: CommentsRepository
     ): PostsRepository {
         return PostsRepositoryImpl(
             ioDispatcher,
-            postCacheDataSource,
+            postCacheSource,
             jsonPlaceholderApiSource,
             commentsRepository
         )
@@ -232,8 +232,8 @@ object ProfileModule {
 
     @ProfileFragmentScope
     @Provides
-    fun provideAlbumCacheDataSourceImpl(albumDaoService: AlbumDaoService): AlbumCacheDataSource {
-        return AlbumCacheDataSourceImpl(albumDaoService)
+    fun provideAlbumCacheDataSourceImpl(albumDaoService: AlbumDaoService): AlbumCacheSource {
+        return AlbumCacheSourceImpl(albumDaoService)
     }
 
 
@@ -242,14 +242,14 @@ object ProfileModule {
     fun provideAlbumsRepository(
         @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         mainDispatcher: CoroutineDispatcher,
-        albumCacheDataSource: AlbumCacheDataSource,
+        albumCacheSource: AlbumCacheSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
         photoRepository: PhotoRepository
     ): AlbumsRepository {
         return AlbumsRepositoryImpl(
             mainDispatcher,
             ioDispatcher,
-            albumCacheDataSource,
+            albumCacheSource,
             jsonPlaceholderApiSource,
             photoRepository
         )
@@ -296,20 +296,20 @@ object ProfileModule {
 
     @ProfileFragmentScope
     @Provides
-    fun providePhotoCacheDataSourceImpl(photoDaoService: PhotoDaoService): PhotoCacheDataSource {
-        return PhotoCacheDataSourceImpl(photoDaoService)
+    fun providePhotoCacheDataSourceImpl(photoDaoService: PhotoDaoService): PhotoCacheSource {
+        return PhotoCacheSourceImpl(photoDaoService)
     }
 
     @ProfileFragmentScope
     @Provides
     fun providePhotoRepository(
         @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
-        photoCacheDataSource: PhotoCacheDataSource,
+        photoCacheSource: PhotoCacheSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource
     ): PhotoRepository {
         return PhotoRepositoryImpl(
             ioDispatcher,
-            photoCacheDataSource,
+            photoCacheSource,
             jsonPlaceholderApiSource
         )
     }
@@ -355,20 +355,20 @@ object ProfileModule {
 
     @ProfileFragmentScope
     @Provides
-    fun provideCommentCacheDataSourceImpl(commentDaoService: CommentDaoService): CommentCacheDataSource {
-        return CommentCacheDataSourceImpl(commentDaoService)
+    fun provideCommentCacheDataSourceImpl(commentDaoService: CommentDaoService): CommentCacheSource {
+        return CommentCacheSourceImpl(commentDaoService)
     }
 
     @ProfileFragmentScope
     @Provides
     fun provideCommentsRepository(
         @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
-        commentsCacheDataSource: CommentCacheDataSource,
+        commentsCacheSource: CommentCacheSource,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource
     ): CommentsRepository {
         return CommentsRepositoryImpl(
             ioDispatcher,
-            commentsCacheDataSource,
+            commentsCacheSource,
             jsonPlaceholderApiSource
         )
     }

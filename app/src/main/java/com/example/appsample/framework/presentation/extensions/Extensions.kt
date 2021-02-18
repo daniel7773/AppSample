@@ -51,7 +51,7 @@ fun spToPx(sp: Float, context: Context): Int {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_SP,
         sp,
-        context.getResources().getDisplayMetrics()
+        context.resources.displayMetrics
     ).toInt()
 }
 

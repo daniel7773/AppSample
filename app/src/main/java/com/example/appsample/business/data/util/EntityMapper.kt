@@ -1,8 +1,8 @@
 package com.example.appsample.business.data.util
 
-interface EntityMapper<Entity, CacheEntity> {
+interface EntityMapper<Object, CacheEntity> {
 
-    fun mapFromCacheEntity(cacheEntity: CacheEntity): Entity
+    fun mapFromCacheEntity(cacheEntity: CacheEntity): Object
 
-    fun mapToCacheEntity(entity: Entity): CacheEntity
+    fun mapToCacheEntity(obj: Object): CacheEntity
 }

@@ -7,6 +7,10 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.appsample.R
+import com.example.appsample.business.domain.state.DataState.Error
+import com.example.appsample.business.domain.state.DataState.Idle
+import com.example.appsample.business.domain.state.DataState.Loading
+import com.example.appsample.business.domain.state.DataState.Success
 import com.example.appsample.databinding.FragmentAuthBinding
 import com.example.appsample.framework.base.presentation.BaseFragment
 import com.example.appsample.framework.presentation.auth.di.factories.viewmodels.AuthViewModelFactory
@@ -41,6 +45,30 @@ constructor(
             it.lifecycleOwner = viewLifecycleOwner
         }
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeViewModelData()
+    }
+
+    private fun observeViewModelData() {
+        viewModel.authState.observe(viewLifecycleOwner) {
+            when (it) {
+                is Idle -> {
+                    if (binding.progressBar.visibility != View.GONE) binding.progressBar.visibility = View.GONE
+                }
+                is Loading -> {
+                    if (binding.progressBar.visibility != View.GONE) binding.progressBar.visibility = View.GONE
+                }
+                is Error -> {
+                    if (binding.progressBar.visibility != View.GONE) binding.progressBar.visibility = View.GONE
+                }
+                is Success -> {
+                    if (binding.progressBar.visibility != View.GONE) binding.progressBar.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun goToRegistration() =

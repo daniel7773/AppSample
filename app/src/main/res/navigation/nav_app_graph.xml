@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/profileFragment"
         tools:layout="@layout/fragment_profile"
-        android:name="com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment">
+        android:name="com.example.appsample.framework.presentation.profile.screens.profile.ProfileFragment">
 
         <action
             android:id="@+id/action_profileFragment_to_albumFragment"

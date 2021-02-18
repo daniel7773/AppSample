@@ -12,8 +12,8 @@ class PostSourceAdapterDelegate :
     ) {
 
     override fun BlockPostSourceBinding.onBind(item: PostSourceElement) {
-        if (item.postModel.title != null && item.postModel.id != null) {
-            post = item.postModel
+        if (item.post.title != null && item.post.id != null) {
+            postSourceName.text = item.post.title
         }
     }
 

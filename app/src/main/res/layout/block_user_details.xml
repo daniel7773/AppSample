@@ -6,7 +6,7 @@
 
         <variable
             name="user"
-            type="com.example.appsample.framework.presentation.common.model.UserModel" />
+            type="com.example.appsample.business.domain.model.User" />
 
     </data>
 
@@ -37,7 +37,7 @@
             android:drawableStart="@drawable/ic_home_work"
             android:drawablePadding="12dp"
             android:gravity="center_vertical"
-            android:text="@{String.format(@string/company_name, user.companyName)}"
+            android:text="@{String.format(@string/company_name, user.company.name)}"
             tools:text="Название компании: Considine-Lockman" />
 
         <!-- city -->
@@ -72,7 +72,7 @@
                 android:id="@+id/street_suit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{user.streetAndSuit}"
+                android:text="@{user.streetAndSuit()}"
                 tools:text="Noberto Crossing Apt. 950" />
 
             <TextView
@@ -86,7 +86,7 @@
                 android:id="@+id/lat_lng"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{String.format(@string/coordinates, user.latAndLang)}"
+                android:text="@{String.format(@string/coordinates, user.latAndLang())}"
                 tools:text="Координаты: lat -71.4197, lng 71.7478" />
 
         </LinearLayout>

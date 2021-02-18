@@ -1,7 +1,7 @@
 package com.example.appsample.framework.presentation.auth.di
 
-import com.example.appsample.business.data.cache.abstraction.UserCacheDataSource
-import com.example.appsample.business.data.cache.implementation.UserCacheDataSourceImpl
+import com.example.appsample.business.data.cache.abstraction.UserCacheSource
+import com.example.appsample.business.data.cache.implementation.UserCacheSourceImpl
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
 import com.example.appsample.business.domain.repository.abstraction.UserRepository
 import com.example.appsample.business.domain.repository.implementation.UserRepositoryImpl
@@ -61,8 +61,8 @@ object AuthModule {
 
     @AuthFragmentScope
     @Provides
-    fun provideUserCacheDataSourceImpl(userDaoService: UserDaoService): UserCacheDataSource {
-        return UserCacheDataSourceImpl(userDaoService)
+    fun provideUserCacheDataSourceImpl(userDaoService: UserDaoService): UserCacheSource {
+        return UserCacheSourceImpl(userDaoService)
     }
 
     @AuthFragmentScope
@@ -70,11 +70,11 @@ object AuthModule {
     fun provideUserRepository(
         @Named("DispatcherIO") ioDispatcher: CoroutineDispatcher,
         jsonPlaceholderApiSource: JsonPlaceholderApiSource,
-        userCacheDataSource: UserCacheDataSource
+        userCacheSource: UserCacheSource
     ): UserRepository {
         return UserRepositoryImpl(
             ioDispatcher,
-            userCacheDataSource,
+            userCacheSource,
             jsonPlaceholderApiSource
         )
     }

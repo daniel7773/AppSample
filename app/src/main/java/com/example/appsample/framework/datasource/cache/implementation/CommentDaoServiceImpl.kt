@@ -1,6 +1,6 @@
 package com.example.appsample.framework.datasource.cache.implementation
 
-import com.example.appsample.business.data.models.CommentEntity
+import com.example.appsample.business.domain.model.Comment
 import com.example.appsample.framework.datasource.cache.abstraction.CommentDaoService
 import com.example.appsample.framework.datasource.cache.database.CommentDao
 import com.example.appsample.framework.datasource.cache.mappers.CommentCacheMapper
@@ -12,12 +12,12 @@ constructor(
     private val commentDao: CommentDao,
     private val commentCacheMapper: CommentCacheMapper
 ) : CommentDaoService {
-    override suspend fun insertComment(commentEntity: CommentEntity): Long {
-        return commentDao.insertComment(commentCacheMapper.mapToCacheEntity(commentEntity))
+    override suspend fun insertComment(comment: Comment): Long {
+        return commentDao.insertComment(commentCacheMapper.mapToCacheEntity(comment))
     }
 
-    override suspend fun insertCommentList(commentList: List<CommentEntity>): LongArray {
-        return commentDao.insertComments(commentCacheMapper.entityListToCacheEntityList(commentList))
+    override suspend fun insertCommentList(commentList: List<Comment>): LongArray {
+        return commentDao.insertComments(commentCacheMapper.listToCacheEntityList(commentList))
     }
 
     override suspend fun searchCommentById(id: Int) = commentDao.searchCommentById(id)?.run {
@@ -25,7 +25,7 @@ constructor(
     }
 
     override suspend fun searchComments(query: String, page: Int) =
-        commentCacheMapper.cacheEntityListToEntityList(commentDao.searchComments(query, page))
+        commentCacheMapper.cacheEntityListToList(commentDao.searchComments(query, page))
 
     override suspend fun updateComment(
         id: Int,
@@ -42,13 +42,13 @@ constructor(
         return commentDao.deleteComment(id)
     }
 
-    override suspend fun deleteComments(comments: List<CommentEntity>): Int {
+    override suspend fun deleteComments(comments: List<Comment>): Int {
         val ids = comments.mapIndexed { index, value -> value.id ?: 0 }
         return commentDao.deleteComments(ids)
     }
 
-    override suspend fun getAllComments(postId: Int): List<CommentEntity> {
-        return commentCacheMapper.cacheEntityListToEntityList(commentDao.getAllComments(postId))
+    override suspend fun getAllComments(postId: Int): List<Comment> {
+        return commentCacheMapper.cacheEntityListToList(commentDao.getAllComments(postId))
     }
 
     override suspend fun getNumComments(userId: Int): Int {

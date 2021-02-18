@@ -8,31 +8,31 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.R
+import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.databinding.ItemImageBinding
-import com.example.appsample.framework.presentation.profile.model.PhotoModel
 import com.squareup.picasso.Picasso
 
 
 class AlbumPhotoListAdapter(
-    private val onItemClick: ((ImageView, PhotoModel, Int) -> Unit)? = null,
+    private val onItemClick: ((ImageView, Photo, Int) -> Unit)? = null,
     stateRestorationPolicy: StateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY,
     private val recycleChildrenOnDetach: Boolean = false
-) : ListAdapter<PhotoModel, AlbumPhotoListAdapter.ImageViewHolder>(DiffCallback()) {
+) : ListAdapter<Photo, AlbumPhotoListAdapter.ImageViewHolder>(DiffCallback()) {
 
     init {
         this.stateRestorationPolicy = stateRestorationPolicy
     }
 
-    internal class DiffCallback : DiffUtil.ItemCallback<PhotoModel>() {
+    internal class DiffCallback : DiffUtil.ItemCallback<Photo>() {
 
-        override fun areItemsTheSame(oldItem: PhotoModel, photoModel: PhotoModel): Boolean {
-            return oldItem == photoModel
+        override fun areItemsTheSame(oldItem: Photo, photo: Photo): Boolean {
+            return oldItem == photo
         }
 
-        override fun areContentsTheSame(oldItem: PhotoModel, photoModel: PhotoModel): Boolean {
-            return oldItem.id == photoModel.id && oldItem.albumId == photoModel.albumId
-                    && oldItem.title == photoModel.title && oldItem.url == photoModel.url
-                    && oldItem.thumbnailUrl == photoModel.thumbnailUrl
+        override fun areContentsTheSame(oldItem: Photo, photo: Photo): Boolean {
+            return oldItem.id == photo.id && oldItem.albumId == photo.albumId
+                    && oldItem.title == photo.title && oldItem.url == photo.url
+                    && oldItem.thumbnailUrl == photo.thumbnailUrl
         }
     }
 
@@ -58,10 +58,10 @@ class AlbumPhotoListAdapter(
 
     inner class ImageViewHolder(
         private val binding: ItemImageBinding,
-        private val onItemClick: ((ImageView, PhotoModel, Int) -> Unit)? = null
+        private val onItemClick: ((ImageView, Photo, Int) -> Unit)? = null
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(model: PhotoModel) {
+        fun bind(model: Photo) {
 
             val imageView = binding.ivPhoto
 
