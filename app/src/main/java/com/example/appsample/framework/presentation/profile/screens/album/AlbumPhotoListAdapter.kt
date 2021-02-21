@@ -66,8 +66,8 @@ class AlbumPhotoListAdapter(
             val imageView = binding.ivPhoto
 
             setImageUrl(model.url!!)
-            // 🔥 Set transition name to resource to drawable
-            binding.ivPhoto.transitionName = "${model.title}"
+
+            binding.ivPhoto.transitionName = binding.ivPhoto.resources.getString(R.string.photo_transition_name) + model.url
 
             binding.root.setOnClickListener {
                 onItemClick?.invoke(imageView, model, bindingAdapterPosition)

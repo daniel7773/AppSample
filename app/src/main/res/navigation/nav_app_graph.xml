@@ -13,7 +13,6 @@
         <action
             android:id="@+id/action_profileFragment_to_albumFragment"
             app:destination="@id/albumFragment"
-            app:launchSingleTop="true"
             app:exitAnim="@anim/dummy_animation_100"
             app:enterAnim="@anim/slide_from_right_transparent"
             app:popExitAnim="@anim/slide_to_right"/>
@@ -21,7 +20,6 @@
         <action
             android:id="@+id/action_profileFragment_to_postFragment"
             app:destination="@id/postFragment"
-            app:launchSingleTop="true"
             app:exitAnim="@anim/dummy_animation_100"
             app:enterAnim="@anim/slide_from_right_transparent"
             app:popExitAnim="@anim/slide_to_right"/>
@@ -42,6 +40,11 @@
             android:name="albumTitle"
             app:argType="string" />
 
+        <action
+            android:id="@+id/action_albumFragment_to_photoFragment"
+            app:destination="@id/photoPagerFragment"
+            app:launchSingleTop="true"/>
+
     </fragment>
 
     <fragment
@@ -53,6 +56,46 @@
             android:name="postId"
             app:argType="integer"
             android:defaultValue="1" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/photoPagerFragment"
+        tools:layout="@layout/fragment_photo_pager"
+        android:name="com.example.appsample.framework.presentation.profile.screens.photo.PhotoPagerFragment">
+
+        <argument
+            android:name="photoUrl"
+            app:argType="string"
+            android:defaultValue="1" />
+
+        <argument
+            android:name="albumId"
+            app:argType="integer"
+            android:defaultValue="1" />
+
+        <argument
+            android:name="photoId"
+            app:argType="integer"
+            android:defaultValue="1" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/photoFragment"
+        tools:layout="@layout/fragment_image"
+        android:name="com.example.appsample.framework.presentation.profile.screens.photo.PhotoFragment">
+
+        <argument
+            android:name="photoUrl"
+            app:argType="string"
+            android:defaultValue="1" />
+
+        <argument
+            android:name="albumId"
+            app:argType="integer"
+            android:defaultValue="1" />
+
 
     </fragment>
 
