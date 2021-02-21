@@ -1,5 +1,6 @@
 package com.example.appsample.framework.presentation.profile.screens.photo
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.transition.TransitionInflater
@@ -124,7 +125,11 @@ constructor(
         subscribeLiveData()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun subscribeLiveData() {
+        sharedViewModel.selected.observe(viewLifecycleOwner) {
+            binding.photoNumber.text = "${it + 1} из ${viewModel.photoList.value?.data?.size}" // {it + 1} cause position starts from 0
+        }
         viewModel.photoList.observe(viewLifecycleOwner) {
             when (it) {
                 is DataState.Idle -> {
