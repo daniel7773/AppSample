@@ -104,7 +104,8 @@ object ProfileTransformator {
         }
         is DataState.Loading -> {
             if (listState.data == null) {
-                sequenceOf(AlbumsLoadingElement())
+                sequenceOf(EmptySpace("album_block_empty_space"))
+                    .plus(AlbumsLoadingElement())
             } else {
                 emptySequence<AdapterElement>()
                     .plus(EmptySpace("album_block_empty_space"))
