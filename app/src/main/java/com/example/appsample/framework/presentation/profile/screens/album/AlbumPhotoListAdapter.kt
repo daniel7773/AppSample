@@ -53,7 +53,7 @@ class AlbumPhotoListAdapter(
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
 //        println("🤔 SingleViewBinderAdapter onBindViewHolder() position: $position, holder: $holder")
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     inner class ImageViewHolder(
@@ -61,13 +61,13 @@ class AlbumPhotoListAdapter(
         private val onItemClick: ((ImageView, Photo, Int) -> Unit)? = null
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(model: Photo) {
+        fun bind(model: Photo, position: Int) {
 
             val imageView = binding.ivPhoto
 
             setImageUrl(model.url!!)
 
-            binding.ivPhoto.transitionName = binding.ivPhoto.resources.getString(R.string.photo_transition_name) + model.url
+            binding.ivPhoto.transitionName = binding.ivPhoto.resources.getString(R.string.photo_transition_name) + position
 
             binding.root.setOnClickListener {
                 onItemClick?.invoke(imageView, model, bindingAdapterPosition)

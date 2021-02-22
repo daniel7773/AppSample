@@ -96,9 +96,6 @@ constructor(
         val transition = TransitionInflater.from(context)
             .inflateTransition(R.transition.image_shared_element_transition)
         sharedElementEnterTransition = transition
-
-        this.binding.root.layoutTransition?.setAnimateParentHierarchy(false)  // to prevent bug of animation viewPager https://stackoverflow.com/questions/59660691/java-lang-illegalstateexception-page-can-only-be-offset-by-a-positive-amount
-
         setEnterSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
@@ -109,6 +106,7 @@ constructor(
                         currentFragment = _binding!!.viewPager[0]
                     }
                     Log.d(TAG, "names.get(0) " + names[0])
+                    Log.d(TAG, "names size: ${names.size}")
                     sharedElements[names[0]] = currentFragment.findViewById(R.id.image)
                 }
             })
@@ -143,6 +141,7 @@ constructor(
                         override fun onPageSelected(position: Int) {
                             super.onPageSelected(position)
                             sharedViewModel.select(position)
+                            Log.d(TAG, "sharedViewModel.selected.value!!: ${sharedViewModel.selected.value}")
                         }
                     })
                     var counter = 0
