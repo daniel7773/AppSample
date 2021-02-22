@@ -1,5 +1,6 @@
 package com.example.appsample.framework.presentation.profile.screens.photo
 
+import android.animation.LayoutTransition
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.example.appsample.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+
 
 class PhotoFragment : Fragment() {
 
@@ -23,6 +25,10 @@ class PhotoFragment : Fragment() {
 
         val imageView = view.findViewById<ImageView>(R.id.image)
         imageView.transitionName = getString(R.string.photo_transition_name) + position
+        val transition = LayoutTransition()
+        transition.setAnimateParentHierarchy(false)
+        container?.layoutTransition = transition
+        container?.layoutTransition?.setAnimateParentHierarchy(false)  // to prevent bug of animation viewPager https://stackoverflow.com/questions/59660691/java-lang-illegalstateexception-page-can-only-be-offset-by-a-positive-amount
 
 
         if (imageView != null) {

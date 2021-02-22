@@ -37,15 +37,21 @@ constructor(
 ) : BaseFragment(R.layout.fragment_photo_pager) {
 
     val TAG = "PhotoPagerFragment"
+    private lateinit var mainNavController: MainNavController
 
     private val args: PhotoPagerFragmentArgs by navArgs()
     private var _binding: FragmentPhotoPagerBinding? = null
     private val binding: FragmentPhotoPagerBinding get() = _binding!!
-    private lateinit var mainNavController: MainNavController
+    var adapter: ImagePagerAdapter? = null
 
     private val viewModel: PhotoViewModel by viewModels {
         GenericSavedStateViewModelFactory(photoViewModelFactory, this)
     }
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+
+    var albumId: Int = 0
+    var photoId: Int = -1
+    var imageUrl = ""
 
     override fun onAttach(context: Context) {
         try {
@@ -55,13 +61,6 @@ constructor(
         }
         super.onAttach(context)
     }
-
-
-    var albumId: Int = 0
-    var photoId: Int = -1
-    var imageUrl = ""
-    var adapter: ImagePagerAdapter? = null
-    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -96,9 +95,6 @@ constructor(
         val transition = TransitionInflater.from(context)
             .inflateTransition(R.transition.image_shared_element_transition)
         sharedElementEnterTransition = transition
-
-        this.binding.root.layoutTransition?.setAnimateParentHierarchy(false)  // to prevent bug of animation viewPager https://stackoverflow.com/questions/59660691/java-lang-illegalstateexception-page-can-only-be-offset-by-a-positive-amount
-
         setEnterSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
@@ -109,6 +105,7 @@ constructor(
                         currentFragment = _binding!!.viewPager[0]
                     }
                     Log.d(TAG, "names.get(0) " + names[0])
+                    Log.d(TAG, "names size: ${names.size}")
                     sharedElements[names[0]] = currentFragment.findViewById(R.id.image)
                 }
             })
@@ -143,6 +140,7 @@ constructor(
                         override fun onPageSelected(position: Int) {
                             super.onPageSelected(position)
                             sharedViewModel.select(position)
+                            Log.d(TAG, "sharedViewModel.selected.value!!: ${sharedViewModel.selected.value}")
                         }
                     })
                     var counter = 0

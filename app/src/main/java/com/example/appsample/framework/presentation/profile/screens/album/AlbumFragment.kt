@@ -110,43 +110,14 @@ constructor(
                 viewModel.searchPhotos()
             }
             exitTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.grid_exit_transition)
+        } else { // scrolling to new position
+            binding.recyclerView.post {
+                val layoutManager: RecyclerView.LayoutManager? = binding.recyclerView.layoutManager
+                layoutManager?.scrollToPosition(sharedViewModel.selected.value!!)
+            }
         }
 
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        scrollToPosition()
-    }
-
-    /**
-     * Scrolls the recycler view to show the last viewed item in the grid. This is important when
-     * navigating back from the grid.
-     */
-    private fun scrollToPosition() {
-        binding.recyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
-            override fun onLayoutChange(
-                v: View,
-                left: Int,
-                top: Int,
-                right: Int,
-                bottom: Int,
-                oldLeft: Int,
-                oldTop: Int,
-                oldRight: Int,
-                oldBottom: Int
-            ) {
-                binding.recyclerView.removeOnLayoutChangeListener(this)
-                val layoutManager: RecyclerView.LayoutManager = binding.recyclerView.layoutManager!!
-                val viewAtPosition = layoutManager.findViewByPosition(sharedViewModel.selected.value!!)
-                if (viewAtPosition == null || layoutManager
-                        .isViewPartiallyVisible(viewAtPosition, false, true)
-                ) {
-                    binding.recyclerView.post { layoutManager.scrollToPosition(sharedViewModel.selected.value!!) }
-                }
-            }
-        })
     }
 
     private fun goToImageFragment(imageView: ImageView, position: Int, photo: Photo) {
@@ -158,7 +129,9 @@ constructor(
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
                     val selectedViewHolder: RecyclerView.ViewHolder = binding.recyclerView
                         .findViewHolderForAdapterPosition(sharedViewModel.selected.value!!) ?: return
-
+                    Log.d(TAG, "sharedViewModel.selected.value!!: ${sharedViewModel.selected.value}")
+                    Log.d(TAG, "names size: ${names.size}")
+                    Log.d(TAG, "names.get(0) " + names[0])
                     sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.ivPhoto)
                 }
             })
@@ -166,6 +139,13 @@ constructor(
         mainNavController.navController().navigate(action, extras)
     }
 
+    override fun onDestroyView() {
+        if (view != null) {
+            val parentViewGroup = requireView().parent as ViewGroup?
+            parentViewGroup?.removeAllViews() // prevents of java.lang.IllegalStateException if user goes back here before transition will be completed
+        }
+        super.onDestroyView()
+    }
 
     private fun closeFragment() {
         mainNavController.navController().popBackStack()
