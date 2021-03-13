@@ -102,7 +102,13 @@ class PhotoPagerFragment @Inject constructor() : BaseFragment(R.layout.fragment_
         setEnterSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
-                    val currentFragment: View = _binding!!.root
+                    val currentFragment: View
+
+                    if (_binding!!.viewPager.size > sharedViewModel.selected.value!!) {
+                        currentFragment = _binding!!.viewPager[sharedViewModel.selected.value!!]
+                    } else {
+                        currentFragment = _binding!!.viewPager[0]
+                    }
                     sharedElements[names[0]] = currentFragment.findViewById(R.id.image)
                 }
             })
