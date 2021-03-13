@@ -8,9 +8,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @ProfileFragmentScope
-class ProfileFragmentFactory
-@Inject
-constructor(
+class ProfileFragmentFactory @Inject constructor(
     private val creators: Map<Class<out Fragment>, @JvmSuppressWildcards Provider<Fragment>>
 ) : FragmentFactory() {
 

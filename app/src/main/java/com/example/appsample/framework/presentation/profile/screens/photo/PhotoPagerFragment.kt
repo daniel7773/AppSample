@@ -13,7 +13,6 @@ import androidx.core.app.SharedElementCallback
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.example.appsample.R
@@ -21,37 +20,26 @@ import com.example.appsample.business.domain.state.DataState
 import com.example.appsample.databinding.FragmentPhotoPagerBinding
 import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
-import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
-import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.PhotoViewModelFactory
-import com.example.appsample.framework.presentation.profile.screens.album.SharedViewModel
+import com.example.appsample.framework.presentation.profile.screens.common.SharedAlbumViewModel
 import com.example.appsample.framework.presentation.profile.screens.photo.adapter.ImagePagerAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
+@InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @FlowPreview
-class PhotoPagerFragment @Inject
-constructor(
-    private val photoViewModelFactory: PhotoViewModelFactory
-) : BaseFragment(R.layout.fragment_photo_pager) {
+class PhotoPagerFragment @Inject constructor() : BaseFragment(R.layout.fragment_photo_pager) {
 
     val TAG = "PhotoPagerFragment"
     private lateinit var mainNavController: MainNavController
 
-    private val args: PhotoPagerFragmentArgs by navArgs()
     private var _binding: FragmentPhotoPagerBinding? = null
     private val binding: FragmentPhotoPagerBinding get() = _binding!!
     var adapter: ImagePagerAdapter? = null
 
-    private val viewModel: PhotoViewModel by viewModels {
-        GenericSavedStateViewModelFactory(photoViewModelFactory, this)
-    }
-    private val sharedViewModel: SharedViewModel by activityViewModels()
-
-    var albumId: Int = 0
-    var photoId: Int = -1
-    var imageUrl = ""
+    private val sharedViewModel: SharedAlbumViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
         try {
@@ -68,27 +56,43 @@ constructor(
     ): View {
         if (_binding == null) {
             _binding = FragmentPhotoPagerBinding.inflate(inflater, container, false)
-
-
-            imageUrl = args.photoUrl
-            albumId = args.albumId
-            photoId = args.photoId
-
-            adapter = ImagePagerAdapter(this, listOf(imageUrl))
-
-            binding.viewPager.adapter = adapter
-
-            if (viewModel.isAlbumIdNull()) {
-                viewModel.setAlbumId(albumId)
-                viewModel.searchPhotos()
-            }
         }
+        setupAdapter()
+
         prepareSharedElementTransition()
 
         if (savedInstanceState == null) {
             postponeEnterTransition()
         }
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                sharedViewModel.select(position)
+            }
+        })
+    }
+
+    private fun setupAdapter() {
+        when (val data = sharedViewModel.photoList.value) {
+            is DataState.Success -> {
+                if (data.data != null) {
+                    adapter = ImagePagerAdapter(this, data.data!!.map { it.url ?: "" }, sharedViewModel.selected.value)
+                    binding.viewPager.adapter = adapter
+                    binding.viewPager.setCurrentItem(sharedViewModel.selected.value!!, false)
+                }
+            }
+            is DataState.Error -> {
+            }
+            is DataState.Loading -> {
+            }
+            is DataState.Idle -> {
+            }
+        }
     }
 
     private fun prepareSharedElementTransition() {
@@ -98,8 +102,7 @@ constructor(
         setEnterSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
-                    val currentFragment: View
-                    currentFragment = _binding!!.root
+                    val currentFragment: View = _binding!!.root
                     sharedElements[names[0]] = currentFragment.findViewById(R.id.image)
                 }
             })
@@ -119,40 +122,7 @@ constructor(
     @SuppressLint("SetTextI18n")
     private fun subscribeLiveData() {
         sharedViewModel.selected.observe(viewLifecycleOwner) {
-            binding.photoNumber.text = "${it + 1} из ${viewModel.photoList.value?.data?.size}" // {it + 1} cause position starts from 0
-        }
-        viewModel.photoList.observe(viewLifecycleOwner) {
-            when (it) {
-                is DataState.Idle -> {
-                    Log.d(TAG, "DataState Idle")
-                }
-                is DataState.Loading -> {
-                    Log.d(TAG, "DataState Loading")
-                }
-                is DataState.Success -> {
-                    binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                        override fun onPageSelected(position: Int) {
-                            sharedViewModel.select(position)
-                            super.onPageSelected(position)
-                        }
-                    })
-                    var counter = 0
-                    var position = 0
-                    it.data?.forEach { photo ->
-                        if (photo.id == photoId) {
-                            position = counter
-                            return@forEach
-                        }
-                        counter += 1
-                    }
-                    adapter?.setPhotoList(it.data!!.map { it.url!! }, position)
-                    binding.viewPager.setCurrentItem(position, false)
-                    sharedViewModel.select(position)
-                }
-                is DataState.Error -> {
-                    Log.d(TAG, "getting DataState.Error")
-                }
-            }
+            binding.photoNumber.text = "${it + 1} из ${sharedViewModel.photoList.value?.data?.size}" // {it + 1} cause position starts from 0
         }
     }
 }

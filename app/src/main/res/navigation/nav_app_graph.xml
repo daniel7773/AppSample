@@ -64,21 +64,6 @@
         tools:layout="@layout/fragment_photo_pager"
         android:name="com.example.appsample.framework.presentation.profile.screens.photo.PhotoPagerFragment">
 
-        <argument
-            android:name="photoUrl"
-            app:argType="string"
-            android:defaultValue="1" />
-
-        <argument
-            android:name="albumId"
-            app:argType="integer"
-            android:defaultValue="1" />
-
-        <argument
-            android:name="photoId"
-            app:argType="integer"
-            android:defaultValue="1" />
-
     </fragment>
 
     <fragment

@@ -23,7 +23,6 @@ import kotlinx.coroutines.runBlocking
 
 private const val NAV_HOST_ID = "NavHostFragment"
 private const val FRAGMENT_FACTORY_NAME = "FragmentFactoryName"
-private const val ENTERED_ID = "EnteredId"
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi

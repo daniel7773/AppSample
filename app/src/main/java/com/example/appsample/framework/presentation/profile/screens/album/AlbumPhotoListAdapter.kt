@@ -13,8 +13,8 @@ import com.example.appsample.databinding.ItemImageBinding
 import com.squareup.picasso.Picasso
 
 
-class AlbumPhotoListAdapter(
-    private val onItemClick: ((ImageView, Photo, Int) -> Unit)? = null,
+class AlbumPhotoListAdapter constructor(
+    private val onItemClick: ((ImageView, Int) -> Unit)? = null,
     stateRestorationPolicy: StateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY,
     private val recycleChildrenOnDetach: Boolean = false
 ) : ListAdapter<Photo, AlbumPhotoListAdapter.ImageViewHolder>(DiffCallback()) {
@@ -58,7 +58,7 @@ class AlbumPhotoListAdapter(
 
     inner class ImageViewHolder(
         private val binding: ItemImageBinding,
-        private val onItemClick: ((ImageView, Photo, Int) -> Unit)? = null
+        private val onItemClick: ((ImageView, Int) -> Unit)? = null
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(model: Photo, position: Int) {
@@ -70,7 +70,7 @@ class AlbumPhotoListAdapter(
             binding.ivPhoto.transitionName = binding.ivPhoto.resources.getString(R.string.photo_transition_name) + position
 
             binding.root.setOnClickListener {
-                onItemClick?.invoke(imageView, model, bindingAdapterPosition)
+                onItemClick?.invoke(imageView, bindingAdapterPosition)
             }
         }
 

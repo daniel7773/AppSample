@@ -11,41 +11,38 @@ import android.widget.ImageView
 import androidx.core.app.SharedElementCallback
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appsample.R
 import com.example.appsample.business.domain.model.Photo
+import com.example.appsample.business.interactors.profile.GetPhotoListUseCase
 import com.example.appsample.databinding.FragmentAlbumBinding
 import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.GenericSavedStateViewModelFactory
 import com.example.appsample.framework.presentation.profile.di.factories.viewmodels.implementations.AlbumViewModelFactory
 import com.example.appsample.framework.presentation.profile.screens.album.itemdecoration.GridMarginDecoration
+import com.example.appsample.framework.presentation.profile.screens.common.SharedAlbumViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
-
-
-class SharedViewModel : ViewModel() {
-    val selected = MutableLiveData<Int>(0)
-
-    fun select(position: Int) {
-        selected.value = position
-    }
-}
+import javax.inject.Named
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @FlowPreview
-class AlbumFragment @Inject
-constructor(
-    private val albumViewModelFactory: AlbumViewModelFactory
+class AlbumFragment @Inject constructor(
+    private val albumViewModelFactory: AlbumViewModelFactory,
+    private val mainDispatcher: CoroutineDispatcher,
+    @Named("DispatcherIO") private val ioDispatcher: CoroutineDispatcher,
+    private val getPhotoListUseCase: GetPhotoListUseCase
 ) : BaseFragment(R.layout.fragment_album) {
+
     private val TAG = AlbumFragment::class.java.simpleName
 
     private val args: AlbumFragmentArgs by navArgs()
@@ -58,7 +55,7 @@ constructor(
     private val viewModel: AlbumViewModel by viewModels {
         GenericSavedStateViewModelFactory(albumViewModelFactory, this)
     }
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedAlbumViewModel by activityViewModels()
 
     var listAdapter: AlbumPhotoListAdapter? = null
 
@@ -85,9 +82,19 @@ constructor(
             albumId = args.albumId
             albumTitle = args.albumTitle
 
-            listAdapter = AlbumPhotoListAdapter({ imageView, photoModel, position ->
+            sharedViewModel.setAlbumId(albumId)
+
+            val  savedStateHandle: SavedStateHandle = SavedStateHandle()
+            sharedViewModel.initStuff(
+                mainDispatcher = mainDispatcher,
+                ioDispatcher = ioDispatcher,
+                getPhotoListUseCase = getPhotoListUseCase
+            )
+
+            listAdapter = AlbumPhotoListAdapter({ imageView, position ->
+                Log.d(TAG, "position $position")
                 sharedViewModel.select(position)
-                goToImageFragment(imageView, position, photoModel)
+                goToImageFragment(imageView, position)
             })
 
             gridLayoutManager = GridLayoutManager(requireContext(), 3)
@@ -120,7 +127,7 @@ constructor(
         return binding.root
     }
 
-    private fun goToImageFragment(imageView: ImageView, position: Int, photo: Photo) {
+    private fun goToImageFragment(imageView: ImageView, position: Int) {
         val extras = FragmentNavigatorExtras(
             imageView to requireContext().getString(R.string.photo_transition_name) + position
         )
@@ -129,11 +136,14 @@ constructor(
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
                     val selectedViewHolder: RecyclerView.ViewHolder = binding.recyclerView
                         .findViewHolderForAdapterPosition(sharedViewModel.selected.value!!) ?: return
+                    Log.d(TAG, "names ${names.size}")
+                    Log.d(TAG, "sharedElements ${sharedElements.size}")
+
 
                     sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.ivPhoto)
                 }
             })
-        val action = AlbumFragmentDirections.actionAlbumFragmentToPhotoFragment(photoUrl = photo.url!!, photoId = photo.id!!, albumId = albumId)
+        val action = AlbumFragmentDirections.actionAlbumFragmentToPhotoFragment()
         mainNavController.navController().navigate(action, extras)
     }
 
