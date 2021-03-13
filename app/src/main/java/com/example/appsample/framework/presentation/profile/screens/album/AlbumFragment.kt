@@ -129,9 +129,7 @@ constructor(
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
                     val selectedViewHolder: RecyclerView.ViewHolder = binding.recyclerView
                         .findViewHolderForAdapterPosition(sharedViewModel.selected.value!!) ?: return
-                    Log.d(TAG, "sharedViewModel.selected.value!!: ${sharedViewModel.selected.value}")
-                    Log.d(TAG, "names size: ${names.size}")
-                    Log.d(TAG, "names.get(0) " + names[0])
+
                     sharedElements[names[0]] = selectedViewHolder.itemView.findViewById(R.id.ivPhoto)
                 }
             })

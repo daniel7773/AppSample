@@ -77,13 +77,13 @@ constructor(
             adapter = ImagePagerAdapter(this, listOf(imageUrl))
 
             binding.viewPager.adapter = adapter
-            prepareSharedElementTransition()
 
             if (viewModel.isAlbumIdNull()) {
                 viewModel.setAlbumId(albumId)
                 viewModel.searchPhotos()
             }
         }
+        prepareSharedElementTransition()
 
         if (savedInstanceState == null) {
             postponeEnterTransition()
@@ -99,13 +99,7 @@ constructor(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(names: List<String>, sharedElements: MutableMap<String, View>) {
                     val currentFragment: View
-                    if (_binding!!.viewPager.size > sharedViewModel.selected.value!!) {
-                        currentFragment = _binding!!.viewPager[sharedViewModel.selected.value!!]
-                    } else {
-                        currentFragment = _binding!!.viewPager[0]
-                    }
-                    Log.d(TAG, "names.get(0) " + names[0])
-                    Log.d(TAG, "names size: ${names.size}")
+                    currentFragment = _binding!!.root
                     sharedElements[names[0]] = currentFragment.findViewById(R.id.image)
                 }
             })
@@ -138,9 +132,8 @@ constructor(
                 is DataState.Success -> {
                     binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                         override fun onPageSelected(position: Int) {
-                            super.onPageSelected(position)
                             sharedViewModel.select(position)
-                            Log.d(TAG, "sharedViewModel.selected.value!!: ${sharedViewModel.selected.value}")
+                            super.onPageSelected(position)
                         }
                     })
                     var counter = 0
