@@ -18,12 +18,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/image"
+    <com.example.appsample.framework.presentation.profile.view.SquareFrameByWidthLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:scaleType="centerCrop"
-        android:contentDescription="image_description" />
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="image_description" />
+
+    </com.example.appsample.framework.presentation.profile.view.SquareFrameByWidthLayout>
 
 </FrameLayout>
