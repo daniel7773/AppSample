@@ -147,14 +147,6 @@ class AlbumFragment @Inject constructor(
         mainNavController.navController().navigate(action, extras)
     }
 
-    override fun onDestroyView() {
-        if (view != null) {
-            val parentViewGroup = requireView().parent as ViewGroup?
-            parentViewGroup?.removeAllViews() // prevents of java.lang.IllegalStateException if user goes back here before transition will be completed
-        }
-        super.onDestroyView()
-    }
-
     private fun closeFragment() {
         mainNavController.navController().popBackStack()
     }
