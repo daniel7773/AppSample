@@ -8,17 +8,26 @@
 
     <!-- User details -->
     <string name="phone_number">Телефон\n%1$s</string>
+    <string name="phone_number_no_args">Телефон</string>
     <string name="city">Город: %1$s</string>
+    <string name="city_no_args">Город:</string>
     <string name="company_name">Название компании: %1$s</string>
+    <string name="company_name_no_args">Название компании:</string>
     <string name="zip_code">Zip код: %1$s</string>
+    <string name="zip_code_no_args">Zip код:</string>
     <string name="coordinates">Координаты: %1$s</string>
     <string name="full_address">Подробный адрес&#8230;</string>
     <string name="hide_full_address">Свернуть подробный адрес</string>
+    <string name="user_error_block_message">Произошла ошибка при получении данных пользователя</string>
 
     <!-- -->
     <string name="albums">Альбомы</string>
+    <string name="add_image">Добавить фото</string>
     <string name="album">Альбом</string>
     <string name="photos_number">%d фотографий</string>
+    <string name="albums_error_block_message">Произошла ошибка при получении альбомов</string>
+    <string name="posts_loading_block_message">Загрузка&#8230;</string>
+    <string name="add_post">Добавить пост</string>
 
 
     <!-- Strings related to login -->
@@ -66,4 +75,7 @@
 • Вы будете видеть своих друзей, которые поддерживают то же сообщество, что и вы — и сможете обсудить с ними закрытые материалы.
 \n\n
 Для тех, кто оформит подписку, будет доступен эксклюзивный набор стикеров пантера «Джонни». Новые стикеры будут приходить каждый месяц в течение года, пока вы поддерживаете нас. 😏</string>
+
+    <string name="photo_transition_name">Photo Transition</string>
+
 </resources>

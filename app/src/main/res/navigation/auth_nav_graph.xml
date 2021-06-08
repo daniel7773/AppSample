@@ -20,6 +20,13 @@
             app:destination="@id/registrationFragment"
             app:launchSingleTop="true"/>
 
+        <action
+            android:id="@+id/action_authFragment_to_profileGraph"
+            app:destination="@id/profile_nav_graph"
+            app:popUpToInclusive="true"
+            app:popUpTo="@id/profile_nav_graph"
+            app:launchSingleTop="true"/>
+
     </fragment>
 
     <fragment

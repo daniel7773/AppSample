@@ -1,6 +1,6 @@
 package com.example.appsample.framework.datasource.cache.implementation
 
-import com.example.appsample.business.data.models.UserEntity
+import com.example.appsample.business.domain.model.User
 import com.example.appsample.framework.datasource.cache.abstraction.UserDaoService
 import com.example.appsample.framework.datasource.cache.database.UserDao
 import com.example.appsample.framework.datasource.cache.mappers.UserCacheMapper
@@ -12,7 +12,7 @@ constructor(
     private val userDao: UserDao,
     private val userMapperUser: UserCacheMapper
 ) : UserDaoService {
-    override suspend fun insertUser(user: UserEntity) =
+    override suspend fun insertUser(user: User) =
         userDao.insertUser(userMapperUser.mapToCacheEntity(user))
 
     override suspend fun searchUserById(id: String) = userDao.searchUserById(id)?.run {
@@ -21,7 +21,7 @@ constructor(
 
     override suspend fun deleteUser(primaryKey: String) = userDao.deleteUser(primaryKey)
 
-    override suspend fun updateUser(user: UserEntity, updated_at: String): Int {
+    override suspend fun updateUser(user: User, updated_at: String): Int {
         val cacheUser = userMapperUser.mapToCacheEntity(user)
         return userDao.updateUser(
             primaryKey = cacheUser.id.toString(),

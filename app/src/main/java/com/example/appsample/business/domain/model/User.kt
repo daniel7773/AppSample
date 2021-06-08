@@ -8,4 +8,10 @@ data class User(
     var phone: String? = null,
     var website: String? = null,
     var company: Company? = null
-)
+) {
+
+    fun streetAndSuit(): String = "${address?.street} ${address?.suite}"
+
+    fun latAndLang(): String = "lat ${address?.geo?.lat} lng ${address?.geo?.lng}"
+
+}

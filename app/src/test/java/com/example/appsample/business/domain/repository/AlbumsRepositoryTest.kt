@@ -1,23 +1,20 @@
 package com.example.appsample.business.domain.repository
 
-import com.example.appsample.business.data.cache.abstraction.AlbumCacheDataSource
-import com.example.appsample.business.data.models.AlbumEntity
-import com.example.appsample.business.data.models.PhotoEntity
+import com.example.appsample.business.data.cache.abstraction.AlbumCacheSource
 import com.example.appsample.business.data.network.DataFactory
 import com.example.appsample.business.data.network.abstraction.JsonPlaceholderApiSource
-import com.example.appsample.business.domain.mappers.AlbumEntityToAlbumMapper
+import com.example.appsample.business.domain.mappers.AlbumDataToAlbumMapper
 import com.example.appsample.business.domain.model.Photo
 import com.example.appsample.business.domain.repository.abstraction.AlbumsRepository
 import com.example.appsample.business.domain.repository.abstraction.PhotoRepository
 import com.example.appsample.business.domain.repository.implementation.AlbumsRepositoryImpl
+import com.example.appsample.business.domain.state.DataState
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
@@ -39,24 +36,24 @@ class AlbumsRepositoryTest {
     val mainCoroutineRule: MainCoroutineRule = MainCoroutineRule()
 
     val networkApi: JsonPlaceholderApiSource = mockk()
-    val albumCacheDataSource: AlbumCacheDataSource = mockk()
+    val albumCacheSource: AlbumCacheSource = mockk()
     val photoRepository: PhotoRepository = mockk()
 
     init {
         albumsRepository = AlbumsRepositoryImpl(
             mainDispatcher = mainCoroutineRule.testDispatcher,
             ioDispatcher = mainCoroutineRule.testDispatcher,
-            albumCacheDataSource = albumCacheDataSource,
+            albumCacheSource = albumCacheSource,
             jsonPlaceholderApiSource = networkApi,
             photoRepository = photoRepository
         )
 
         coEvery {
-            albumCacheDataSource.insertAlbum(any())
+            albumCacheSource.insertAlbum(any())
         } returns 1L
 
         coEvery {
-            albumCacheDataSource.insertAlbumList(any())
+            albumCacheSource.insertAlbumList(any())
         } returns LongArray(1)
     }
 
@@ -71,18 +68,18 @@ class AlbumsRepositoryTest {
         } returns DataFactory.produceListOfAlbumsEntity(albumNum)
 
         coEvery {
-            albumCacheDataSource.getAllAlbums(userId)
-        } returns DataFactory.produceListOfAlbumsEntity(albumNum)
+            albumCacheSource.getAllAlbums(userId)
+        } returns DataFactory.produceListOfAlbums(albumNum)
 
         coEvery {
-            photoRepository.getPhotoById(any(), any())
-        } returns flowOf(Photo())
+            photoRepository.getPhotoByIdSuspend(any(), any())
+        } returns Photo()
 
         val networkValue = networkApi.getAlbumsFromUserAsync(userId).await()
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
-        Assertions.assertThat(AlbumEntityToAlbumMapper.mapList(networkValue!!).size)
-            .isEqualTo(repositoryValue.first()?.size)
+        Assertions.assertThat(AlbumDataToAlbumMapper.mapList(networkValue!!).size)
+            .isEqualTo(repositoryValue.first().data?.size)
     }
 
     @Test
@@ -93,10 +90,10 @@ class AlbumsRepositoryTest {
 
         coEvery { networkApi.getAlbumsFromUserAsync(userId).await() } throws exception
 
-        coEvery { albumCacheDataSource.getAllAlbums(userId) } throws exception
+        coEvery { albumCacheSource.getAllAlbums(userId) } throws exception
 
         val repositoryValue = albumsRepository.getAlbumList(userId)
 
-        Assertions.assertThat(repositoryValue.first()).isEqualTo(null)
+        Assertions.assertThat(repositoryValue.first()).isInstanceOf(DataState.Error::class.java)
     }
 }

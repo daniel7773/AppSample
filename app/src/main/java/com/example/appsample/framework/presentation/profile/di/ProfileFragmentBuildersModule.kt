@@ -5,8 +5,9 @@ import androidx.fragment.app.FragmentFactory
 import com.example.appsample.framework.presentation.profile.di.factories.fragments.ProfileFragmentFactory
 import com.example.appsample.framework.presentation.profile.di.keys.ProfileFragmentKey
 import com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment
-import com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment
+import com.example.appsample.framework.presentation.profile.screens.photo.PhotoPagerFragment
 import com.example.appsample.framework.presentation.profile.screens.post.PostFragment
+import com.example.appsample.framework.presentation.profile.screens.profile.ProfileFragment
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -37,4 +38,9 @@ abstract class ProfileFragmentBuildersModule {
     @IntoMap
     @ProfileFragmentKey(PostFragment::class)
     abstract fun bindPostFragment(postFragment: PostFragment): Fragment
+
+    @Binds
+    @IntoMap
+    @ProfileFragmentKey(PhotoPagerFragment::class)
+    abstract fun bindPhotoFragment(photoPagerFragment: PhotoPagerFragment): Fragment
 }

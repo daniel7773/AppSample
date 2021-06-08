@@ -7,7 +7,7 @@
 
         <variable
             name="post"
-            type="com.example.appsample.framework.presentation.profile.model.PostModel" />
+            type="com.example.appsample.business.domain.model.Post" />
 
     </data>
 
@@ -26,8 +26,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="12dp"
-            android:textColor="@color/black"
             android:text="@{post.body}"
+            android:textColor="@color/black"
             tools:text="@string/dummy_post_body_text" />
 
         <ImageView

@@ -1,6 +1,8 @@
 package com.example.appsample.framework.presentation.profile.screens.post
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.example.appsample.R
 import com.example.appsample.databinding.FragmentPostBinding
+import com.example.appsample.framework.app.ui.MainNavController
 import com.example.appsample.framework.base.presentation.BaseFragment
 import com.example.appsample.framework.base.presentation.delegateadapter.delegate.CompositeDelegateAdapter
 import com.example.appsample.framework.base.presentation.delegateadapter.separators.DividerAdapterDelegate
@@ -29,8 +32,11 @@ class PostFragment @Inject
 constructor(
     private val postViewModelFactory: PostViewModelFactory
 ) : BaseFragment(R.layout.fragment_post) {
+    private val TAG = PostFragment::class.java.simpleName
 
     private val args: PostFragmentArgs by navArgs()
+
+    private lateinit var mainNavController: MainNavController
 
     private var _binding: FragmentPostBinding? = null
     private val binding: FragmentPostBinding get() = _binding!!
@@ -47,6 +53,15 @@ constructor(
         EmptySpaceAdapterDelegate()
     )
 
+    override fun onAttach(context: Context) {
+        try {
+            mainNavController = context as MainNavController
+        } catch (e: ClassCastException) {
+            Log.e(TAG, "$context must implement MainNavController")
+        }
+        super.onAttach(context)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,12 +75,17 @@ constructor(
         }
         _binding!!.recyclerView.adapter = adapter
 
+        _binding!!.backButton.setOnClickListener { closeFragment() }
+
         // will be called only once, since we consider postId should not be null in ViewModel after setting once
         if (viewModel.isPostIdNull()) {
             viewModel.setPostId(postId)
             viewModel.startSearch()
         }
-
         return binding.root
+    }
+
+    private fun closeFragment() {
+        mainNavController.navController().popBackStack()
     }
 }

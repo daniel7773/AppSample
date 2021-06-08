@@ -1,17 +1,20 @@
 package com.example.appsample.framework.presentation.auth
 
 import com.example.appsample.business.data.network.DataFactory
+import com.example.appsample.business.domain.model.User
 import com.example.appsample.business.interactors.common.GetUserUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
-import com.example.appsample.framework.presentation.common.model.State
+import com.example.appsample.business.domain.state.DataState
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -37,16 +40,16 @@ class AuthViewModelTest {
         // Given
         coEvery {
             getUserUseCase.getUser(any())
-        } returns flowOf(DataFactory.produceUser())
+        } returns flowOf(DataState.Success(DataFactory.produceUser()))
         authViewModel.userId.value = "2"
 
         // When
         authViewModel.startLoading()
         advanceTimeBy(5000)
-        val user = (authViewModel.authState.value as State.Success)
+        val user = (authViewModel.authState.value as DataState.Success)
 
         // Then
-        assertThat(user).isInstanceOf(State.Success::class.java)
+        assertThat(user).isInstanceOf(DataState.Success::class.java)
     }
 
     @Test
@@ -55,15 +58,12 @@ class AuthViewModelTest {
         // Given
         coEvery {
             getUserUseCase.getUser(any())
-        } throws Exception()
+        } returns flowOf(DataState.Error(User(), "", null))
         authViewModel.userId.value = "2"
 
         // When
         authViewModel.startLoading()
 
-        val user = (authViewModel.authState.value as State.Error)
-        // Then
-        assertThat(authViewModel.authState.value!!.exception).isNotNull
-        assertThat(authViewModel.authState.value?.exception).isInstanceOf(user.exception::class.java)
+        Assertions.assertThat(authViewModel.authState.value).isInstanceOf(DataState.Error::class.java)
     }
 }

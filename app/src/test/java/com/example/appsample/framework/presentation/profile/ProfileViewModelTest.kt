@@ -9,8 +9,8 @@ import com.example.appsample.business.interactors.profile.GetAlbumListUseCase
 import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPostListUseCase
 import com.example.appsample.framework.base.presentation.SessionManager
-import com.example.appsample.framework.presentation.common.model.State
-import com.example.appsample.framework.presentation.profile.screens.main.ProfileViewModel
+import com.example.appsample.business.domain.state.DataState
+import com.example.appsample.framework.presentation.profile.screens.profile.ProfileViewModel
 import com.example.appsample.rules.InstantExecutorExtension
 import com.example.appsample.rules.MainCoroutineRule
 import io.mockk.coEvery
@@ -71,14 +71,14 @@ class ProfileViewModelTest {
 
                 coEvery {
                     getUserUseCase.getUser(any())
-                } returns flowOf(DataFactory.produceUser())
+                } returns flowOf(DataState.Success(DataFactory.produceUser()))
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.user).isNotNull
-                assertThat(profileViewModel.user).isInstanceOf(State.Success::class.java)
+                assertThat(profileViewModel.user).isInstanceOf(DataState.Success::class.java)
                 assertThat(profileViewModel.user.exception).isNull()
             }
 
@@ -97,8 +97,7 @@ class ProfileViewModelTest {
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.user.exception).isNotNull
-
+                assertThat(profileViewModel.user).isInstanceOf(DataState.Error::class.java)
             }
     }
 
@@ -112,14 +111,14 @@ class ProfileViewModelTest {
 
                 coEvery {
                     getAlbumListUseCase.getAlbumList(any())
-                } returns flowOf(DataFactory.produceListOfAlbums(4))
+                } returns flowOf(DataState.Success(DataFactory.produceListOfAlbums(4)))
 
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.albumList).isNotNull
-                assertThat(profileViewModel.albumList).isInstanceOf(State.Success::class.java)
+                assertThat(profileViewModel.albumList).isInstanceOf(DataState.Success::class.java)
                 assertThat(profileViewModel.albumList.exception).isNull()
             }
 
@@ -138,7 +137,7 @@ class ProfileViewModelTest {
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.albumList.exception).isNotNull
+                assertThat(profileViewModel.albumList).isInstanceOf(DataState.Error::class.java)
             }
     }
 
@@ -152,16 +151,16 @@ class ProfileViewModelTest {
                 val exception = Exception("My exception")
                 coEvery {
                     getPostListUseCase.getPostList(any())
-                } returns flowOf(DataFactory.produceListOfPosts(4))
+                } returns flowOf(DataState.Success(DataFactory.produceListOfPosts(4)))
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
-                } returns flowOf(listOf(Comment()))
+                } returns flowOf(DataState.Success(listOf(Comment())))
                 // When
                 profileViewModel.startSearch()
 
                 // Then
                 assertThat(profileViewModel.postList).isNotNull
-                assertThat(profileViewModel.postList).isInstanceOf(State.Success::class.java)
+                assertThat(profileViewModel.postList).isInstanceOf(DataState.Success::class.java)
                 assertThat(profileViewModel.postList.exception).isNull()
             }
 
@@ -175,12 +174,12 @@ class ProfileViewModelTest {
                 } throws Exception()
                 coEvery {
                     getCommentListUseCase.getCommentList(any())
-                } returns flowOf(listOf<Comment>())
+                } returns flowOf(DataState.Error(listOf(), "", null))
                 // When
                 profileViewModel.startSearch()
 
                 // Then
-                assertThat(profileViewModel.postList.exception).isNotNull
+                assertThat(profileViewModel.postList).isInstanceOf(DataState.Error::class.java)
 
             }
     }

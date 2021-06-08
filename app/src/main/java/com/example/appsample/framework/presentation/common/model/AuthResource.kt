@@ -1,12 +1,14 @@
 package com.example.appsample.framework.presentation.common.model
 
+import com.example.appsample.business.domain.model.User
+
 sealed class AuthResource(
-    open val user: UserModel?,
+    open val user: User?,
     open val message: String?,
     val isLoading: Boolean
 ) {
     data class Authenticated(
-        override val user: UserModel,
+        override val user: User,
         override val message: String
     ) : AuthResource(user, message, false)
 

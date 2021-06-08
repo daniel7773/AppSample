@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_nav_graph"
     app:startDestination="@id/profileFragment">
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.appsample.framework.presentation.profile.screens.main.ProfileFragment">
+        tools:layout="@layout/fragment_profile"
+        android:name="com.example.appsample.framework.presentation.profile.screens.profile.ProfileFragment">
 
         <action
             android:id="@+id/action_profileFragment_to_albumFragment"
             app:destination="@id/albumFragment"
-            app:launchSingleTop="true"/>
+            app:exitAnim="@anim/dummy_animation_100"
+            app:enterAnim="@anim/slide_from_right_transparent"
+            app:popExitAnim="@anim/slide_to_right"/>
 
         <action
             android:id="@+id/action_profileFragment_to_postFragment"
             app:destination="@id/postFragment"
-            app:launchSingleTop="true"/>
+            app:exitAnim="@anim/dummy_animation_100"
+            app:enterAnim="@anim/slide_from_right_transparent"
+            app:popExitAnim="@anim/slide_to_right"/>
 
     </fragment>
 
     <fragment
         android:id="@+id/albumFragment"
+        tools:layout="@layout/fragment_album"
         android:name="com.example.appsample.framework.presentation.profile.screens.album.AlbumFragment">
 
         <argument
@@ -32,16 +40,47 @@
             android:name="albumTitle"
             app:argType="string" />
 
+        <action
+            android:id="@+id/action_albumFragment_to_photoFragment"
+            app:destination="@id/photoPagerFragment"
+            app:launchSingleTop="true"/>
+
     </fragment>
 
     <fragment
         android:id="@+id/postFragment"
+        tools:layout="@layout/fragment_post"
         android:name="com.example.appsample.framework.presentation.profile.screens.post.PostFragment">
 
         <argument
             android:name="postId"
             app:argType="integer"
             android:defaultValue="1" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/photoPagerFragment"
+        tools:layout="@layout/fragment_photo_pager"
+        android:name="com.example.appsample.framework.presentation.profile.screens.photo.PhotoPagerFragment">
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/photoFragment"
+        tools:layout="@layout/fragment_image"
+        android:name="com.example.appsample.framework.presentation.profile.screens.photo.PhotoFragment">
+
+        <argument
+            android:name="photoUrl"
+            app:argType="string"
+            android:defaultValue="1" />
+
+        <argument
+            android:name="albumId"
+            app:argType="integer"
+            android:defaultValue="1" />
+
 
     </fragment>
 

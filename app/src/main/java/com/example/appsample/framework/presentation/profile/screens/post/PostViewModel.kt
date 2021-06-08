@@ -5,14 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.appsample.business.domain.model.Comment
+import com.example.appsample.business.domain.model.Post
+import com.example.appsample.business.domain.state.DataState
+import com.example.appsample.business.domain.state.DataState.Error
+import com.example.appsample.business.domain.state.DataState.Idle
+import com.example.appsample.business.domain.state.DataState.Loading
+import com.example.appsample.business.domain.state.DataState.Success
 import com.example.appsample.business.interactors.profile.GetCommentListUseCase
 import com.example.appsample.business.interactors.profile.GetPostUseCase
 import com.example.appsample.framework.base.presentation.delegateadapter.delegate.AdapterElement
-import com.example.appsample.framework.presentation.common.model.State
-import com.example.appsample.framework.presentation.profile.mappers.CommentToCommentModelMapper
-import com.example.appsample.framework.presentation.profile.mappers.PostToPostModelMapper
-import com.example.appsample.framework.presentation.profile.model.CommentModel
-import com.example.appsample.framework.presentation.profile.model.PostModel
 import com.example.appsample.framework.presentation.profile.screens.post.adapters.PostTransformator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -40,9 +42,9 @@ class PostViewModel constructor( // I suppose it is better to use database inste
     private val _postId: MutableLiveData<Int> = savedStateHandle.getLiveData(POST_ID_KEY)
     val postId: LiveData<Int> = _postId
 
-    var post: State<PostModel?> = State.Success(PostModel(), "Holder, remove later")
+    var post: DataState<Post?> = Success(Post(), "Holder, remove later")
 
-    var commentList: State<List<CommentModel>?> = State.Unknown()
+    var commentList: DataState<List<Comment>?> = Idle()
 
     private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(true)
     val isLoading: MutableLiveData<Boolean> by lazy { _isLoading }
@@ -80,38 +82,27 @@ class PostViewModel constructor( // I suppose it is better to use database inste
 
 
     private suspend fun searchCommentList(postId: Int) {
-        commentList = State.Loading("Loading")
+        commentList = Loading(null, "Loading")
         getCommentListUseCase.getCommentList(postId).collect { comments ->
-            if (comments == null) {
-                commentList = State.Error("Error", Exception())
-                return@collect
-            }
-            commentList = State.Success(CommentToCommentModelMapper.map(comments), "SUCCESS")
+            commentList = comments
             refreshData()
         }
     }
 
     private suspend fun searchPost(postId: Int) {
-        post = State.Loading("Loading")
+        post = Loading(null, "Loading")
         getPostUseCase.getPost(postId).collect { post ->
-            if (post == null) {
-                this.post = State.Error("Error", Exception())
-                return@collect
-            }
-            this.post = State.Success(PostToPostModelMapper.map(post), "SUCCESS")
+            this.post = post
             refreshData()
         }
     }
 
     private fun refreshData() = viewModelScope.launch(mainDispatcher) {
         _items.value = PostTransformator.transform(post, commentList)
-        isLoading.value = commentList is State.Loading || post is State.Loading
+        isLoading.value = commentList is Loading || post is Loading
     }
 
-    private fun <T> getError(throwable: Throwable) = State.Error<T>(
-        throwable.message.toString(),
-        Exception("Error launching coroutine in ViewModel")
-    )
+    private fun <T> getError(throwable: Throwable) = Error<T>(null, "Error launching coroutine in ViewModel", Exception(throwable))
 
     companion object {
         private const val TAG = "PostViewModel"
