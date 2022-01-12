@@ -22,9 +22,7 @@ class SharedAlbumViewModel : ViewModel() {
 
     private var mainDispatcher: CoroutineDispatcher? = null
     private var ioDispatcher: CoroutineDispatcher? = null
-
     private var getPhotoListUseCase: GetPhotoListUseCase? = null
-
     private var savedStateHandle: SavedStateHandle? = null // TODO: add this back
 
     fun initStuff(
@@ -34,13 +32,7 @@ class SharedAlbumViewModel : ViewModel() {
     ) {
         this.mainDispatcher = mainDispatcher
         this.ioDispatcher = ioDispatcher
-
-
         this.getPhotoListUseCase = getPhotoListUseCase
-
-
-
-
         if (_albumId.value != null) { // it means viewModel is recreating and will not be called from fragment
             searchPhotos()
         }
@@ -79,15 +71,6 @@ class SharedAlbumViewModel : ViewModel() {
     private suspend fun launchSearch(albumId: Int) {
         refreshData(DataState.Loading(null, "Loading..."))
         supervisorScope {
-
-            requireNotNull(
-                getPhotoListUseCase
-            ).getPhotoList(albumId).collect { photoData ->
-
-                refreshData(photoData)
-
-            }
-
 
         }
     }
